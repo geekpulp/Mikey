@@ -83,3 +83,15 @@
   - File watcher ensures sidebar stays in sync with prd.json changes
   - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm compile ✓)
   - Next: functional-006 (Change item status) or functional-001 (Add new PRD item) for more interactivity
+
+- 2026-02-04: Completed functional-006: Change item status from detail panel
+  - Added status dropdown/selector to detail panel metadata section
+  - Implemented changeStatus() JavaScript function to post status change messages
+  - Added changeItemStatus() method to handle status updates in DetailPanel class
+  - Status dropdown includes all valid statuses: not-started, in-progress, in-review, completed
+  - Added validation to ensure only valid status values are accepted
+  - Updates persist immediately to prd.json file with proper formatting
+  - File watcher ensures sidebar automatically refreshes to show new status icon
+  - User receives confirmation message when status is updated
+  - Extension compiles successfully (pnpm typecheck ✓, pnpm compile ✓)
+  - Next: functional-007 (Toggle passes field) or functional-001 (Add new PRD item)

@@ -20,6 +20,9 @@ export class DetailPanel {
 					case 'toggleStep':
 						this.toggleStepCompletion(message.stepIndex);
 						break;
+					case 'changeStatus':
+						this.changeItemStatus(message.status);
+						break;
 				}
 			},
 			null,
@@ -198,6 +201,24 @@ export class DetailPanel {
 			font-size: 12px;
 			font-weight: bold;
 		}
+		.status-selector {
+			padding: 6px 12px;
+			background-color: var(--vscode-input-background);
+			color: var(--vscode-input-foreground);
+			border: 1px solid var(--vscode-input-border);
+			border-radius: 4px;
+			font-size: 12px;
+			font-weight: 600;
+			text-transform: uppercase;
+			cursor: pointer;
+			outline: none;
+		}
+		.status-selector:hover {
+			background-color: var(--vscode-inputOption-hoverBackground);
+		}
+		.status-selector:focus {
+			border-color: var(--vscode-focusBorder);
+		}
 	</style>
 	<script>
 		const vscode = acquireVsCodeApi();
@@ -206,6 +227,13 @@ export class DetailPanel {
 			vscode.postMessage({
 				command: 'toggleStep',
 				stepIndex: stepIndex
+			});
+		}
+		
+		function changeStatus(newStatus) {
+			vscode.postMessage({
+				command: 'changeStatus',
+				status: newStatus
 			});
 		}
 	</script>
@@ -224,7 +252,12 @@ export class DetailPanel {
 			</div>
 			<div class="metadata-item">
 				<span class="label">Status:</span>
-				<span class="badge badge-status">${this._escapeHtml(item.status)}</span>
+				<select class="status-selector" onchange="changeStatus(this.value)">
+					<option value="not-started" ${item.status === 'not-started' ? 'selected' : ''}>Not Started</option>
+					<option value="in-progress" ${item.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+					<option value="in-review" ${item.status === 'in-review' ? 'selected' : ''}>In Review</option>
+					<option value="completed" ${item.status === 'completed' ? 'selected' : ''}>Completed</option>
+				</select>
 			</div>
 			<div class="metadata-item">
 				${passesBadge}
@@ -337,6 +370,55 @@ export class DetailPanel {
 			
 		} catch (error) {
 			vscode.window.showErrorMessage(`Failed to update step: ${error}`);
+		}
+	}
+
+	private changeItemStatus(newStatus: string): void {
+		if (!this._currentItem) {
+			return;
+		}
+
+		// Validate status value
+		const validStatuses = ['not-started', 'in-progress', 'in-review', 'completed'];
+		if (!validStatuses.includes(newStatus)) {
+			vscode.window.showErrorMessage(`Invalid status: ${newStatus}`);
+			return;
+		}
+
+		const workspaceFolders = vscode.workspace.workspaceFolders;
+		if (!workspaceFolders) {
+			vscode.window.showErrorMessage('No workspace folder found');
+			return;
+		}
+
+		const prdPath = path.join(workspaceFolders[0].uri.fsPath, 'plans', 'prd.json');
+		
+		try {
+			// Read current PRD file
+			const content = fs.readFileSync(prdPath, 'utf-8');
+			const prdItems: PrdItem[] = JSON.parse(content);
+			
+			// Find the current item in the array
+			const itemIndex = prdItems.findIndex(item => item.id === this._currentItem!.id);
+			if (itemIndex === -1) {
+				vscode.window.showErrorMessage('Item not found in PRD file');
+				return;
+			}
+
+			// Update status (type-safe after validation)
+			prdItems[itemIndex].status = newStatus as 'not-started' | 'in-progress' | 'in-review' | 'completed';
+
+			// Write updated PRD file
+			fs.writeFileSync(prdPath, JSON.stringify(prdItems, null, '\t'), 'utf-8');
+			
+			// Update current item reference and refresh view
+			this._currentItem = prdItems[itemIndex];
+			this.update(prdItems[itemIndex]);
+			
+			vscode.window.showInformationMessage(`Status updated to: ${newStatus}`);
+			
+		} catch (error) {
+			vscode.window.showErrorMessage(`Failed to update status: ${error}`);
 		}
 	}
 }

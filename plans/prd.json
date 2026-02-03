@@ -159,14 +159,14 @@
 		"category": "functional",
 		"description": "Change item status from detail panel",
 		"steps": [
-			"Open the detail panel for an item",
-			"Locate the status dropdown/selector",
-			"Change status from 'not-started' to 'in-progress'",
-			"Verify sidebar icon updates immediately",
-			"Verify prd.json status field is updated"
+			{ "text": "Open the detail panel for an item", "completed": true },
+			{ "text": "Locate the status dropdown/selector", "completed": true },
+			{ "text": "Change status from 'not-started' to 'in-progress'", "completed": true },
+			{ "text": "Verify sidebar icon updates immediately", "completed": true },
+			{ "text": "Verify prd.json status field is updated", "completed": true }
 		],
-		"status": "not-started",
-		"passes": false
+		"status": "completed",
+		"passes": true
 	},
 	{
 		"id": "functional-007",
