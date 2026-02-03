@@ -149,6 +149,41 @@ try {
 }
 }
 
+async deleteItem(item: PrdItem): Promise<void> {
+if (!this.prdFilePath) {
+	vscode.window.showErrorMessage('No PRD file found');
+	return;
+}
+
+// Show confirmation dialog
+const confirmed = await vscode.window.showWarningMessage(
+	`Delete item "${item.id}: ${item.description}"?`,
+	{ modal: true },
+	'Delete'
+);
+
+if (confirmed !== 'Delete') {
+	return; // User cancelled
+}
+
+// Find and remove the item
+const itemIndex = this.prdItems.findIndex(i => i.id === item.id);
+if (itemIndex === -1) {
+	vscode.window.showErrorMessage(`Item ${item.id} not found`);
+	return;
+}
+
+this.prdItems.splice(itemIndex, 1);
+
+try {
+	fs.writeFileSync(this.prdFilePath, JSON.stringify(this.prdItems, null, '\t'), 'utf-8');
+	this._onDidChangeTreeData.fire();
+	vscode.window.showInformationMessage(`Deleted item: ${item.id}`);
+} catch (error) {
+	vscode.window.showErrorMessage(`Failed to delete item: ${error}`);
+}
+}
+
 private generateUniqueId(category: string): string {
 const categoryItems = this.prdItems.filter(item => item.category === category);
 const numbers = categoryItems.map(item => {

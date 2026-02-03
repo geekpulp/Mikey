@@ -136,3 +136,18 @@
   - Edit button appears inline in tree view for each PRD item
   - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm compile ✓)
   - Next: functional-003 (Delete PRD item) or functional-004 (Add, edit, remove steps) for more CRUD operations
+
+
+- 2026-02-04: Completed functional-003: Delete PRD item
+  - Added ralph.deleteItem command to package.json with trash icon
+  - Registered command in view/item/context menu for prdItem context (appears inline with edit button)
+  - Implemented deleteItem() method in PrdTreeDataProvider to remove items from the list
+  - Delete button shows confirmation dialog with modal prompt: "Delete item [id]: [description]?"
+  - User must explicitly click "Delete" button to confirm, or can cancel by pressing ESC
+  - Item is removed from prdItems array using splice() based on item ID
+  - Changes are persisted to prd.json with proper JSON formatting (tabs)
+  - File watcher ensures sidebar refreshes automatically to remove deleted item from view
+  - User receives confirmation message when item is successfully deleted
+  - Delete button appears inline in tree view for each PRD item (trash icon)
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm compile ✓)
+  - Next: functional-004 (Add, edit, remove steps) would complete step management within items

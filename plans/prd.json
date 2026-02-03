@@ -116,14 +116,14 @@
 		"category": "functional",
 		"description": "Delete PRD item",
 		"steps": [
-			"Select an item in the sidebar",
-			"Click 'Delete' button or use context menu",
-			"Verify confirmation dialog appears",
-			"Confirm deletion",
-			"Verify item is removed from sidebar and prd.json"
+			{ "text": "Select an item in the sidebar", "completed": true },
+			{ "text": "Click 'Delete' button or use context menu", "completed": true },
+			{ "text": "Verify confirmation dialog appears", "completed": true },
+			{ "text": "Confirm deletion", "completed": true },
+			{ "text": "Verify item is removed from sidebar and prd.json", "completed": true }
 		],
-		"status": "not-started",
-		"passes": false
+		"status": "completed",
+		"passes": true
 	},
 	{
 		"id": "functional-004",

@@ -47,6 +47,11 @@
         "command": "ralph.editItem",
         "title": "Edit PRD Item",
         "icon": "$(edit)"
+      },
+      {
+        "command": "ralph.deleteItem",
+        "title": "Delete PRD Item",
+        "icon": "$(trash)"
       }
     ],
     "menus": {
@@ -65,6 +70,11 @@
       "view/item/context": [
         {
           "command": "ralph.editItem",
+          "when": "view == ralph.prdExplorer && viewItem == prdItem",
+          "group": "inline"
+        },
+        {
+          "command": "ralph.deleteItem",
           "when": "view == ralph.prdExplorer && viewItem == prdItem",
           "group": "inline"
         }
