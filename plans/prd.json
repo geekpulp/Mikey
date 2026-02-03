@@ -60,14 +60,14 @@
 		"category": "ui",
 		"description": "Detail panel opens when selecting a sidebar item",
 		"steps": [
-			"Click on a PRD item in the sidebar",
-			"Verify a webview panel opens showing item details",
-			"Verify the panel displays: id, category, description, status, passes, and all steps",
-			"Verify each step has a checkbox showing its completion state",
-			"Click a different item in sidebar and verify panel updates"
+			{ "text": "Click on a PRD item in the sidebar", "completed": true },
+			{ "text": "Verify a webview panel opens showing item details", "completed": true },
+			{ "text": "Verify the panel displays: id, category, description, status, passes, and all steps", "completed": true },
+			{ "text": "Verify each step has a checkbox showing its completion state", "completed": true },
+			{ "text": "Click a different item in sidebar and verify panel updates", "completed": true }
 		],
-		"status": "not-started",
-		"passes": false
+		"status": "completed",
+		"passes": true
 	},
 	{
 		"id": "ui-004",

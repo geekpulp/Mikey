@@ -50,3 +50,18 @@
   - File watcher ensures sidebar updates automatically when prd.json is modified
   - Extension compiles successfully (pnpm typecheck ✓, pnpm compile ✓)
   - Next: ui-003 (Detail panel) would be a logical next feature for item interaction
+
+
+- 2026-02-04: Completed ui-003: Detail panel opens when selecting a sidebar item
+  - Created DetailPanel class (src/detailPanel.ts) to manage webview panel lifecycle
+  - Implemented singleton pattern to reuse/reveal existing panel when clicking items
+  - Added ralph.openItem command to extension.ts and registered it in activation
+  - Made tree items clickable by adding command property to PrdItem tree items
+  - Webview displays comprehensive item details: id, category, description, status, passes
+  - Styled status badges with color-coded indicators matching sidebar icons
+  - Rendered steps list with checkboxes showing completion state (checked/unchecked)
+  - Applied strikethrough and opacity to completed steps for visual clarity
+  - HTML escaping ensures safe rendering of user content
+  - Panel updates when clicking different items in sidebar
+  - Extension compiles successfully (pnpm typecheck ✓, pnpm compile ✓)
+  - Next: functional-001 (Add new PRD item) or functional-005 (Toggle step completion) to enable interactivity

@@ -100,6 +100,13 @@ const { icon, color } = this.getStatusIcon(item.status);
 treeItem.iconPath = new vscode.ThemeIcon(icon, color);
 treeItem.contextValue = 'prdItem';
 
+// Make item clickable - opens detail panel
+treeItem.command = {
+command: 'ralph.openItem',
+title: 'Open Item Details',
+arguments: [item]
+};
+
 return treeItem;
 }
 

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { PrdTreeDataProvider } from './prdTreeDataProvider';
+import { PrdTreeDataProvider, PrdItem } from './prdTreeDataProvider';
+import { DetailPanel } from './detailPanel';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('Ralph extension is now active');
@@ -19,6 +20,12 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand('ralph.addItem', () => {
       vscode.window.showInformationMessage('Add item functionality coming soon');
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('ralph.openItem', (item: PrdItem) => {
+      DetailPanel.createOrShow(context.extensionUri, item);
     })
   );
 }
