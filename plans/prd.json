@@ -88,14 +88,14 @@
 		"category": "functional",
 		"description": "Add new PRD item",
 		"steps": [
-			"Click the 'Add Item' button in the sidebar toolbar",
-			"Verify a form/dialog appears with fields: category, description",
-			"Fill in the form and submit",
-			"Verify the new item appears in the sidebar with auto-generated ID",
-			"Verify prd.json is updated with the new item (status: not-started, passes: false, empty steps)"
+			{ "text": "Click the 'Add Item' button in the sidebar toolbar", "completed": true },
+			{ "text": "Verify a form/dialog appears with fields: category, description", "completed": true },
+			{ "text": "Fill in the form and submit", "completed": true },
+			{ "text": "Verify the new item appears in the sidebar with auto-generated ID", "completed": true },
+			{ "text": "Verify prd.json is updated with the new item (status: not-started, passes: false, empty steps)", "completed": true }
 		],
-		"status": "not-started",
-		"passes": false
+		"status": "completed",
+		"passes": true
 	},
 	{
 		"id": "functional-002",
@@ -187,14 +187,14 @@
 		"category": "functional",
 		"description": "Auto-generate unique IDs for new items",
 		"steps": [
-			"Create a new PRD item",
-			"Verify an ID is auto-generated in format 'category-XXX' (e.g., 'ui-005')",
-			"Create another item in the same category",
-			"Verify the new ID increments correctly",
-			"Verify no duplicate IDs exist in prd.json"
+			{ "text": "Create a new PRD item", "completed": true },
+			{ "text": "Verify an ID is auto-generated in format 'category-XXX' (e.g., 'ui-005')", "completed": true },
+			{ "text": "Create another item in the same category", "completed": true },
+			{ "text": "Verify the new ID increments correctly", "completed": true },
+			{ "text": "Verify no duplicate IDs exist in prd.json", "completed": true }
 		],
-		"status": "not-started",
-		"passes": false
+		"status": "completed",
+		"passes": true
 	},
 	{
 		"id": "git-001",

@@ -18,8 +18,27 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('ralph.addItem', () => {
-      vscode.window.showInformationMessage('Add item functionality coming soon');
+    vscode.commands.registerCommand('ralph.addItem', async () => {
+      const categories = ['setup', 'ui', 'functional', 'git', 'agent', 'polish'];
+      
+      const category = await vscode.window.showQuickPick(categories, {
+        placeHolder: 'Select category for the new item'
+      });
+      
+      if (!category) {
+        return;
+      }
+      
+      const description = await vscode.window.showInputBox({
+        prompt: 'Enter description for the new item',
+        placeHolder: 'e.g., Implement export functionality'
+      });
+      
+      if (!description) {
+        return;
+      }
+      
+      await prdProvider.addItem(category, description);
     })
   );
 

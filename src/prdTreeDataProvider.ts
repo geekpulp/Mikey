@@ -75,6 +75,44 @@ refresh(): void {
 this.loadPrdFile();
 }
 
+async addItem(category: string, description: string): Promise<void> {
+if (!this.prdFilePath) {
+	vscode.window.showErrorMessage('No PRD file found');
+	return;
+}
+
+const newId = this.generateUniqueId(category);
+const newItem: PrdItem = {
+	id: newId,
+	category,
+	description,
+	steps: [],
+	status: 'not-started',
+	passes: false
+};
+
+this.prdItems.push(newItem);
+
+try {
+	fs.writeFileSync(this.prdFilePath, JSON.stringify(this.prdItems, null, '\t'), 'utf-8');
+	this._onDidChangeTreeData.fire();
+	vscode.window.showInformationMessage(`Added item: ${newId}`);
+} catch (error) {
+	vscode.window.showErrorMessage(`Failed to add item: ${error}`);
+}
+}
+
+private generateUniqueId(category: string): string {
+const categoryItems = this.prdItems.filter(item => item.category === category);
+const numbers = categoryItems.map(item => {
+	const match = item.id.match(new RegExp(`^${category}-(\\d+)$`));
+	return match ? parseInt(match[1], 10) : 0;
+});
+const maxNumber = numbers.length > 0 ? Math.max(...numbers) : 0;
+const nextNumber = maxNumber + 1;
+return `${category}-${String(nextNumber).padStart(3, '0')}`;
+}
+
 getTreeItem(element: TreeNode): vscode.TreeItem {
 if (element instanceof CategoryNode) {
 const treeItem = new vscode.TreeItem(

@@ -106,3 +106,19 @@
   - Toggle shows icon (✓ or ✗) and descriptive text ("Passes" or "Does not pass")
   - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm compile ✓)
   - Next: functional-001 (Add new PRD item) or functional-008 (Auto-generate unique IDs) would be valuable next features
+
+
+- 2026-02-04: Completed functional-001: Add new PRD item
+  - Implemented addItem() method in PrdTreeDataProvider to add new items to prd.json
+  - Created generateUniqueId() method that generates IDs in format 'category-XXX' (e.g., 'ui-005')
+  - ID generation finds highest number in category and increments (with zero-padding to 3 digits)
+  - Updated ralph.addItem command in extension.ts to show input dialogs
+  - Added QuickPick for category selection (setup, ui, functional, git, agent, polish)
+  - Added InputBox for description entry with helpful placeholder text
+  - New items are created with: auto-generated ID, selected category, entered description, empty steps array, status 'not-started', passes false
+  - File watcher ensures sidebar refreshes automatically after adding item
+  - User receives confirmation message showing the new item ID
+  - Add Item button (+ icon) is available in sidebar toolbar via existing package.json configuration
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm compile ✓)
+  - Also completed functional-008 (Auto-generate unique IDs) as part of this implementation
+  - Next: functional-002 (Edit existing PRD item) or functional-003 (Delete PRD item) for full CRUD operations
