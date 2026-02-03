@@ -16,9 +16,11 @@ A JSON array of work items:
 ```json
 [
   {
+    "id": "functional-001",
     "category": "functional",
     "description": "User can send a message",
     "steps": ["Open chat", "Type message", "Click Send", "Verify it appears"],
+    "status": "not-started",
     "passes": false
   }
 ]
@@ -26,16 +28,20 @@ A JSON array of work items:
 
 | Field | Description |
 |-------|-------------|
-| `category` | `"functional"`, `"ui"`, or custom |
+| `id` | Unique identifier (format: `category-XXX`) |
+| `category` | `"functional"`, `"ui"`, `"setup"`, `"git"`, `"agent"`, or custom |
 | `description` | One-line requirement |
-| `steps` | How to verify it works |
-| `passes` | `false` → `true` when complete |
+| `steps` | How to verify it works (can be strings or objects with `text` and `completed`) |
+| `status` | `"not-started"`, `"in-progress"`, `"in-review"`, or `"completed"` |
+| `passes` | `false` → `true` when verified complete |
 
 ## Best Practices
 
 - **Keep items small** — one feature per agent iteration
 - **Be specific** — clear acceptance criteria help the agent
-- **Start with `passes: false`** — the agent flips it to `true`
+- **Use unique IDs** — format as `category-XXX` (e.g., `ui-001`, `functional-002`)
+- **Start with `status: "not-started"`** — update to `in-progress` when working
+- **Start with `passes: false`** — the agent flips it to `true` when verified
 - **Order by priority** — agent picks from the top
 
 ## Per-Prompt PRDs

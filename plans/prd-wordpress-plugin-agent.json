@@ -1,84 +1,100 @@
 [
 	{
-		"category": "functional",
-		"description": "Local WordPress environment starts via wp-env",
-		"steps": [
-			"Run: npx wp-env start",
-			"Open the local WordPress site started by wp-env",
-			"Verify the site loads successfully"
-		],
-		"passes": false
-	},
+    "id": "functional-001",
+    "category": "functional",
+    "description": "Local WordPress environment starts via wp-env",
+    "steps": [
+      "Run: npx wp-env start",
+      "Open the local WordPress site started by wp-env",
+      "Verify the site loads successfully"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
 	{
-		"category": "functional",
-		"description": "Plugin can be activated without warnings/notices/fatal errors",
-		"steps": [
-			"Install the plugin in a WordPress site",
-			"Activate the plugin",
-			"Verify there are no fatal errors",
-			"Verify there are no PHP warnings/notices triggered on activation"
-		],
-		"passes": false
-	},
+    "id": "functional-002",
+    "category": "functional",
+    "description": "Plugin can be activated without warnings/notices/fatal errors",
+    "steps": [
+      "Install the plugin in a WordPress site",
+      "Activate the plugin",
+      "Verify there are no fatal errors",
+      "Verify there are no PHP warnings/notices triggered on activation"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
 	{
-		"category": "functional",
-		"description": "Hello Ralph block appears in the block inserter",
-		"steps": [
-			"Open the post editor (block editor)",
-			"Open the block inserter",
-			"Search for 'Hello Ralph'",
-			"Verify a block named 'Hello Ralph' is available"
-		],
-		"passes": false
-	},
+    "id": "functional-003",
+    "category": "functional",
+    "description": "Hello Ralph block appears in the block inserter",
+    "steps": [
+      "Open the post editor (block editor)",
+      "Open the block inserter",
+      "Search for 'Hello Ralph'",
+      "Verify a block named 'Hello Ralph' is available"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
 	{
-		"category": "functional",
-		"description": "Hello Ralph block can be inserted, saved, and persists after editor reload",
-		"steps": [
-			"Insert the 'Hello Ralph' block into a post",
-			"Save (or publish) the post",
-			"Reload the editor",
-			"Verify the block is still present and renders correctly in the editor"
-		],
-		"passes": false
-	},
+    "id": "functional-004",
+    "category": "functional",
+    "description": "Hello Ralph block can be inserted, saved, and persists after editor reload",
+    "steps": [
+      "Insert the 'Hello Ralph' block into a post",
+      "Save (or publish) the post",
+      "Reload the editor",
+      "Verify the block is still present and renders correctly in the editor"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
 	{
-		"category": "ui",
-		"description": "Editor preview shows the expected 'Hello Ralph' content",
-		"steps": [
-			"Insert the 'Hello Ralph' block",
-			"Verify the block displays the expected text/content in the editor"
-		],
-		"passes": false
-	},
+    "id": "ui-001",
+    "category": "ui",
+    "description": "Editor preview shows the expected 'Hello Ralph' content",
+    "steps": [
+      "Insert the 'Hello Ralph' block",
+      "Verify the block displays the expected text/content in the editor"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
 	{
-		"category": "functional",
-		"description": "Front-end renders the expected 'Hello Ralph' content",
-		"steps": [
-			"View the post on the front-end",
-			"Verify the 'Hello Ralph' content is visible and correct"
-		],
-		"passes": false
-	},
+    "id": "functional-005",
+    "category": "functional",
+    "description": "Front-end renders the expected 'Hello Ralph' content",
+    "steps": [
+      "View the post on the front-end",
+      "Verify the 'Hello Ralph' content is visible and correct"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
 	{
-		"category": "devex",
-		"description": "PHP checks pass (composer lint and composer test via PHPUnit + Brain Monkey)",
-		"steps": [
-			"Run: composer lint",
-			"Verify the command exits successfully",
-			"Run: composer test",
-			"Verify the command exits successfully and runs PHPUnit + Brain Monkey tests"
-		],
-		"passes": false
-	},
+    "id": "devex-001",
+    "category": "devex",
+    "description": "PHP checks pass (composer lint and composer test via PHPUnit + Brain Monkey)",
+    "steps": [
+      "Run: composer lint",
+      "Verify the command exits successfully",
+      "Run: composer test",
+      "Verify the command exits successfully and runs PHPUnit + Brain Monkey tests"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
 	{
-		"category": "devex",
-		"description": "Block assets build successfully (npm run build)",
-		"steps": [
-			"Run: npm install",
-			"Run: npm run build",
-			"Verify the command exits successfully and produces block build artifacts"
-		],
-		"passes": false
-	}
+    "id": "devex-002",
+    "category": "devex",
+    "description": "Block assets build successfully (npm run build)",
+    "steps": [
+      "Run: npm install",
+      "Run: npm run build",
+      "Verify the command exits successfully and produces block build artifacts"
+    ],
+    "status": "not-started",
+    "passes": false
+  }
 ]

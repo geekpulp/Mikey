@@ -150,7 +150,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Default model if not provided
-MODEL="${MODEL:-gpt-5.2}"
+MODEL="${MODEL:-claude-sonnet-4.5}"
 
 if [[ -z "$prompt_file" ]]; then
    echo "Error: --prompt is required" >&2
@@ -220,13 +220,17 @@ if [[ ${#allow_tools[@]} -eq 0 ]]; then
    fi
 fi
 
-for tool in "${allow_tools[@]}"; do
-   copilot_tool_args+=(--allow-tool "$tool")
-done
+if [[ ${#allow_tools[@]} -gt 0 ]]; then
+   for tool in "${allow_tools[@]}"; do
+      copilot_tool_args+=(--allow-tool "$tool")
+   done
+fi
 
-for tool in "${deny_tools[@]}"; do
-   copilot_tool_args+=(--deny-tool "$tool")
-done
+if [[ ${#deny_tools[@]} -gt 0 ]]; then
+   for tool in "${deny_tools[@]}"; do
+      copilot_tool_args+=(--deny-tool "$tool")
+   done
+fi
 
 
 

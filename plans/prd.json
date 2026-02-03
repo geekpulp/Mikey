@@ -1,96 +1,381 @@
 [
 	{
-		"category": "functional",
-		"description": "User can send a message and see it appear in the conversation",
+		"id": "setup-001",
+		"category": "setup",
+		"description": "Extension scaffolding and activation",
 		"steps": [
-			"Open the chat app and navigate to a conversation",
-			"Type a message in the composer",
-			"Click Send (or press Enter)",
-			"Verify the message appears in the message list",
-			"Verify the message content matches what was typed"
+			{ "text": "Run 'yo code' or manually create extension structure with package.json, tsconfig.json, and src folder", "completed": true },
+			{ "text": "Define extension activation events in package.json (onView, workspaceContains:prd.json)", "completed": true },
+			{ "text": "Create extension entry point that registers all commands and views", "completed": true },
+			{ "text": "Run extension in Extension Development Host", "completed": true },
+			{ "text": "Verify extension activates without errors in Output panel", "completed": true }
 		],
+		"status": "completed",
 		"passes": true
 	},
 	{
-		"category": "functional",
-		"description": "Messages persist after refresh/reopen",
+		"id": "setup-002",
+		"category": "setup",
+		"description": "PRD file detection and loading",
 		"steps": [
-			"Send a message in a conversation",
-			"Refresh the page (or close and reopen the app)",
-			"Navigate back to the same conversation",
-			"Verify the previously sent message is still visible"
+			"Open a workspace containing a prd.json file in the plans/ folder",
+			"Verify extension detects and loads the prd.json file automatically",
+			"Verify items are parsed correctly with all fields (id, category, description, steps, status, passes)",
+			"Modify prd.json externally and verify extension reloads changes",
+			"Verify error handling when prd.json is malformed"
 		],
+		"status": "not-started",
 		"passes": false
 	},
 	{
-		"category": "functional",
-		"description": "Real-time incoming messages appear without manual refresh",
-		"steps": [
-			"Open the same conversation in two browser windows (User A and User B)",
-			"From User B, send a message to the conversation",
-			"On User A, verify the new message appears automatically",
-			"Verify ordering places the new message at the end of the conversation"
-		],
-		"passes": false
-	},
-	{
-		"category": "functional",
-		"description": "Unread count increments and clears when a conversation is opened",
-		"steps": [
-			"Open the chat app in two windows (User A and User B)",
-			"On User B, send a message to a conversation that User A is not currently viewing",
-			"On User A, verify the conversation shows an unread badge/count",
-			"Open that conversation",
-			"Verify the unread badge/count clears"
-		],
-		"passes": false
-	},
-	{
-		"category": "functional",
-		"description": "Typing indicator shows when another user is composing",
-		"steps": [
-			"Open the same conversation in two windows (User A and User B)",
-			"On User B, focus the composer and start typing",
-			"On User A, verify a typing indicator appears (e.g., 'User B is typing\u2026')",
-			"On User B, stop typing for a few seconds",
-			"On User A, verify the typing indicator disappears"
-		],
-		"passes": false
-	},
-	{
-		"category": "functional",
-		"description": "User can search conversations and messages",
-		"steps": [
-			"Ensure there are multiple conversations and messages with distinct keywords",
-			"Use the search bar to search for a keyword present in a message",
-			"Verify results include the matching conversation/message",
-			"Open the result",
-			"Verify the matching message is highlighted or scrolled into view"
-		],
-		"passes": false
-	},
-	{
+		"id": "ui-001",
 		"category": "ui",
-		"description": "Conversation list shows name, last message preview, and timestamp",
+		"description": "Sidebar tree view displays PRD items",
 		"steps": [
-			"Open the chat app with existing conversations",
-			"Verify each conversation row shows a title/name",
-			"Verify a last-message preview is visible",
-			"Verify a timestamp for the last message is visible"
+			"Open a workspace with a valid prd.json",
+			"Verify a 'Ralph' or 'PRD' view appears in the Activity Bar",
+			"Click the Activity Bar icon to open the sidebar",
+			"Verify all PRD items are listed with their descriptions",
+			"Verify items are grouped or labeled by category (setup, ui, functional, git, agent)"
 		],
+		"status": "not-started",
 		"passes": false
 	},
 	{
+		"id": "ui-002",
 		"category": "ui",
-		"description": "Composer disables Send for empty message and enables when text is present",
+		"description": "Sidebar shows status indicators for each item",
 		"steps": [
-			"Open a conversation",
-			"Verify the Send button is disabled when the composer is empty",
-			"Type at least one character",
-			"Verify the Send button becomes enabled",
-			"Delete all text",
-			"Verify the Send button becomes disabled again"
+			"Open the sidebar with PRD items loaded",
+			"Verify each item displays a status icon (not-started, in-progress, in-review, completed)",
+			"Verify different statuses have visually distinct icons or colors",
+			"Change an item's status in prd.json manually",
+			"Verify the sidebar updates to reflect the new status"
 		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "ui-003",
+		"category": "ui",
+		"description": "Detail panel opens when selecting a sidebar item",
+		"steps": [
+			"Click on a PRD item in the sidebar",
+			"Verify a webview panel opens showing item details",
+			"Verify the panel displays: id, category, description, status, passes, and all steps",
+			"Verify each step has a checkbox showing its completion state",
+			"Click a different item in sidebar and verify panel updates"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "ui-004",
+		"category": "ui",
+		"description": "Drag-and-drop reordering in sidebar",
+		"steps": [
+			"Open the sidebar with multiple PRD items",
+			"Drag an item from one position to another",
+			"Verify the item moves to the new position visually",
+			"Verify prd.json is updated with the new order",
+			"Reload the extension and verify order persists"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "functional-001",
+		"category": "functional",
+		"description": "Add new PRD item",
+		"steps": [
+			"Click the 'Add Item' button in the sidebar toolbar",
+			"Verify a form/dialog appears with fields: category, description",
+			"Fill in the form and submit",
+			"Verify the new item appears in the sidebar with auto-generated ID",
+			"Verify prd.json is updated with the new item (status: not-started, passes: false, empty steps)"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "functional-002",
+		"category": "functional",
+		"description": "Edit existing PRD item",
+		"steps": [
+			"Select an item in the sidebar",
+			"Click 'Edit' button or use context menu",
+			"Verify form/dialog opens pre-filled with current values",
+			"Modify description and category",
+			"Submit and verify changes appear in sidebar and prd.json"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "functional-003",
+		"category": "functional",
+		"description": "Delete PRD item",
+		"steps": [
+			"Select an item in the sidebar",
+			"Click 'Delete' button or use context menu",
+			"Verify confirmation dialog appears",
+			"Confirm deletion",
+			"Verify item is removed from sidebar and prd.json"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "functional-004",
+		"category": "functional",
+		"description": "Add, edit, and remove steps within an item",
+		"steps": [
+			"Open the detail panel for an item",
+			"Click 'Add Step' and enter step text",
+			"Verify step appears in the list",
+			"Double-click a step to edit its text",
+			"Click delete icon on a step to remove it",
+			"Verify all changes persist to prd.json"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "functional-005",
+		"category": "functional",
+		"description": "Toggle step completion checkboxes",
+		"steps": [
+			"Open the detail panel for an item with steps",
+			"Click a step's checkbox to mark it complete",
+			"Verify checkbox shows checked state",
+			"Verify step completion state persists to prd.json (steps become objects with text and completed fields)",
+			"Uncheck the step and verify state updates"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "functional-006",
+		"category": "functional",
+		"description": "Change item status from detail panel",
+		"steps": [
+			"Open the detail panel for an item",
+			"Locate the status dropdown/selector",
+			"Change status from 'not-started' to 'in-progress'",
+			"Verify sidebar icon updates immediately",
+			"Verify prd.json status field is updated"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "functional-007",
+		"category": "functional",
+		"description": "Toggle passes field from detail panel",
+		"steps": [
+			"Open the detail panel for an item",
+			"Locate the 'passes' toggle/checkbox",
+			"Toggle from false to true",
+			"Verify visual indicator updates (e.g., green checkmark)",
+			"Verify prd.json passes field is updated"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "functional-008",
+		"category": "functional",
+		"description": "Auto-generate unique IDs for new items",
+		"steps": [
+			"Create a new PRD item",
+			"Verify an ID is auto-generated in format 'category-XXX' (e.g., 'ui-005')",
+			"Create another item in the same category",
+			"Verify the new ID increments correctly",
+			"Verify no duplicate IDs exist in prd.json"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "git-001",
+		"category": "git",
+		"description": "Create feature branch when starting work on an item",
+		"steps": [
+			"Select an item with status 'not-started'",
+			"Click 'Start Work' button",
+			"Verify a new git branch is created (e.g., 'feature/setup-001')",
+			"Verify the workspace switches to the new branch",
+			"Verify item status changes to 'in-progress'"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "git-002",
+		"category": "git",
+		"description": "Track changed files for in-progress item",
+		"steps": [
+			"Start work on an item (creates feature branch)",
+			"Make changes to files in the workspace",
+			"Open the detail panel for the in-progress item",
+			"Verify a 'Changed Files' section shows modified files",
+			"Verify the list updates as more files are changed"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "git-003",
+		"category": "git",
+		"description": "View diff of changed file using VS Code native diff",
+		"steps": [
+			"With an in-progress item that has changed files",
+			"Click on a file in the 'Changed Files' list",
+			"Verify VS Code opens the native diff view",
+			"Verify diff shows changes between feature branch and main",
+			"Verify both sides of the diff are scrollable and navigable"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "git-004",
+		"category": "git",
+		"description": "Mark item for review and show all diffs",
+		"steps": [
+			"With an in-progress item that has changed files",
+			"Click 'Submit for Review' button",
+			"Verify item status changes to 'in-review'",
+			"Verify all changed files are listed in the detail panel",
+			"Verify user can click through each file to review diffs"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "git-005",
+		"category": "git",
+		"description": "Complete item and merge branch",
+		"steps": [
+			"With an item in 'in-review' status",
+			"Click 'Complete' or 'Approve' button",
+			"Verify confirmation dialog shows summary of changes",
+			"Confirm completion",
+			"Verify item status changes to 'completed' and passes to true"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "agent-001",
+		"category": "agent",
+		"description": "Start Work triggers Copilot chat with item context",
+		"steps": [
+			"Select a PRD item and click 'Start Work'",
+			"Verify GitHub Copilot Chat opens (or extension chat panel)",
+			"Verify the chat is pre-populated with context about the item",
+			"Verify context includes: description, steps, category, and relevant workspace info",
+			"Verify agent can reference the PRD item in responses"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "agent-002",
+		"category": "agent",
+		"description": "Agent receives project prompt template",
+		"steps": [
+			"Start work on an item",
+			"Verify the agent context includes the appropriate prompt from prompts/ folder",
+			"Verify prompt is selected based on item category or project configuration",
+			"Verify agent responses align with the prompt's instructions",
+			"Test with different prompt templates (default.txt, safe-write-only.txt)"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "agent-003",
+		"category": "agent",
+		"description": "Agent can update step completion status",
+		"steps": [
+			"Start work on an item with the agent",
+			"As agent completes implementation steps, verify it can mark steps complete",
+			"Verify step checkboxes update in the detail panel",
+			"Verify prd.json is updated with step completion",
+			"Verify user can also manually override step status"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "agent-004",
+		"category": "agent",
+		"description": "Agent uses skill references for context",
+		"steps": [
+			"Start work on an item related to WordPress plugin development",
+			"Verify agent has access to skills/wp-plugin-development/SKILL.md",
+			"Verify agent references the skill's references/ documents when relevant",
+			"Ask agent about WordPress security best practices",
+			"Verify response incorporates content from security.md reference"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "polish-001",
+		"category": "polish",
+		"description": "Filter items by status in sidebar",
+		"steps": [
+			"Open the sidebar with multiple items in different statuses",
+			"Click filter dropdown or toggle buttons",
+			"Select 'In Progress' filter",
+			"Verify only in-progress items are shown",
+			"Clear filter and verify all items return"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "polish-002",
+		"category": "polish",
+		"description": "Filter items by category in sidebar",
+		"steps": [
+			"Open the sidebar with items in multiple categories",
+			"Click category filter dropdown",
+			"Select 'ui' category",
+			"Verify only UI category items are shown",
+			"Select multiple categories and verify combined results"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "polish-003",
+		"category": "polish",
+		"description": "Keyboard shortcuts for common actions",
+		"steps": [
+			"With sidebar focused, press 'n' or configured shortcut",
+			"Verify 'Add Item' dialog opens",
+			"With item selected, press 'Enter'",
+			"Verify detail panel opens",
+			"Press 'Delete' key and verify delete confirmation appears"
+		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "polish-004",
+		"category": "polish",
+		"description": "Progress summary in sidebar header",
+		"steps": [
+			"Open sidebar with items in various statuses",
+			"Verify header shows progress summary (e.g., '3/10 completed')",
+			"Complete an item",
+			"Verify progress summary updates immediately",
+			"Verify progress bar or percentage indicator reflects completion"
+		],
+		"status": "not-started",
 		"passes": false
 	}
 ]

@@ -58,10 +58,10 @@ https://github.com/user-attachments/assets/28206ee1-8dad-4871-aef5-1a9f24625dba
 
 ### Choose a Model
 
-Set the `MODEL` environment variable (default: `gpt-5.2`):
+Set the `MODEL` environment variable (default: `claude-sonnet-4.5`):
 
 ```bash
-MODEL=claude-opus-4.5 ./ralph.sh --prompt prompts/default.txt --prd plans/prd.json --allow-profile safe 10
+MODEL=gpt-5 ./ralph.sh --prompt prompts/default.txt --prd plans/prd.json --allow-profile safe 10
 ```
 
 ### Define Your Work Items
@@ -71,9 +71,11 @@ Create `plans/prd.json` with your requirements:
 ```json
 [
   {
+    "id": "functional-001",
     "category": "functional",
     "description": "User can send a message and see it in the conversation",
     "steps": ["Open chat", "Type message", "Click Send", "Verify it appears"],
+    "status": "not-started",
     "passes": false
   }
 ]
@@ -81,10 +83,12 @@ Create `plans/prd.json` with your requirements:
 
 | Field         | Description                                |
 |---------------|--------------------------------------------|
-| `category`    | `"functional"`, `"ui"`, or custom          |
+| `id`          | Unique identifier (e.g., `functional-001`) |
+| `category`    | `"functional"`, `"ui"`, `"setup"`, or custom |
 | `description` | One-line summary                           |
 | `steps`       | How to verify it works                     |
-| `passes`      | `false` → `true` when complete             |
+| `status`      | `"not-started"` / `"in-progress"` / `"in-review"` / `"completed"` |
+| `passes`      | `false` → `true` when verified             |
 
 See the [`plans/`](plans/) folder for more context.
 
@@ -150,7 +154,7 @@ MODEL=claude-opus-4.5 ./ralph-once.sh --prompt prompts/default.txt --prd plans/p
 
 | Variable | Description        | Default   |
 |----------|--------------------|-----------|
-| `MODEL`  | Model to use       | `gpt-5.2` |
+| `MODEL`  | Model to use       | `claude-sonnet-4.5` |
 
 ### Permission Profiles
 

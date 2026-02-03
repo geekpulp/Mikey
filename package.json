@@ -1,0 +1,74 @@
+{
+  "name": "ralph",
+  "displayName": "Ralph",
+  "description": "PRD-driven development workflow extension",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onView:ralph.prdExplorer",
+    "workspaceContains:**/plans/prd.json"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ralph",
+          "title": "Ralph",
+          "icon": "resources/ralph-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "ralph": [
+        {
+          "id": "ralph.prdExplorer",
+          "name": "PRD Items"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "ralph.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "ralph.addItem",
+        "title": "Add PRD Item",
+        "icon": "$(add)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "ralph.refresh",
+          "when": "view == ralph.prdExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "ralph.addItem",
+          "when": "view == ralph.prdExplorer",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "typecheck": "tsc --noEmit",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.75.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -12,3 +12,15 @@
 
 # Ad-hoc temp files from manual runs
 /tmp-copilot-test.txt
+
+# VS Code extension
+node_modules/
+out/
+*.vsix
+.vscode-test/
+
+# Temp scripts
+create-dirs.sh
+
+# Ralph prompt files
+.ralph-prompt.*

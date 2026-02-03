@@ -164,7 +164,7 @@ fi
 iterations="$1"
 
 # Default model if not provided
-MODEL="${MODEL:-gpt-5.2}"
+MODEL="${MODEL:-claude-sonnet-4.5}"
 
 if [[ -z "$prompt_file" ]]; then
   echo "Error: --prompt is required" >&2
@@ -232,13 +232,17 @@ if [[ ${#allow_tools[@]} -eq 0 ]]; then
   fi
 fi
 
-for tool in "${allow_tools[@]}"; do
-  copilot_tool_args+=(--allow-tool "$tool")
-done
+if [[ ${#allow_tools[@]} -gt 0 ]]; then
+  for tool in "${allow_tools[@]}"; do
+    copilot_tool_args+=(--allow-tool "$tool")
+  done
+fi
 
-for tool in "${deny_tools[@]}"; do
-  copilot_tool_args+=(--deny-tool "$tool")
-done
+if [[ ${#deny_tools[@]} -gt 0 ]]; then
+  for tool in "${deny_tools[@]}"; do
+    copilot_tool_args+=(--deny-tool "$tool")
+  done
+fi
 
 
 
@@ -248,6 +252,7 @@ for ((i=1; i<=iterations; i++)); do
 
   # Copilot CLI 0.0.377+ may produce no output when a prompt contains multiple
   # @file attachments. Combine PRD + progress into a single attachment.
+  echo "[$(date '+%H:%M:%S')] Building context file..."
   context_file="$(mktemp ".ralph-context.${i}.XXXXXX")"
   {
     echo "# Context"
@@ -294,6 +299,9 @@ for ((i=1; i<=iterations; i++)); do
     echo
   } >"$combined_prompt_file"
 
+  echo "[$(date '+%H:%M:%S')] Calling Copilot CLI (model: $MODEL)..."
+  echo "[$(date '+%H:%M:%S')] This may take a few minutes. Copilot is working..."
+
   if command -v script >/dev/null 2>&1; then
     transcript_file="$(mktemp -t ralph-copilot.XXXXXX)"
     script -q -F "$transcript_file" \
@@ -303,6 +311,7 @@ for ((i=1; i<=iterations; i++)); do
         "${copilot_tool_args[@]}" \
       >/dev/null 2>&1
     status=$?
+    echo "[$(date '+%H:%M:%S')] Copilot finished (exit code: $status)"
     result="$(cat "$transcript_file" 2>/dev/null || true)"
     rm -f "$transcript_file" >/dev/null 2>&1 || true
   else
@@ -314,26 +323,36 @@ for ((i=1; i<=iterations; i++)); do
         2>&1
     )
     status=$?
+    echo "[$(date '+%H:%M:%S')] Copilot finished (exit code: $status)"
   fi
   set -e
 
   rm -f "$context_file" >/dev/null 2>&1 || true
   rm -f "$combined_prompt_file" >/dev/null 2>&1 || true
 
-  echo "$result"
+  if [[ -n "$result" ]]; then
+    echo "[$(date '+%H:%M:%S')] Copilot response (${#result} chars):"
+    echo "------------------------------------"
+    echo "$result"
+    echo "------------------------------------"
+  else
+    echo "[$(date '+%H:%M:%S')] Warning: Copilot returned empty response"
+  fi
 
   if [[ $status -ne 0 ]]; then
-    echo "Copilot exited with status $status; continuing to next iteration."
+    echo "[$(date '+%H:%M:%S')] Copilot exited with status $status; continuing to next iteration."
     continue
   fi
 
   if [[ "$result" == *"<promise>COMPLETE</promise>"* ]]; then
-    echo "PRD complete, exiting."
+    echo "[$(date '+%H:%M:%S')] PRD complete, exiting."
     if command -v tt >/dev/null 2>&1; then
       tt notify "PRD complete after $i iterations"
     fi
     exit 0
   fi
+
+  echo "[$(date '+%H:%M:%S')] Iteration $i complete. Moving to next..."
 done
 
-echo "Finished $iterations iterations without receiving the completion signal."
+echo "[$(date '+%H:%M:%S')] Finished $iterations iterations without receiving the completion signal."

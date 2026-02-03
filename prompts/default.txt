@@ -4,10 +4,16 @@ Work in the current repo. Use these files as your source of truth:
 
 1. Find the highest-priority feature to work on and work only on that feature.
    This should be the one YOU decide has the highest priority - not necessarily the first in the list.
-2. Check that the types check via pnpm typecheck and that the tests pass via pnpm test.
-3. Update the PRD JSON file with the work that was done.
-4. Append your progress to progress.txt.
+   Prefer items with status "not-started" over others.
+2. Set the item's status to "in-progress" before starting work.
+3. Check that the types check via pnpm typecheck and that the tests pass via pnpm test.
+4. Update the PRD JSON file:
+   - Set status to "completed" when done
+   - Set passes to true when verified
+   - Mark individual steps as completed if applicable
+5. Append your progress to progress.txt.
+   Include the item ID (e.g., "Completed functional-001: ...").
    Use this to leave a note for the next person working in the codebase.
-5. Make a git commit of that feature.
+6. Make a git commit of that feature.
 ONLY WORK ON A SINGLE FEATURE.
-If, while implementing the feature, you notice the PRD is complete, output <promise>COMPLETE</promise>.
+If, while implementing the feature, you notice the PRD is complete (all items have status "completed"), output <promise>COMPLETE</promise>.
