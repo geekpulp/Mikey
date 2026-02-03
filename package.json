@@ -42,6 +42,11 @@
         "command": "ralph.addItem",
         "title": "Add PRD Item",
         "icon": "$(add)"
+      },
+      {
+        "command": "ralph.editItem",
+        "title": "Edit PRD Item",
+        "icon": "$(edit)"
       }
     ],
     "menus": {
@@ -55,6 +60,13 @@
           "command": "ralph.addItem",
           "when": "view == ralph.prdExplorer",
           "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "ralph.editItem",
+          "when": "view == ralph.prdExplorer && viewItem == prdItem",
+          "group": "inline"
         }
       ]
     }

@@ -102,6 +102,53 @@ try {
 }
 }
 
+async editItem(item: PrdItem): Promise<void> {
+if (!this.prdFilePath) {
+	vscode.window.showErrorMessage('No PRD file found');
+	return;
+}
+
+// Show category picker pre-selected with current category
+const categories = ['setup', 'ui', 'functional', 'git', 'agent', 'polish'];
+const category = await vscode.window.showQuickPick(categories, {
+	placeHolder: 'Select category',
+	title: `Edit Item: ${item.id}`
+});
+
+if (!category) {
+	return; // User cancelled
+}
+
+// Show description input pre-filled with current description
+const description = await vscode.window.showInputBox({
+	prompt: 'Enter description',
+	value: item.description,
+	placeHolder: 'e.g., Implement export functionality'
+});
+
+if (!description) {
+	return; // User cancelled
+}
+
+// Find and update the item
+const itemIndex = this.prdItems.findIndex(i => i.id === item.id);
+if (itemIndex === -1) {
+	vscode.window.showErrorMessage(`Item ${item.id} not found`);
+	return;
+}
+
+this.prdItems[itemIndex].category = category;
+this.prdItems[itemIndex].description = description;
+
+try {
+	fs.writeFileSync(this.prdFilePath, JSON.stringify(this.prdItems, null, '\t'), 'utf-8');
+	this._onDidChangeTreeData.fire();
+	vscode.window.showInformationMessage(`Updated item: ${item.id}`);
+} catch (error) {
+	vscode.window.showErrorMessage(`Failed to update item: ${error}`);
+}
+}
+
 private generateUniqueId(category: string): string {
 const categoryItems = this.prdItems.filter(item => item.category === category);
 const numbers = categoryItems.map(item => {

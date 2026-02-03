@@ -122,3 +122,17 @@
   - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm compile ✓)
   - Also completed functional-008 (Auto-generate unique IDs) as part of this implementation
   - Next: functional-002 (Edit existing PRD item) or functional-003 (Delete PRD item) for full CRUD operations
+
+- 2026-02-04: Completed functional-002: Edit existing PRD item
+  - Added ralph.editItem command to package.json with edit icon
+  - Registered command in view/item/context menu for prdItem context (appears when right-clicking items)
+  - Implemented editItem() method in PrdTreeDataProvider to update existing items
+  - Edit dialog shows QuickPick for category selection (pre-selected with current category)
+  - Edit dialog shows InputBox for description (pre-filled with current description)
+  - User can cancel at any step by pressing ESC or clicking Cancel
+  - Updates are persisted to prd.json with proper JSON formatting (tabs)
+  - File watcher ensures sidebar refreshes automatically to show updated item
+  - User receives confirmation message when item is updated
+  - Edit button appears inline in tree view for each PRD item
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm compile ✓)
+  - Next: functional-003 (Delete PRD item) or functional-004 (Add, edit, remove steps) for more CRUD operations

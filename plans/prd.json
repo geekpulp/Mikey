@@ -102,14 +102,14 @@
 		"category": "functional",
 		"description": "Edit existing PRD item",
 		"steps": [
-			"Select an item in the sidebar",
-			"Click 'Edit' button or use context menu",
-			"Verify form/dialog opens pre-filled with current values",
-			"Modify description and category",
-			"Submit and verify changes appear in sidebar and prd.json"
+			{ "text": "Select an item in the sidebar", "completed": true },
+			{ "text": "Click 'Edit' button or use context menu", "completed": true },
+			{ "text": "Verify form/dialog opens pre-filled with current values", "completed": true },
+			{ "text": "Modify description and category", "completed": true },
+			{ "text": "Submit and verify changes appear in sidebar and prd.json", "completed": true }
 		],
-		"status": "not-started",
-		"passes": false
+		"status": "completed",
+		"passes": true
 	},
 	{
 		"id": "functional-003",

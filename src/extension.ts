@@ -43,6 +43,12 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
+    vscode.commands.registerCommand('ralph.editItem', async (item: PrdItem) => {
+      await prdProvider.editItem(item);
+    })
+  );
+
+  context.subscriptions.push(
     vscode.commands.registerCommand('ralph.openItem', (item: PrdItem) => {
       DetailPanel.createOrShow(context.extensionUri, item);
     })
