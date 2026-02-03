@@ -16,9 +16,18 @@ export interface PrdItem {
 	passes: boolean;
 }
 
-export class PrdTreeDataProvider implements vscode.TreeDataProvider<PrdItem> {
-private _onDidChangeTreeData: vscode.EventEmitter<PrdItem | undefined | null | void> = new vscode.EventEmitter<PrdItem | undefined | null | void>();
-readonly onDidChangeTreeData: vscode.Event<PrdItem | undefined | null | void> = this._onDidChangeTreeData.event;
+export class CategoryNode {
+	constructor(
+		public readonly category: string,
+		public readonly items: PrdItem[]
+	) {}
+}
+
+export type TreeNode = CategoryNode | PrdItem;
+
+export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
+private _onDidChangeTreeData: vscode.EventEmitter<TreeNode | undefined | null | void> = new vscode.EventEmitter<TreeNode | undefined | null | void>();
+readonly onDidChangeTreeData: vscode.Event<TreeNode | undefined | null | void> = this._onDidChangeTreeData.event;
 
 private prdItems: PrdItem[] = [];
 private prdFilePath: string | undefined;
@@ -66,26 +75,60 @@ refresh(): void {
 this.loadPrdFile();
 }
 
-getTreeItem(element: PrdItem): vscode.TreeItem {
+getTreeItem(element: TreeNode): vscode.TreeItem {
+if (element instanceof CategoryNode) {
 const treeItem = new vscode.TreeItem(
-`[${element.id}] ${element.description}`,
+element.category.toUpperCase(),
+vscode.TreeItemCollapsibleState.Expanded
+);
+treeItem.iconPath = new vscode.ThemeIcon('folder');
+treeItem.contextValue = 'category';
+return treeItem;
+}
+
+const item = element as PrdItem;
+const treeItem = new vscode.TreeItem(
+`[${item.id}] ${item.description}`,
 vscode.TreeItemCollapsibleState.None
 );
 
-treeItem.tooltip = `Category: ${element.category}\nStatus: ${element.status}\nPasses: ${element.passes}`;
-treeItem.description = element.status;
+treeItem.tooltip = `Category: ${item.category}\nStatus: ${item.status}\nPasses: ${item.passes}`;
+treeItem.description = item.status;
 
 // Set icon based on status
-const iconName = this.getStatusIcon(element.status);
+const iconName = this.getStatusIcon(item.status);
 treeItem.iconPath = new vscode.ThemeIcon(iconName);
+treeItem.contextValue = 'prdItem';
 
 return treeItem;
 }
 
-getChildren(element?: PrdItem): Thenable<PrdItem[]> {
+getChildren(element?: TreeNode): Thenable<TreeNode[]> {
 if (!element) {
-return Promise.resolve(this.prdItems);
+// Root level: return category nodes
+const categories = new Map<string, PrdItem[]>();
+this.prdItems.forEach(item => {
+if (!categories.has(item.category)) {
+categories.set(item.category, []);
 }
+categories.get(item.category)!.push(item);
+});
+
+const categoryNodes: CategoryNode[] = [];
+categories.forEach((items, category) => {
+categoryNodes.push(new CategoryNode(category, items));
+});
+
+// Sort categories by name
+categoryNodes.sort((a, b) => a.category.localeCompare(b.category));
+return Promise.resolve(categoryNodes);
+}
+
+if (element instanceof CategoryNode) {
+// Return items in this category
+return Promise.resolve(element.items);
+}
+
 return Promise.resolve([]);
 }
 

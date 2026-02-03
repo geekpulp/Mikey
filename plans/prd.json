@@ -32,14 +32,14 @@
 		"category": "ui",
 		"description": "Sidebar tree view displays PRD items",
 		"steps": [
-			"Open a workspace with a valid prd.json",
-			"Verify a 'Ralph' or 'PRD' view appears in the Activity Bar",
-			"Click the Activity Bar icon to open the sidebar",
-			"Verify all PRD items are listed with their descriptions",
-			"Verify items are grouped or labeled by category (setup, ui, functional, git, agent)"
+			{ "text": "Open a workspace with a valid prd.json", "completed": true },
+			{ "text": "Verify a 'Ralph' or 'PRD' view appears in the Activity Bar", "completed": true },
+			{ "text": "Click the Activity Bar icon to open the sidebar", "completed": true },
+			{ "text": "Verify all PRD items are listed with their descriptions", "completed": true },
+			{ "text": "Verify items are grouped or labeled by category (setup, ui, functional, git, agent)", "completed": true }
 		],
-		"status": "not-started",
-		"passes": false
+		"status": "completed",
+		"passes": true
 	},
 	{
 		"id": "ui-002",

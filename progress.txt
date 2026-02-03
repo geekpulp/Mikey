@@ -25,3 +25,16 @@
   - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm compile ✓)
   - Next: Extension should now display PRD items in sidebar when loaded in Extension Development Host
 
+- 2026-02-04: Completed ui-001: Sidebar tree view displays PRD items
+  - Enhanced PrdTreeDataProvider to support category grouping
+  - Added CategoryNode class to represent category groups in the tree
+  - Modified TreeNode type to support both CategoryNode and PrdItem
+  - Updated getTreeItem() to render categories as expandable folders
+  - Updated getChildren() to group items by category at root level
+  - Categories are sorted alphabetically and displayed in UPPERCASE
+  - Each category is expandable/collapsible with folder icon
+  - PRD items are displayed under their respective categories
+  - Items show status in description and appropriate status icons
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm compile ✓)
+  - Next: Test in Extension Development Host to verify tree view with category grouping works correctly
+
