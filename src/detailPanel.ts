@@ -1,14 +1,30 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 import { PrdItem, PrdStep } from './prdTreeDataProvider';
 
 export class DetailPanel {
 	public static currentPanel: DetailPanel | undefined;
 	private readonly _panel: vscode.WebviewPanel;
 	private _disposables: vscode.Disposable[] = [];
+	private _currentItem: PrdItem | undefined;
 
 	private constructor(panel: vscode.WebviewPanel, private extensionUri: vscode.Uri) {
 		this._panel = panel;
 		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
+		
+		// Handle messages from the webview
+		this._panel.webview.onDidReceiveMessage(
+			message => {
+				switch (message.command) {
+					case 'toggleStep':
+						this.toggleStepCompletion(message.stepIndex);
+						break;
+				}
+			},
+			null,
+			this._disposables
+		);
 	}
 
 	public static createOrShow(extensionUri: vscode.Uri, item: PrdItem) {
@@ -27,7 +43,7 @@ export class DetailPanel {
 			'PRD Item Details',
 			column || vscode.ViewColumn.One,
 			{
-				enableScripts: false,
+				enableScripts: true,
 				retainContextWhenHidden: true,
 			}
 		);
@@ -37,6 +53,7 @@ export class DetailPanel {
 	}
 
 	public update(item: PrdItem) {
+		this._currentItem = item;
 		this._panel.title = `[${item.id}] ${item.description}`;
 		this._panel.webview.html = this._getHtmlForWebview(item);
 	}
@@ -182,6 +199,16 @@ export class DetailPanel {
 			font-weight: bold;
 		}
 	</style>
+	<script>
+		const vscode = acquireVsCodeApi();
+		
+		function toggleStep(stepIndex) {
+			vscode.postMessage({
+				command: 'toggleStep',
+				stepIndex: stepIndex
+			});
+		}
+	</script>
 </head>
 <body>
 	<div class="header">
@@ -227,7 +254,7 @@ export class DetailPanel {
 			return `
 				<li class="step-item">
 					<span class="step-checkbox">
-						<span class="${checkboxClass}"></span>
+						<span class="${checkboxClass}" onclick="toggleStep(${index})" style="cursor: pointer;"></span>
 					</span>
 					<span class="${textClass}">${this._escapeHtml(stepText)}</span>
 				</li>
@@ -257,5 +284,59 @@ export class DetailPanel {
 			.replace(/>/g, '&gt;')
 			.replace(/"/g, '&quot;')
 			.replace(/'/g, '&#039;');
+	}
+
+	private toggleStepCompletion(stepIndex: number): void {
+		if (!this._currentItem) {
+			return;
+		}
+
+		const workspaceFolders = vscode.workspace.workspaceFolders;
+		if (!workspaceFolders) {
+			vscode.window.showErrorMessage('No workspace folder found');
+			return;
+		}
+
+		const prdPath = path.join(workspaceFolders[0].uri.fsPath, 'plans', 'prd.json');
+		
+		try {
+			// Read current PRD file
+			const content = fs.readFileSync(prdPath, 'utf-8');
+			const prdItems: PrdItem[] = JSON.parse(content);
+			
+			// Find the current item in the array
+			const itemIndex = prdItems.findIndex(item => item.id === this._currentItem!.id);
+			if (itemIndex === -1) {
+				vscode.window.showErrorMessage('Item not found in PRD file');
+				return;
+			}
+
+			const item = prdItems[itemIndex];
+			
+			// Ensure step exists
+			if (stepIndex < 0 || stepIndex >= item.steps.length) {
+				vscode.window.showErrorMessage('Invalid step index');
+				return;
+			}
+
+			// Convert step to object format if it's a string
+			const step = item.steps[stepIndex];
+			if (typeof step === 'string') {
+				item.steps[stepIndex] = { text: step, completed: true };
+			} else {
+				// Toggle completion state
+				step.completed = !step.completed;
+			}
+
+			// Write updated PRD file
+			fs.writeFileSync(prdPath, JSON.stringify(prdItems, null, '\t'), 'utf-8');
+			
+			// Update current item reference and refresh view
+			this._currentItem = item;
+			this.update(item);
+			
+		} catch (error) {
+			vscode.window.showErrorMessage(`Failed to update step: ${error}`);
+		}
 	}
 }

@@ -65,3 +65,21 @@
   - Panel updates when clicking different items in sidebar
   - Extension compiles successfully (pnpm typecheck ✓, pnpm compile ✓)
   - Next: functional-001 (Add new PRD item) or functional-005 (Toggle step completion) to enable interactivity
+
+
+- 2026-02-04: Completed functional-005: Toggle step completion checkboxes
+  - Enabled scripts in webview panel (enableScripts: true)
+  - Added onclick handlers to checkboxes with cursor pointer styling
+  - Implemented JavaScript function toggleStep() that posts messages to extension
+  - Created message handler in DetailPanel to receive toggleStep messages from webview
+  - Implemented toggleStepCompletion() method that:
+    * Reads current prd.json file
+    * Finds the item by ID
+    * Converts string steps to object format {text, completed} on first toggle
+    * Toggles the completed boolean state for subsequent clicks
+    * Writes updated JSON back to file with proper formatting (tabs)
+    * Refreshes the webview to show updated state
+  - Checkboxes are now interactive and persist state to prd.json
+  - File watcher ensures sidebar stays in sync with prd.json changes
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm compile ✓)
+  - Next: functional-006 (Change item status) or functional-001 (Add new PRD item) for more interactivity

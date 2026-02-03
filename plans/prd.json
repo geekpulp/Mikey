@@ -145,14 +145,14 @@
 		"category": "functional",
 		"description": "Toggle step completion checkboxes",
 		"steps": [
-			"Open the detail panel for an item with steps",
-			"Click a step's checkbox to mark it complete",
-			"Verify checkbox shows checked state",
-			"Verify step completion state persists to prd.json (steps become objects with text and completed fields)",
-			"Uncheck the step and verify state updates"
+			{ "text": "Open the detail panel for an item with steps", "completed": true },
+			{ "text": "Click a step's checkbox to mark it complete", "completed": true },
+			{ "text": "Verify checkbox shows checked state", "completed": true },
+			{ "text": "Verify step completion state persists to prd.json (steps become objects with text and completed fields)", "completed": true },
+			{ "text": "Uncheck the step and verify state updates", "completed": true }
 		],
-		"status": "not-started",
-		"passes": false
+		"status": "completed",
+		"passes": true
 	},
 	{
 		"id": "functional-006",
