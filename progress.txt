@@ -95,3 +95,14 @@
   - User receives confirmation message when status is updated
   - Extension compiles successfully (pnpm typecheck ✓, pnpm compile ✓)
   - Next: functional-007 (Toggle passes field) or functional-001 (Add new PRD item)
+
+- 2026-02-04: Completed functional-007: Toggle passes field from detail panel
+  - Added togglePasses message handler in DetailPanel class
+  - Created interactive passes toggle button with visual states (green checkmark for true, red X for false)
+  - Implemented togglePasses() JavaScript function to post messages from webview to extension
+  - Added togglePasses() method to toggle passes field and persist to prd.json
+  - Applied distinct styling to passes toggle: green background when true, red when false
+  - User receives confirmation message when passes field is updated
+  - Toggle shows icon (✓ or ✗) and descriptive text ("Passes" or "Does not pass")
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm compile ✓)
+  - Next: functional-001 (Add new PRD item) or functional-008 (Auto-generate unique IDs) would be valuable next features

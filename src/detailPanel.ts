@@ -23,6 +23,9 @@ export class DetailPanel {
 					case 'changeStatus':
 						this.changeItemStatus(message.status);
 						break;
+					case 'togglePasses':
+						this.togglePasses();
+						break;
 				}
 			},
 			null,
@@ -76,10 +79,7 @@ export class DetailPanel {
 
 	private _getHtmlForWebview(item: PrdItem): string {
 		const statusBadgeColor = this._getStatusColor(item.status);
-		const passesBadge = item.passes
-			? '<span class="badge badge-success">✓ Passes</span>'
-			: '<span class="badge badge-failed">✗ Does not pass</span>';
-
+		
 		const stepsHtml = this._renderSteps(item.steps);
 
 		return `<!DOCTYPE html>
@@ -219,6 +219,37 @@ export class DetailPanel {
 		.status-selector:focus {
 			border-color: var(--vscode-focusBorder);
 		}
+		.passes-toggle {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			padding: 6px 12px;
+			background-color: var(--vscode-input-background);
+			border: 1px solid var(--vscode-input-border);
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: 12px;
+			font-weight: 600;
+			text-transform: uppercase;
+			user-select: none;
+		}
+		.passes-toggle:hover {
+			background-color: var(--vscode-inputOption-hoverBackground);
+		}
+		.passes-toggle.passes-true {
+			background-color: var(--vscode-testing-iconPassed);
+			border-color: var(--vscode-testing-iconPassed);
+			color: var(--vscode-button-foreground);
+		}
+		.passes-toggle.passes-false {
+			background-color: var(--vscode-testing-iconFailed);
+			border-color: var(--vscode-testing-iconFailed);
+			color: var(--vscode-button-foreground);
+		}
+		.passes-icon {
+			font-size: 14px;
+			font-weight: bold;
+		}
 	</style>
 	<script>
 		const vscode = acquireVsCodeApi();
@@ -234,6 +265,12 @@ export class DetailPanel {
 			vscode.postMessage({
 				command: 'changeStatus',
 				status: newStatus
+			});
+		}
+		
+		function togglePasses() {
+			vscode.postMessage({
+				command: 'togglePasses'
 			});
 		}
 	</script>
@@ -260,7 +297,10 @@ export class DetailPanel {
 				</select>
 			</div>
 			<div class="metadata-item">
-				${passesBadge}
+				<div class="passes-toggle passes-${item.passes}" onclick="togglePasses()">
+					<span class="passes-icon">${item.passes ? '✓' : '✗'}</span>
+					<span>${item.passes ? 'Passes' : 'Does not pass'}</span>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -419,6 +459,49 @@ export class DetailPanel {
 			
 		} catch (error) {
 			vscode.window.showErrorMessage(`Failed to update status: ${error}`);
+		}
+	}
+
+	private togglePasses(): void {
+		if (!this._currentItem) {
+			return;
+		}
+
+		const workspaceFolders = vscode.workspace.workspaceFolders;
+		if (!workspaceFolders) {
+			vscode.window.showErrorMessage('No workspace folder found');
+			return;
+		}
+
+		const prdPath = path.join(workspaceFolders[0].uri.fsPath, 'plans', 'prd.json');
+		
+		try {
+			// Read current PRD file
+			const content = fs.readFileSync(prdPath, 'utf-8');
+			const prdItems: PrdItem[] = JSON.parse(content);
+			
+			// Find the current item in the array
+			const itemIndex = prdItems.findIndex(item => item.id === this._currentItem!.id);
+			if (itemIndex === -1) {
+				vscode.window.showErrorMessage('Item not found in PRD file');
+				return;
+			}
+
+			// Toggle passes field
+			prdItems[itemIndex].passes = !prdItems[itemIndex].passes;
+
+			// Write updated PRD file
+			fs.writeFileSync(prdPath, JSON.stringify(prdItems, null, '\t'), 'utf-8');
+			
+			// Update current item reference and refresh view
+			this._currentItem = prdItems[itemIndex];
+			this.update(prdItems[itemIndex]);
+			
+			const passesValue = prdItems[itemIndex].passes ? 'true (passes)' : 'false (does not pass)';
+			vscode.window.showInformationMessage(`Passes field updated to: ${passesValue}`);
+			
+		} catch (error) {
+			vscode.window.showErrorMessage(`Failed to toggle passes: ${error}`);
 		}
 	}
 }

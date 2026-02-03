@@ -173,14 +173,14 @@
 		"category": "functional",
 		"description": "Toggle passes field from detail panel",
 		"steps": [
-			"Open the detail panel for an item",
-			"Locate the 'passes' toggle/checkbox",
-			"Toggle from false to true",
-			"Verify visual indicator updates (e.g., green checkmark)",
-			"Verify prd.json passes field is updated"
+			{ "text": "Open the detail panel for an item", "completed": true },
+			{ "text": "Locate the 'passes' toggle/checkbox", "completed": true },
+			{ "text": "Toggle from false to true", "completed": true },
+			{ "text": "Verify visual indicator updates (e.g., green checkmark)", "completed": true },
+			{ "text": "Verify prd.json passes field is updated", "completed": true }
 		],
-		"status": "not-started",
-		"passes": false
+		"status": "completed",
+		"passes": true
 	},
 	{
 		"id": "functional-008",
