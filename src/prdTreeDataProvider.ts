@@ -95,9 +95,9 @@ vscode.TreeItemCollapsibleState.None
 treeItem.tooltip = `Category: ${item.category}\nStatus: ${item.status}\nPasses: ${item.passes}`;
 treeItem.description = item.status;
 
-// Set icon based on status
-const iconName = this.getStatusIcon(item.status);
-treeItem.iconPath = new vscode.ThemeIcon(iconName);
+// Set icon based on status with color
+const { icon, color } = this.getStatusIcon(item.status);
+treeItem.iconPath = new vscode.ThemeIcon(icon, color);
 treeItem.contextValue = 'prdItem';
 
 return treeItem;
@@ -132,16 +132,16 @@ return Promise.resolve(element.items);
 return Promise.resolve([]);
 }
 
-private getStatusIcon(status: string): string {
+private getStatusIcon(status: string): { icon: string; color?: vscode.ThemeColor } {
 switch (status) {
 case 'completed':
-return 'pass';
+return { icon: 'pass', color: new vscode.ThemeColor('testing.iconPassed') };
 case 'in-progress':
-return 'sync';
+return { icon: 'sync~spin', color: new vscode.ThemeColor('charts.yellow') };
 case 'in-review':
-return 'eye';
+return { icon: 'eye', color: new vscode.ThemeColor('charts.blue') };
 default:
-return 'circle-outline';
+return { icon: 'circle-outline', color: new vscode.ThemeColor('charts.gray') };
 }
 }
 }

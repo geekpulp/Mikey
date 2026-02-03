@@ -38,3 +38,15 @@
   - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm compile ✓)
   - Next: Test in Extension Development Host to verify tree view with category grouping works correctly
 
+
+- 2026-02-04: Completed ui-002: Sidebar shows status indicators for each item
+  - Enhanced getStatusIcon() method to return both icon name and ThemeColor
+  - Added distinct colored icons for each status:
+    * not-started: circle-outline (gray)
+    * in-progress: sync~spin with animation (yellow)
+    * in-review: eye (blue)
+    * completed: pass (green - using testing.iconPassed theme color)
+  - Updated getTreeItem() to destructure and apply both icon and color
+  - File watcher ensures sidebar updates automatically when prd.json is modified
+  - Extension compiles successfully (pnpm typecheck ✓, pnpm compile ✓)
+  - Next: ui-003 (Detail panel) would be a logical next feature for item interaction

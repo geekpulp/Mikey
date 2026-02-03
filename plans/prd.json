@@ -46,14 +46,14 @@
 		"category": "ui",
 		"description": "Sidebar shows status indicators for each item",
 		"steps": [
-			"Open the sidebar with PRD items loaded",
-			"Verify each item displays a status icon (not-started, in-progress, in-review, completed)",
-			"Verify different statuses have visually distinct icons or colors",
-			"Change an item's status in prd.json manually",
-			"Verify the sidebar updates to reflect the new status"
+			{ "text": "Open the sidebar with PRD items loaded", "completed": true },
+			{ "text": "Verify each item displays a status icon (not-started, in-progress, in-review, completed)", "completed": true },
+			{ "text": "Verify different statuses have visually distinct icons or colors", "completed": true },
+			{ "text": "Change an item's status in prd.json manually", "completed": true },
+			{ "text": "Verify the sidebar updates to reflect the new status", "completed": true }
 		],
-		"status": "not-started",
-		"passes": false
+		"status": "completed",
+		"passes": true
 	},
 	{
 		"id": "ui-003",
