@@ -14,3 +14,14 @@
   - Extension compiles successfully with TypeScript (pnpm typecheck ✓, pnpm compile ✓)
   - Note: Used git hash-object workaround due to mkdir/file creation permission restrictions
   - Next: The extension is ready to run in Extension Development Host for testing
+
+- 2026-02-04: Completed setup-002: PRD file detection and loading
+  - Updated extension.ts to register PrdTreeDataProvider with the ralph.prdExplorer view
+  - Added command registrations for ralph.refresh and ralph.addItem
+  - Fixed PrdStep type to handle both string and object formats (text + completed fields)
+  - PrdTreeDataProvider now properly loads prd.json from plans/ folder
+  - Implemented file watcher to automatically reload when prd.json changes externally
+  - Added error handling for malformed JSON with user-friendly error messages
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm compile ✓)
+  - Next: Extension should now display PRD items in sidebar when loaded in Extension Development Host
+

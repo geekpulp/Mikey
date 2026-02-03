@@ -2,13 +2,18 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
+export interface PrdStep {
+	text: string;
+	completed?: boolean;
+}
+
 export interface PrdItem {
-id: string;
-category: string;
-description: string;
-steps: string[];
-status: 'not-started' | 'in-progress' | 'in-review' | 'completed';
-passes: boolean;
+	id: string;
+	category: string;
+	description: string;
+	steps: (string | PrdStep)[];
+	status: 'not-started' | 'in-progress' | 'in-review' | 'completed';
+	passes: boolean;
 }
 
 export class PrdTreeDataProvider implements vscode.TreeDataProvider<PrdItem> {

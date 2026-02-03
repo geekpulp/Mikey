@@ -18,14 +18,14 @@
 		"category": "setup",
 		"description": "PRD file detection and loading",
 		"steps": [
-			"Open a workspace containing a prd.json file in the plans/ folder",
-			"Verify extension detects and loads the prd.json file automatically",
-			"Verify items are parsed correctly with all fields (id, category, description, steps, status, passes)",
-			"Modify prd.json externally and verify extension reloads changes",
-			"Verify error handling when prd.json is malformed"
+			{ "text": "Open a workspace containing a prd.json file in the plans/ folder", "completed": true },
+			{ "text": "Verify extension detects and loads the prd.json file automatically", "completed": true },
+			{ "text": "Verify items are parsed correctly with all fields (id, category, description, steps, status, passes)", "completed": true },
+			{ "text": "Modify prd.json externally and verify extension reloads changes", "completed": true },
+			{ "text": "Verify error handling when prd.json is malformed", "completed": true }
 		],
-		"status": "not-started",
-		"passes": false
+		"status": "completed",
+		"passes": true
 	},
 	{
 		"id": "ui-001",
