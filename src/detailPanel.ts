@@ -26,6 +26,15 @@ export class DetailPanel {
 					case 'togglePasses':
 						this.togglePasses();
 						break;
+					case 'addStep':
+						this.addStep();
+						break;
+					case 'editStep':
+						this.editStep(message.stepIndex);
+						break;
+					case 'deleteStep':
+						this.deleteStep(message.stepIndex);
+						break;
 				}
 			},
 			null,
@@ -250,6 +259,45 @@ export class DetailPanel {
 			font-size: 14px;
 			font-weight: bold;
 		}
+		.add-step-btn {
+			margin-left: 15px;
+			padding: 4px 12px;
+			background-color: var(--vscode-button-background);
+			color: var(--vscode-button-foreground);
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: 12px;
+			font-weight: 600;
+		}
+		.add-step-btn:hover {
+			background-color: var(--vscode-button-hoverBackground);
+		}
+		.step-actions {
+			display: flex;
+			gap: 8px;
+			flex-shrink: 0;
+		}
+		.step-btn {
+			padding: 2px 8px;
+			background-color: var(--vscode-button-secondaryBackground);
+			color: var(--vscode-button-secondaryForeground);
+			border: none;
+			border-radius: 3px;
+			cursor: pointer;
+			font-size: 11px;
+			font-weight: 500;
+		}
+		.step-btn:hover {
+			background-color: var(--vscode-button-secondaryHoverBackground);
+		}
+		.step-btn.delete {
+			background-color: var(--vscode-testing-iconFailed);
+			color: var(--vscode-button-foreground);
+		}
+		.step-btn.delete:hover {
+			opacity: 0.8;
+		}
 	</style>
 	<script>
 		const vscode = acquireVsCodeApi();
@@ -271,6 +319,26 @@ export class DetailPanel {
 		function togglePasses() {
 			vscode.postMessage({
 				command: 'togglePasses'
+			});
+		}
+		
+		function addStep() {
+			vscode.postMessage({
+				command: 'addStep'
+			});
+		}
+		
+		function editStep(stepIndex) {
+			vscode.postMessage({
+				command: 'editStep',
+				stepIndex: stepIndex
+			});
+		}
+		
+		function deleteStep(stepIndex) {
+			vscode.postMessage({
+				command: 'deleteStep',
+				stepIndex: stepIndex
 			});
 		}
 	</script>
@@ -306,7 +374,10 @@ export class DetailPanel {
 	</div>
 
 	<div class="section">
-		<div class="section-title">Steps</div>
+		<div class="section-title">
+			Steps
+			<button class="add-step-btn" onclick="addStep()">+ Add Step</button>
+		</div>
 		${stepsHtml}
 	</div>
 </body>
@@ -330,6 +401,10 @@ export class DetailPanel {
 						<span class="${checkboxClass}" onclick="toggleStep(${index})" style="cursor: pointer;"></span>
 					</span>
 					<span class="${textClass}">${this._escapeHtml(stepText)}</span>
+					<div class="step-actions">
+						<button class="step-btn" onclick="editStep(${index})">Edit</button>
+						<button class="step-btn delete" onclick="deleteStep(${index})">Delete</button>
+					</div>
 				</li>
 			`;
 		}).join('');
@@ -502,6 +577,192 @@ export class DetailPanel {
 			
 		} catch (error) {
 			vscode.window.showErrorMessage(`Failed to toggle passes: ${error}`);
+		}
+	}
+
+	private async addStep(): Promise<void> {
+		if (!this._currentItem) {
+			return;
+		}
+
+		// Prompt user for step text
+		const stepText = await vscode.window.showInputBox({
+			prompt: 'Enter the step description',
+			placeHolder: 'e.g., Implement user authentication',
+			validateInput: (value) => {
+				return value.trim() ? null : 'Step text cannot be empty';
+			}
+		});
+
+		if (!stepText) {
+			return; // User cancelled
+		}
+
+		const workspaceFolders = vscode.workspace.workspaceFolders;
+		if (!workspaceFolders) {
+			vscode.window.showErrorMessage('No workspace folder found');
+			return;
+		}
+
+		const prdPath = path.join(workspaceFolders[0].uri.fsPath, 'plans', 'prd.json');
+		
+		try {
+			// Read current PRD file
+			const content = fs.readFileSync(prdPath, 'utf-8');
+			const prdItems: PrdItem[] = JSON.parse(content);
+			
+			// Find the current item in the array
+			const itemIndex = prdItems.findIndex(item => item.id === this._currentItem!.id);
+			if (itemIndex === -1) {
+				vscode.window.showErrorMessage('Item not found in PRD file');
+				return;
+			}
+
+			// Add new step (as string initially)
+			prdItems[itemIndex].steps.push(stepText.trim());
+
+			// Write updated PRD file
+			fs.writeFileSync(prdPath, JSON.stringify(prdItems, null, '\t'), 'utf-8');
+			
+			// Update current item reference and refresh view
+			this._currentItem = prdItems[itemIndex];
+			this.update(prdItems[itemIndex]);
+			
+			vscode.window.showInformationMessage('Step added successfully');
+			
+		} catch (error) {
+			vscode.window.showErrorMessage(`Failed to add step: ${error}`);
+		}
+	}
+
+	private async editStep(stepIndex: number): Promise<void> {
+		if (!this._currentItem) {
+			return;
+		}
+
+		// Ensure step exists
+		if (stepIndex < 0 || stepIndex >= this._currentItem.steps.length) {
+			vscode.window.showErrorMessage('Invalid step index');
+			return;
+		}
+
+		const step = this._currentItem.steps[stepIndex];
+		const currentText = typeof step === 'string' ? step : step.text;
+
+		// Prompt user for new step text
+		const stepText = await vscode.window.showInputBox({
+			prompt: 'Edit the step description',
+			value: currentText,
+			validateInput: (value) => {
+				return value.trim() ? null : 'Step text cannot be empty';
+			}
+		});
+
+		if (!stepText) {
+			return; // User cancelled
+		}
+
+		const workspaceFolders = vscode.workspace.workspaceFolders;
+		if (!workspaceFolders) {
+			vscode.window.showErrorMessage('No workspace folder found');
+			return;
+		}
+
+		const prdPath = path.join(workspaceFolders[0].uri.fsPath, 'plans', 'prd.json');
+		
+		try {
+			// Read current PRD file
+			const content = fs.readFileSync(prdPath, 'utf-8');
+			const prdItems: PrdItem[] = JSON.parse(content);
+			
+			// Find the current item in the array
+			const itemIndex = prdItems.findIndex(item => item.id === this._currentItem!.id);
+			if (itemIndex === -1) {
+				vscode.window.showErrorMessage('Item not found in PRD file');
+				return;
+			}
+
+			// Update step text, preserving completed status if it's an object
+			const existingStep = prdItems[itemIndex].steps[stepIndex];
+			if (typeof existingStep === 'string') {
+				prdItems[itemIndex].steps[stepIndex] = stepText.trim();
+			} else {
+				existingStep.text = stepText.trim();
+			}
+
+			// Write updated PRD file
+			fs.writeFileSync(prdPath, JSON.stringify(prdItems, null, '\t'), 'utf-8');
+			
+			// Update current item reference and refresh view
+			this._currentItem = prdItems[itemIndex];
+			this.update(prdItems[itemIndex]);
+			
+			vscode.window.showInformationMessage('Step updated successfully');
+			
+		} catch (error) {
+			vscode.window.showErrorMessage(`Failed to edit step: ${error}`);
+		}
+	}
+
+	private async deleteStep(stepIndex: number): Promise<void> {
+		if (!this._currentItem) {
+			return;
+		}
+
+		// Ensure step exists
+		if (stepIndex < 0 || stepIndex >= this._currentItem.steps.length) {
+			vscode.window.showErrorMessage('Invalid step index');
+			return;
+		}
+
+		const step = this._currentItem.steps[stepIndex];
+		const stepText = typeof step === 'string' ? step : step.text;
+
+		// Confirm deletion
+		const confirmation = await vscode.window.showWarningMessage(
+			`Delete step: "${stepText}"?`,
+			{ modal: true },
+			'Delete'
+		);
+
+		if (confirmation !== 'Delete') {
+			return; // User cancelled
+		}
+
+		const workspaceFolders = vscode.workspace.workspaceFolders;
+		if (!workspaceFolders) {
+			vscode.window.showErrorMessage('No workspace folder found');
+			return;
+		}
+
+		const prdPath = path.join(workspaceFolders[0].uri.fsPath, 'plans', 'prd.json');
+		
+		try {
+			// Read current PRD file
+			const content = fs.readFileSync(prdPath, 'utf-8');
+			const prdItems: PrdItem[] = JSON.parse(content);
+			
+			// Find the current item in the array
+			const itemIndex = prdItems.findIndex(item => item.id === this._currentItem!.id);
+			if (itemIndex === -1) {
+				vscode.window.showErrorMessage('Item not found in PRD file');
+				return;
+			}
+
+			// Remove step from array
+			prdItems[itemIndex].steps.splice(stepIndex, 1);
+
+			// Write updated PRD file
+			fs.writeFileSync(prdPath, JSON.stringify(prdItems, null, '\t'), 'utf-8');
+			
+			// Update current item reference and refresh view
+			this._currentItem = prdItems[itemIndex];
+			this.update(prdItems[itemIndex]);
+			
+			vscode.window.showInformationMessage('Step deleted successfully');
+			
+		} catch (error) {
+			vscode.window.showErrorMessage(`Failed to delete step: ${error}`);
 		}
 	}
 }

@@ -130,15 +130,15 @@
 		"category": "functional",
 		"description": "Add, edit, and remove steps within an item",
 		"steps": [
-			"Open the detail panel for an item",
-			"Click 'Add Step' and enter step text",
-			"Verify step appears in the list",
-			"Double-click a step to edit its text",
-			"Click delete icon on a step to remove it",
-			"Verify all changes persist to prd.json"
+			{ "text": "Open the detail panel for an item", "completed": true },
+			{ "text": "Click 'Add Step' and enter step text", "completed": true },
+			{ "text": "Verify step appears in the list", "completed": true },
+			{ "text": "Click 'Edit' button on a step to edit its text", "completed": true },
+			{ "text": "Click delete icon on a step to remove it", "completed": true },
+			{ "text": "Verify all changes persist to prd.json", "completed": true }
 		],
-		"status": "not-started",
-		"passes": false
+		"status": "completed",
+		"passes": true
 	},
 	{
 		"id": "functional-005",

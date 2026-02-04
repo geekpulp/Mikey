@@ -151,3 +151,20 @@
   - Delete button appears inline in tree view for each PRD item (trash icon)
   - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm compile ✓)
   - Next: functional-004 (Add, edit, remove steps) would complete step management within items
+
+- 2026-02-04: Completed functional-004: Add, edit, and remove steps within an item
+  - Extended DetailPanel message handler to support addStep, editStep, and deleteStep commands
+  - Added "+ Add Step" button to Steps section header in detail panel
+  - Implemented addStep() method that prompts for step text and appends new step to item's steps array
+  - Implemented editStep() method that shows InputBox pre-filled with current step text for editing
+  - Implemented deleteStep() method with confirmation dialog before removing step
+  - Added Edit and Delete buttons to each step item in the rendered steps list
+  - Step text validation ensures steps cannot be empty strings
+  - Edit preserves completed status when updating step text (works with both string and object step formats)
+  - All step modifications persist immediately to prd.json with proper JSON formatting (tabs)
+  - User receives confirmation messages for successful add/edit/delete operations
+  - Webview refreshes automatically to reflect changes after each operation
+  - Added CSS styling for step action buttons (Edit and Delete) with hover states
+  - Delete button has red background (testing.iconFailed color) for visual clarity
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm compile ✓)
+  - Next: git-001 (Create feature branch) or ui-004 (Drag-and-drop reordering) would be logical next features
