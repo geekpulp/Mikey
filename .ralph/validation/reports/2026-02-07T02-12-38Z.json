@@ -1,0 +1,42 @@
+{
+  "tool": "ralph-validation",
+  "timestamp": "2026-02-07T02:12:38.198Z",
+  "profile": "safe",
+  "target": "general",
+  "result": "pass",
+  "checks": [
+    {
+      "name": "prd-schema",
+      "status": "pass",
+      "message": "PRD schema is valid"
+    },
+    {
+      "name": "typecheck",
+      "status": "pass",
+      "message": "Typecheck passed",
+      "details": "\n> ralph@0.0.1 typecheck /Users/glenyoung/Developer/projects/ralph\n> tsc --noEmit\n\n"
+    },
+    {
+      "name": "test",
+      "status": "pass",
+      "message": "Tests passed",
+      "details": "> ralph@0.0.1 test /Users/glenyoung/Developer/projects/ralph\n> node ./out/test/runTest.js\n\nRalph Extension Tests\n====================\n\n✓ Test file structure validated\n✓ Agent review test helpers available\n\nFor comprehensive testing:\n  1. Install test dependencies: pnpm add -D @types/mocha @vscode/test-electron mocha glob\n  2. Follow test/AGENT_REVIEW_TESTING_GUIDE.md for manual testing\n  3. Run automated tests with: pnpm test\n\nTest helpers exported:\n  - AgentReviewWorkflowTests.verifyTestEnvironment()\n  - AgentReviewWorkflowTests.validateReportStructure()\n  - AgentReviewWorkflowTests.validateTimeoutReport()\n  - AgentReviewWorkflowTests.validateErrorReport()"
+    },
+    {
+      "name": "single-feature",
+      "status": "pass",
+      "message": "Single feature enforced: only polish-011 was modified"
+    },
+    {
+      "name": "progress-updated",
+      "status": "pass",
+      "message": "progress.txt was updated"
+    },
+    {
+      "name": "git-commit",
+      "status": "pass",
+      "message": "New git commit detected"
+    }
+  ],
+  "attemptNumber": 1
+}

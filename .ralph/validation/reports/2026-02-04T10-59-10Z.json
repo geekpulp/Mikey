@@ -1,0 +1,42 @@
+{
+  "tool": "ralph-validation",
+  "timestamp": "2026-02-04T10:59:10.970Z",
+  "profile": "safe",
+  "target": "general",
+  "result": "pass",
+  "checks": [
+    {
+      "name": "prd-schema",
+      "status": "pass",
+      "message": "PRD schema is valid"
+    },
+    {
+      "name": "typecheck",
+      "status": "pass",
+      "message": "Typecheck passed",
+      "details": "\n> ralph@0.0.1 typecheck /Users/glenyoung/Developer/projects/ralph\n> tsc --noEmit\n\n"
+    },
+    {
+      "name": "test",
+      "status": "pass",
+      "message": "Tests passed",
+      "details": "> ralph@0.0.1 test /Users/glenyoung/Developer/projects/ralph\n> node ./out/test/runTest.js\n\nNo tests configured yet. Passing by default."
+    },
+    {
+      "name": "single-feature",
+      "status": "pass",
+      "message": "Single feature enforced: only agent-review-005 was modified"
+    },
+    {
+      "name": "progress-updated",
+      "status": "pass",
+      "message": "progress.txt was updated"
+    },
+    {
+      "name": "git-commit",
+      "status": "pass",
+      "message": "New git commit detected"
+    }
+  ],
+  "attemptNumber": 1
+}

@@ -1,0 +1,43 @@
+{
+  "success": false,
+  "timestamp": "2026-02-07T01:38:23.989Z",
+  "profile": "safe",
+  "mode": "post",
+  "reportPath": "/Users/glenyoung/Developer/projects/ralph/.ralph/validation/reports/2026-02-07T01-38-23Z.json",
+  "checks": [
+    {
+      "name": "prd-schema",
+      "status": "pass",
+      "message": "PRD schema is valid"
+    },
+    {
+      "name": "typecheck",
+      "status": "pass",
+      "message": "Typecheck passed",
+      "details": "\n> ralph@0.0.1 typecheck /Users/glenyoung/Developer/projects/ralph\n> tsc --noEmit\n\n"
+    },
+    {
+      "name": "test",
+      "status": "pass",
+      "message": "Tests passed",
+      "details": "> ralph@0.0.1 test /Users/glenyoung/Developer/projects/ralph\n> node ./out/test/runTest.js\n\nRalph Extension Tests\n====================\n\n✓ Test file structure validated\n✓ Agent review test helpers available\n\nFor comprehensive testing:\n  1. Install test dependencies: pnpm add -D @types/mocha @vscode/test-electron mocha glob\n  2. Follow test/AGENT_REVIEW_TESTING_GUIDE.md for manual testing\n  3. Run automated tests with: pnpm test\n\nTest helpers exported:\n  - AgentReviewWorkflowTests.verifyTestEnvironment()\n  - AgentReviewWorkflowTests.validateReportStructure()\n  - AgentReviewWorkflowTests.validateTimeoutReport()\n  - AgentReviewWorkflowTests.validateErrorReport()"
+    },
+    {
+      "name": "single-feature",
+      "status": "fail",
+      "message": "Single-feature violation: 9 items were modified",
+      "details": "Modified items: functional-014, ui-008, functional-016, functional-017, ui-009, functional-018, functional-019, polish-013, agent-review-012",
+      "remediationKey": "single-feature-violation"
+    },
+    {
+      "name": "progress-updated",
+      "status": "pass",
+      "message": "progress.txt was updated"
+    },
+    {
+      "name": "git-commit",
+      "status": "pass",
+      "message": "New git commit detected"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "tool": "ralph-validation",
+  "timestamp": "2026-02-04T03:57:56.051Z",
+  "profile": "safe",
+  "target": "general",
+  "result": "fail",
+  "checks": [
+    {
+      "name": "prd-schema",
+      "status": "fail",
+      "message": "PRD schema validation failed with 1 error(s)",
+      "details": "[setup-003.status] Invalid transition from 'not-started' to 'completed'",
+      "remediationKey": "prd-schema-invalid"
+    },
+    {
+      "name": "typecheck",
+      "status": "pass",
+      "message": "Typecheck passed",
+      "details": "\n> ralph@0.0.1 typecheck /Users/glenyoung/Developer/projects/ralph\n> tsc --noEmit\n\n"
+    },
+    {
+      "name": "test",
+      "status": "fail",
+      "message": "Tests failed",
+      "details": "> ralph@0.0.1 test /Users/glenyoung/Developer/projects/ralph\n> node ./out/test/runTest.js\n\n ELIFECYCLE  Test failed. See above for more details.\n\nnode:internal/modules/cjs/loader:1386\n  throw err;\n  ^\n\nError: Cannot find module '/Users/glenyoung/Developer/projects/ralph/out/test/runTest.js'\n    at Function._resolveFilename (node:internal/modules/cjs/loader:1383:15)\n    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)\n    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)\n    at Function._load (node:internal/modules/cjs/loader:1192:37)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'MODULE_NOT_FOUND',\n  requireStack: []\n}\n\nNode.js v22.20.0",
+      "remediationKey": "tests-failing"
+    },
+    {
+      "name": "single-feature",
+      "status": "pass",
+      "message": "Single feature enforced: only setup-003 was modified"
+    },
+    {
+      "name": "progress-updated",
+      "status": "pass",
+      "message": "progress.txt was updated"
+    },
+    {
+      "name": "git-commit",
+      "status": "pass",
+      "message": "New git commit detected"
+    }
+  ],
+  "attemptNumber": 1
+}
