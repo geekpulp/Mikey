@@ -453,16 +453,20 @@
 	{
 		"id": "git-005",
 		"category": "git",
-		"description": "Complete item and merge branch",
+		"description": "Auto-merge feature branch when item status changes to completed",
 		"steps": [
-			"With an item in 'in-review' status",
-			"Click 'Complete' or 'Approve' button",
-			"Verify confirmation dialog shows summary of changes",
-			"Confirm completion",
-			"Verify item status changes to 'completed' and passes to true"
+			"With an item in 'in-review' status on a feature branch",
+			"Change status to 'completed' in the detail panel",
+			"Verify confirmation dialog appears explaining the merge operation",
+			"Confirm the merge",
+			"Verify feature branch is merged into main",
+			"Verify changes are pushed to remote",
+			"Verify feature branch is deleted locally",
+			"Verify workspace switches back to main branch",
+			"Verify success message shows merge details"
 		],
-		"status": "not-started",
-		"passes": false
+		"status": "completed",
+		"passes": true
 	},
 	{
 		"id": "agent-001",

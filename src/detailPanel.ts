@@ -21,7 +21,9 @@ export class DetailPanel {
 						this.toggleStepCompletion(message.stepIndex);
 						break;
 					case 'changeStatus':
-						this.changeItemStatus(message.status);
+					this.changeItemStatus(message.status).catch(err => {
+						vscode.window.showErrorMessage(`Failed to change status: ${err}`);
+					});
 						break;
 					case 'togglePasses':
 						this.togglePasses();
@@ -488,7 +490,7 @@ export class DetailPanel {
 		}
 	}
 
-	private changeItemStatus(newStatus: string): void {
+	private async changeItemStatus(newStatus: string): Promise<void> {
 		if (!this._currentItem) {
 			return;
 		}
@@ -531,6 +533,11 @@ export class DetailPanel {
 			this.update(prdItems[itemIndex]);
 			
 			vscode.window.showInformationMessage(`Status updated to: ${newStatus}`);
+			
+			// If status is 'completed', trigger auto-merge workflow
+			if (newStatus === 'completed') {
+				await this.handleCompletionMerge(workspaceFolders[0].uri.fsPath);
+			}
 			
 		} catch (error) {
 			vscode.window.showErrorMessage(`Failed to update status: ${error}`);
@@ -765,4 +772,87 @@ export class DetailPanel {
 			vscode.window.showErrorMessage(`Failed to delete step: ${error}`);
 		}
 	}
+
+private async handleCompletionMerge(workspaceRoot: string): Promise<void> {
+	try {
+		// Get current branch
+		const currentBranch = await this.getCurrentBranch(workspaceRoot);
+		
+		// Check if we're on a feature branch
+		if (!this.isFeatureBranch(currentBranch)) {
+			// Not on a feature branch, nothing to merge
+			return;
+		}
+		
+		// Prompt user for confirmation
+		const featureBranch = currentBranch;
+		const message = `Merge feature branch '${featureBranch}' into main?\n\nThis will:\n• Switch to main branch\n• Pull latest changes\n• Merge ${featureBranch}\n• Push to remote\n• Delete ${featureBranch} locally`;
+		
+		const choice = await vscode.window.showInformationMessage(
+			message,
+			{ modal: true },
+			'Merge & Complete',
+			'Skip Merge'
+		);
+		
+		if (choice !== 'Merge & Complete') {
+			return;
+		}
+		
+		// Show progress
+		await vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: 'Merging feature branch',
+			cancellable: false
+		}, async (progress) => {
+			progress.report({ message: 'Switching to main branch...' });
+			await this.execGitCommand(workspaceRoot, ['checkout', 'main']);
+			
+			progress.report({ message: 'Pulling latest changes...' });
+			await this.execGitCommand(workspaceRoot, ['pull']);
+			
+			progress.report({ message: `Merging ${featureBranch}...` });
+			await this.execGitCommand(workspaceRoot, ['merge', featureBranch, '--no-ff', '-m', `Merge ${featureBranch}: ${this._currentItem?.description}`]);
+			
+			progress.report({ message: 'Pushing to remote...' });
+			await this.execGitCommand(workspaceRoot, ['push', 'origin', 'main']);
+			
+			progress.report({ message: 'Cleaning up feature branch...' });
+			await this.execGitCommand(workspaceRoot, ['branch', '-d', featureBranch]);
+			
+			return;
+		});
+		
+		vscode.window.showInformationMessage(`✓ Successfully merged ${featureBranch} into main and pushed to remote`);
+		
+	} catch (error) {
+		vscode.window.showErrorMessage(`Failed to merge branch: ${error}`);
+	}
+}
+
+private async getCurrentBranch(workspaceRoot: string): Promise<string> {
+	const result = await this.execGitCommand(workspaceRoot, ['rev-parse', '--abbrev-ref', 'HEAD']);
+	return result.trim();
+}
+
+private isFeatureBranch(branchName: string): boolean {
+	// Consider it a feature branch if it's not main, master, develop, or similar
+	const mainBranches = ['main', 'master', 'develop', 'dev'];
+	return !mainBranches.includes(branchName);
+}
+
+private async execGitCommand(cwd: string, args: string[]): Promise<string> {
+	const { promisify } = require('util');
+	const { exec } = require('child_process');
+	const execAsync = promisify(exec);
+	
+	const command = `git ${args.join(' ')}`;
+	const { stdout, stderr } = await execAsync(command, { cwd });
+	
+	if (stderr && !stderr.includes('Switched to branch') && !stderr.includes('Already up to date')) {
+		throw new Error(stderr);
+	}
+	
+	return stdout;
+}
 }

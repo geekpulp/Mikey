@@ -178,3 +178,9 @@
   - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm test ✓)
   - Note: This was a subtle but critical bug that affected all JavaScript functionality in the detail panel webview
   - Next: Continue with remaining PRD items or address any other bugs
+- 2026-02-11: Completed git-005: Auto-merge feature branch when item status changes to completed
+  - Implemented auto-merge workflow that triggers when status changes to completed on a feature branch
+  - Added confirmation dialog before merging
+  - Automatically switches to main, pulls latest, merges feature branch, pushes to remote, and deletes local branch
+  - Uses VS Code progress notifications to show merge steps
+  - Extension compiles successfully (pnpm typecheck ✓, pnpm test ✓)
