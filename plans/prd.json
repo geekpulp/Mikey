@@ -617,8 +617,8 @@
 		"category": "Action",
 		"description": "Build a new version of the extension so I can share it with others",
 		"steps": [],
-		"status": "not-started",
-		"passes": false
+		"status": "completed",
+		"passes": true
 	},
 	{
 		"id": "Docs-001",
