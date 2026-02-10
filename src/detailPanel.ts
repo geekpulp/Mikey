@@ -341,7 +341,7 @@ export class DetailPanel {
 				stepIndex: stepIndex
 			});
 		}
-	</script>
+	<\/script>
 </head>
 <body>
 	<div class="header">
