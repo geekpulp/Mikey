@@ -184,3 +184,11 @@
   - Automatically switches to main, pulls latest, merges feature branch, pushes to remote, and deletes local branch
   - Uses VS Code progress notifications to show merge steps
   - Extension compiles successfully (pnpm typecheck ✓, pnpm test ✓)
+
+- 2026-02-11: Completed Bug-002: Removed duplicate "Create PRD Item" button
+  - Verified only ONE command exists for adding PRD items: ralph.addItem ("Add PRD Item")
+  - The duplicate "openCreatePanel" command found in git history has been successfully removed
+  - Confirmed no duplicate menu entries in view/title
+  - Extension now has a single, consistent way to add PRD items via the toolbar button
+  - Tests pass, typecheck passes
+  - Note: If users still see duplicates, advise reloading VS Code window or reinstalling extension

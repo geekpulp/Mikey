@@ -593,6 +593,30 @@
 		"category": "Bug",
 		"description": "There appears to be two buttons that add a new PRD item. the first is \"Add PRD Item (N)\" and the second \"Create PRD Item\". Both appear to do the same thing, but only one is required. Please fix this issue.",
 		"steps": [],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "Audit-001",
+		"category": "Audit",
+		"description": "I'd like to audit the project to determine where the codebase could be polished to improve its maintainablity. please perform an audit and create an audit report in a .reports folder for me to review. This report will likely inform additional items being added to the prd.json so consider that when creating the report.",
+		"steps": [],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "Bug-003",
+		"category": "Bug",
+		"description": "I notice when a new work item in the PRD is started it is appended to the current copilot chat session rather than starting a fresh session. Its important it is started as a new chat session as we want to ensure we are avoiding blowing the context window of a given chat. This shoud also be the case when exicuting any particular step in the PRD item too. Each PRD item and each step within it shold be a new chat session which is started with suffcient context that it can continue the work from the previous step.",
+		"steps": [],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "Action-001",
+		"category": "Action",
+		"description": "Build a new version of the extension so I can share it with others",
+		"steps": [],
 		"status": "not-started",
 		"passes": false
 	}
