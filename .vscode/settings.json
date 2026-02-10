@@ -1,12 +1,15 @@
 {
     "mikey.categories": [
-        "setup",
-        "ui",
-        "functional",
-        "git",
-        "agent",
-        "validation",
-        "polish",
-        "Bug"
+      "setup",
+      "ui",
+      "functional",
+      "git",
+      "agent",
+      "validation",
+      "polish",
+      "Bug",
+      "Audit",
+      "Action",
+      "Docs"
     ]
 }
