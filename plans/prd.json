@@ -619,5 +619,13 @@
 		"steps": [],
 		"status": "not-started",
 		"passes": false
+	},
+	{
+		"id": "Docs-001",
+		"category": "Docs",
+		"description": "Update docs so anyone installing and using the extension has a clear overview of what the extensions does, how to use it, what's required to use it, and how to set things up.",
+		"steps": [],
+		"status": "not-started",
+		"passes": false
 	}
 ]
