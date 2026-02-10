@@ -168,3 +168,13 @@
   - Delete button has red background (testing.iconFailed color) for visual clarity
   - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm compile ✓)
   - Next: git-001 (Create feature branch) or ui-004 (Drag-and-drop reordering) would be logical next features
+- 2026-02-11: Completed Bug-001: Fixed Add Step button not working
+  - Identified and fixed critical HTML parsing bug in detailPanel.ts
+  - Issue: The closing </script> tag in the HTML template literal was being parsed prematurely by the browser's HTML parser
+  - This caused the JavaScript code to be truncated, preventing all JS functions including addStep() from executing
+  - Solution: Escaped the closing script tag by changing </script> to <\/script> in the template literal
+  - This prevents premature parsing while still rendering correctly as </script> in the final HTML
+  - All interactive buttons (Add Step, Edit, Delete, toggle checkboxes) now work correctly
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm test ✓)
+  - Note: This was a subtle but critical bug that affected all JavaScript functionality in the detail panel webview
+  - Next: Continue with remaining PRD items or address any other bugs

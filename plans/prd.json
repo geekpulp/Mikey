@@ -4,11 +4,26 @@
 		"category": "setup",
 		"description": "Extension scaffolding and activation",
 		"steps": [
-			{ "text": "Run 'yo code' or manually create extension structure with package.json, tsconfig.json, and src folder", "completed": true },
-			{ "text": "Define extension activation events in package.json (onView, workspaceContains:prd.json)", "completed": true },
-			{ "text": "Create extension entry point that registers all commands and views", "completed": true },
-			{ "text": "Run extension in Extension Development Host", "completed": true },
-			{ "text": "Verify extension activates without errors in Output panel", "completed": true }
+			{
+				"text": "Run 'yo code' or manually create extension structure with package.json, tsconfig.json, and src folder",
+				"completed": true
+			},
+			{
+				"text": "Define extension activation events in package.json (onView, workspaceContains:prd.json)",
+				"completed": true
+			},
+			{
+				"text": "Create extension entry point that registers all commands and views",
+				"completed": true
+			},
+			{
+				"text": "Run extension in Extension Development Host",
+				"completed": true
+			},
+			{
+				"text": "Verify extension activates without errors in Output panel",
+				"completed": true
+			}
 		],
 		"status": "completed",
 		"passes": true
@@ -18,11 +33,26 @@
 		"category": "setup",
 		"description": "PRD file detection and loading",
 		"steps": [
-			{ "text": "Open a workspace containing a prd.json file in the plans/ folder", "completed": true },
-			{ "text": "Verify extension detects and loads the prd.json file automatically", "completed": true },
-			{ "text": "Verify items are parsed correctly with all fields (id, category, description, steps, status, passes)", "completed": true },
-			{ "text": "Modify prd.json externally and verify extension reloads changes", "completed": true },
-			{ "text": "Verify error handling when prd.json is malformed", "completed": true }
+			{
+				"text": "Open a workspace containing a prd.json file in the plans/ folder",
+				"completed": true
+			},
+			{
+				"text": "Verify extension detects and loads the prd.json file automatically",
+				"completed": true
+			},
+			{
+				"text": "Verify items are parsed correctly with all fields (id, category, description, steps, status, passes)",
+				"completed": true
+			},
+			{
+				"text": "Modify prd.json externally and verify extension reloads changes",
+				"completed": true
+			},
+			{
+				"text": "Verify error handling when prd.json is malformed",
+				"completed": true
+			}
 		],
 		"status": "completed",
 		"passes": true
@@ -32,11 +62,26 @@
 		"category": "ui",
 		"description": "Sidebar tree view displays PRD items",
 		"steps": [
-			{ "text": "Open a workspace with a valid prd.json", "completed": true },
-			{ "text": "Verify a 'Ralph' or 'PRD' view appears in the Activity Bar", "completed": true },
-			{ "text": "Click the Activity Bar icon to open the sidebar", "completed": true },
-			{ "text": "Verify all PRD items are listed with their descriptions", "completed": true },
-			{ "text": "Verify items are grouped or labeled by category (setup, ui, functional, git, agent)", "completed": true }
+			{
+				"text": "Open a workspace with a valid prd.json",
+				"completed": true
+			},
+			{
+				"text": "Verify a 'Ralph' or 'PRD' view appears in the Activity Bar",
+				"completed": true
+			},
+			{
+				"text": "Click the Activity Bar icon to open the sidebar",
+				"completed": true
+			},
+			{
+				"text": "Verify all PRD items are listed with their descriptions",
+				"completed": true
+			},
+			{
+				"text": "Verify items are grouped or labeled by category (setup, ui, functional, git, agent)",
+				"completed": true
+			}
 		],
 		"status": "completed",
 		"passes": true
@@ -46,11 +91,26 @@
 		"category": "ui",
 		"description": "Sidebar shows status indicators for each item",
 		"steps": [
-			{ "text": "Open the sidebar with PRD items loaded", "completed": true },
-			{ "text": "Verify each item displays a status icon (not-started, in-progress, in-review, completed)", "completed": true },
-			{ "text": "Verify different statuses have visually distinct icons or colors", "completed": true },
-			{ "text": "Change an item's status in prd.json manually", "completed": true },
-			{ "text": "Verify the sidebar updates to reflect the new status", "completed": true }
+			{
+				"text": "Open the sidebar with PRD items loaded",
+				"completed": true
+			},
+			{
+				"text": "Verify each item displays a status icon (not-started, in-progress, in-review, completed)",
+				"completed": true
+			},
+			{
+				"text": "Verify different statuses have visually distinct icons or colors",
+				"completed": true
+			},
+			{
+				"text": "Change an item's status in prd.json manually",
+				"completed": true
+			},
+			{
+				"text": "Verify the sidebar updates to reflect the new status",
+				"completed": true
+			}
 		],
 		"status": "completed",
 		"passes": true
@@ -60,11 +120,26 @@
 		"category": "ui",
 		"description": "Detail panel opens when selecting a sidebar item",
 		"steps": [
-			{ "text": "Click on a PRD item in the sidebar", "completed": true },
-			{ "text": "Verify a webview panel opens showing item details", "completed": true },
-			{ "text": "Verify the panel displays: id, category, description, status, passes, and all steps", "completed": true },
-			{ "text": "Verify each step has a checkbox showing its completion state", "completed": true },
-			{ "text": "Click a different item in sidebar and verify panel updates", "completed": true }
+			{
+				"text": "Click on a PRD item in the sidebar",
+				"completed": true
+			},
+			{
+				"text": "Verify a webview panel opens showing item details",
+				"completed": true
+			},
+			{
+				"text": "Verify the panel displays: id, category, description, status, passes, and all steps",
+				"completed": true
+			},
+			{
+				"text": "Verify each step has a checkbox showing its completion state",
+				"completed": true
+			},
+			{
+				"text": "Click a different item in sidebar and verify panel updates",
+				"completed": true
+			}
 		],
 		"status": "completed",
 		"passes": true
@@ -88,11 +163,26 @@
 		"category": "functional",
 		"description": "Add new PRD item",
 		"steps": [
-			{ "text": "Click the 'Add Item' button in the sidebar toolbar", "completed": true },
-			{ "text": "Verify a form/dialog appears with fields: category, description", "completed": true },
-			{ "text": "Fill in the form and submit", "completed": true },
-			{ "text": "Verify the new item appears in the sidebar with auto-generated ID", "completed": true },
-			{ "text": "Verify prd.json is updated with the new item (status: not-started, passes: false, empty steps)", "completed": true }
+			{
+				"text": "Click the 'Add Item' button in the sidebar toolbar",
+				"completed": true
+			},
+			{
+				"text": "Verify a form/dialog appears with fields: category, description",
+				"completed": true
+			},
+			{
+				"text": "Fill in the form and submit",
+				"completed": true
+			},
+			{
+				"text": "Verify the new item appears in the sidebar with auto-generated ID",
+				"completed": true
+			},
+			{
+				"text": "Verify prd.json is updated with the new item (status: not-started, passes: false, empty steps)",
+				"completed": true
+			}
 		],
 		"status": "completed",
 		"passes": true
@@ -102,11 +192,26 @@
 		"category": "functional",
 		"description": "Edit existing PRD item",
 		"steps": [
-			{ "text": "Select an item in the sidebar", "completed": true },
-			{ "text": "Click 'Edit' button or use context menu", "completed": true },
-			{ "text": "Verify form/dialog opens pre-filled with current values", "completed": true },
-			{ "text": "Modify description and category", "completed": true },
-			{ "text": "Submit and verify changes appear in sidebar and prd.json", "completed": true }
+			{
+				"text": "Select an item in the sidebar",
+				"completed": true
+			},
+			{
+				"text": "Click 'Edit' button or use context menu",
+				"completed": true
+			},
+			{
+				"text": "Verify form/dialog opens pre-filled with current values",
+				"completed": true
+			},
+			{
+				"text": "Modify description and category",
+				"completed": true
+			},
+			{
+				"text": "Submit and verify changes appear in sidebar and prd.json",
+				"completed": true
+			}
 		],
 		"status": "completed",
 		"passes": true
@@ -116,11 +221,26 @@
 		"category": "functional",
 		"description": "Delete PRD item",
 		"steps": [
-			{ "text": "Select an item in the sidebar", "completed": true },
-			{ "text": "Click 'Delete' button or use context menu", "completed": true },
-			{ "text": "Verify confirmation dialog appears", "completed": true },
-			{ "text": "Confirm deletion", "completed": true },
-			{ "text": "Verify item is removed from sidebar and prd.json", "completed": true }
+			{
+				"text": "Select an item in the sidebar",
+				"completed": true
+			},
+			{
+				"text": "Click 'Delete' button or use context menu",
+				"completed": true
+			},
+			{
+				"text": "Verify confirmation dialog appears",
+				"completed": true
+			},
+			{
+				"text": "Confirm deletion",
+				"completed": true
+			},
+			{
+				"text": "Verify item is removed from sidebar and prd.json",
+				"completed": true
+			}
 		],
 		"status": "completed",
 		"passes": true
@@ -130,12 +250,30 @@
 		"category": "functional",
 		"description": "Add, edit, and remove steps within an item",
 		"steps": [
-			{ "text": "Open the detail panel for an item", "completed": true },
-			{ "text": "Click 'Add Step' and enter step text", "completed": true },
-			{ "text": "Verify step appears in the list", "completed": true },
-			{ "text": "Click 'Edit' button on a step to edit its text", "completed": true },
-			{ "text": "Click delete icon on a step to remove it", "completed": true },
-			{ "text": "Verify all changes persist to prd.json", "completed": true }
+			{
+				"text": "Open the detail panel for an item",
+				"completed": true
+			},
+			{
+				"text": "Click 'Add Step' and enter step text",
+				"completed": true
+			},
+			{
+				"text": "Verify step appears in the list",
+				"completed": true
+			},
+			{
+				"text": "Click 'Edit' button on a step to edit its text",
+				"completed": true
+			},
+			{
+				"text": "Click delete icon on a step to remove it",
+				"completed": true
+			},
+			{
+				"text": "Verify all changes persist to prd.json",
+				"completed": true
+			}
 		],
 		"status": "completed",
 		"passes": true
@@ -145,11 +283,26 @@
 		"category": "functional",
 		"description": "Toggle step completion checkboxes",
 		"steps": [
-			{ "text": "Open the detail panel for an item with steps", "completed": true },
-			{ "text": "Click a step's checkbox to mark it complete", "completed": true },
-			{ "text": "Verify checkbox shows checked state", "completed": true },
-			{ "text": "Verify step completion state persists to prd.json (steps become objects with text and completed fields)", "completed": true },
-			{ "text": "Uncheck the step and verify state updates", "completed": true }
+			{
+				"text": "Open the detail panel for an item with steps",
+				"completed": true
+			},
+			{
+				"text": "Click a step's checkbox to mark it complete",
+				"completed": true
+			},
+			{
+				"text": "Verify checkbox shows checked state",
+				"completed": true
+			},
+			{
+				"text": "Verify step completion state persists to prd.json (steps become objects with text and completed fields)",
+				"completed": true
+			},
+			{
+				"text": "Uncheck the step and verify state updates",
+				"completed": true
+			}
 		],
 		"status": "completed",
 		"passes": true
@@ -159,11 +312,26 @@
 		"category": "functional",
 		"description": "Change item status from detail panel",
 		"steps": [
-			{ "text": "Open the detail panel for an item", "completed": true },
-			{ "text": "Locate the status dropdown/selector", "completed": true },
-			{ "text": "Change status from 'not-started' to 'in-progress'", "completed": true },
-			{ "text": "Verify sidebar icon updates immediately", "completed": true },
-			{ "text": "Verify prd.json status field is updated", "completed": true }
+			{
+				"text": "Open the detail panel for an item",
+				"completed": true
+			},
+			{
+				"text": "Locate the status dropdown/selector",
+				"completed": true
+			},
+			{
+				"text": "Change status from 'not-started' to 'in-progress'",
+				"completed": true
+			},
+			{
+				"text": "Verify sidebar icon updates immediately",
+				"completed": true
+			},
+			{
+				"text": "Verify prd.json status field is updated",
+				"completed": true
+			}
 		],
 		"status": "completed",
 		"passes": true
@@ -173,11 +341,26 @@
 		"category": "functional",
 		"description": "Toggle passes field from detail panel",
 		"steps": [
-			{ "text": "Open the detail panel for an item", "completed": true },
-			{ "text": "Locate the 'passes' toggle/checkbox", "completed": true },
-			{ "text": "Toggle from false to true", "completed": true },
-			{ "text": "Verify visual indicator updates (e.g., green checkmark)", "completed": true },
-			{ "text": "Verify prd.json passes field is updated", "completed": true }
+			{
+				"text": "Open the detail panel for an item",
+				"completed": true
+			},
+			{
+				"text": "Locate the 'passes' toggle/checkbox",
+				"completed": true
+			},
+			{
+				"text": "Toggle from false to true",
+				"completed": true
+			},
+			{
+				"text": "Verify visual indicator updates (e.g., green checkmark)",
+				"completed": true
+			},
+			{
+				"text": "Verify prd.json passes field is updated",
+				"completed": true
+			}
 		],
 		"status": "completed",
 		"passes": true
@@ -187,11 +370,26 @@
 		"category": "functional",
 		"description": "Auto-generate unique IDs for new items",
 		"steps": [
-			{ "text": "Create a new PRD item", "completed": true },
-			{ "text": "Verify an ID is auto-generated in format 'category-XXX' (e.g., 'ui-005')", "completed": true },
-			{ "text": "Create another item in the same category", "completed": true },
-			{ "text": "Verify the new ID increments correctly", "completed": true },
-			{ "text": "Verify no duplicate IDs exist in prd.json", "completed": true }
+			{
+				"text": "Create a new PRD item",
+				"completed": true
+			},
+			{
+				"text": "Verify an ID is auto-generated in format 'category-XXX' (e.g., 'ui-005')",
+				"completed": true
+			},
+			{
+				"text": "Create another item in the same category",
+				"completed": true
+			},
+			{
+				"text": "Verify the new ID increments correctly",
+				"completed": true
+			},
+			{
+				"text": "Verify no duplicate IDs exist in prd.json",
+				"completed": true
+			}
 		],
 		"status": "completed",
 		"passes": true
@@ -375,6 +573,22 @@
 			"Verify progress summary updates immediately",
 			"Verify progress bar or percentage indicator reflects completion"
 		],
+		"status": "not-started",
+		"passes": false
+	},
+	{
+		"id": "Bug-001",
+		"category": "Bug",
+		"description": "The user cannot add steps to a new PRD item via the UI. The add steps button is present, as in the steps area in the UI, but they dont seem to work. Clicking the + Add Step button appears to do nothing. Please address this issue",
+		"steps": [],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "Bug-002",
+		"category": "Bug",
+		"description": "There appears to be two buttons that add a new PRD item. the first is \"Add PRD Item (N)\" and the second \"Create PRD Item\". Both appear to do the same thing, but only one is required. Please fix this issue.",
+		"steps": [],
 		"status": "not-started",
 		"passes": false
 	}
