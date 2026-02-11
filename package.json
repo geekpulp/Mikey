@@ -52,31 +52,46 @@
         "command": "ralph.deleteItem",
         "title": "Delete PRD Item",
         "icon": "$(trash)"
+      },
+      {
+        "command": "ralph.runItem",
+        "title": "Run PRD Item",
+        "icon": "$(play)"
       }
     ],
     "menus": {
       "view/title": [
         {
+          "command": "ralph.runItem",
+          "when": "view == ralph.prdExplorer",
+          "group": "navigation@1"
+        },
+        {
           "command": "ralph.refresh",
           "when": "view == ralph.prdExplorer",
-          "group": "navigation"
+          "group": "navigation@2"
         },
         {
           "command": "ralph.addItem",
           "when": "view == ralph.prdExplorer",
-          "group": "navigation"
+          "group": "navigation@3"
         }
       ],
       "view/item/context": [
         {
+          "command": "ralph.runItem",
+          "when": "view == ralph.prdExplorer && viewItem == prdItem",
+          "group": "inline@1"
+        },
+        {
           "command": "ralph.editItem",
           "when": "view == ralph.prdExplorer && viewItem == prdItem",
-          "group": "inline"
+          "group": "inline@2"
         },
         {
           "command": "ralph.deleteItem",
           "when": "view == ralph.prdExplorer && viewItem == prdItem",
-          "group": "inline"
+          "group": "inline@3"
         }
       ]
     }

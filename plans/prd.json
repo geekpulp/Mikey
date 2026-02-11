@@ -609,7 +609,7 @@
 		"category": "Bug",
 		"description": "I notice when a new work item in the PRD is started it is appended to the current copilot chat session rather than starting a fresh session. Its important it is started as a new chat session as we want to ensure we are avoiding blowing the context window of a given chat. This shoud also be the case when exicuting any particular step in the PRD item too. Each PRD item and each step within it shold be a new chat session which is started with suffcient context that it can continue the work from the previous step.",
 		"steps": [],
-		"status": "not-started",
+		"status": "in-progress",
 		"passes": false
 	},
 	{
