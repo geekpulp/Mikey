@@ -1351,27 +1351,27 @@
     "steps": [
       {
         "text": "Add 'Archive Completed Items' command to package.json contributions",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Implement command handler that calls archiveManager.archiveCompleted()",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Show success message with count of archived items and archive file name",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Reload PRD tree to reflect removed archived items",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Add command shortcut or menu option in PRD tree context menu",
-        "completed": false
+        "completed": true
       }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "feature-009",

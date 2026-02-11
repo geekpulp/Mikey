@@ -1332,3 +1332,53 @@ Implemented a comprehensive archiving system to keep prd.json lean by moving com
 - feature-008: Add UI command to archive completed PRD items (can now be implemented)
 - feature-009: Add archiving options and configuration settings
 - test-002: Add tests for PRD item archiving functionality
+
+## Completed feature-008: Add UI command to archive completed PRD items
+
+**Date:** 2026-02-11
+
+**Summary:**
+Implemented a comprehensive UI command to archive completed PRD items using the ArchiveManager module.
+
+**Changes made:**
+- Added "ralph.archiveCompleted" command to package.json contributions with $(archive) icon
+- Added command to view/title menu in navigation group @4
+- Imported ArchiveManager and PrdFileManager in extension.ts
+- Implemented command handler that:
+  - Initializes ArchiveManager with workspace path
+  - Reads current PRD items using PrdFileManager
+  - Calls archiveManager.archiveCompleted() to identify and archive completed items
+  - Saves remaining items back to prd.json
+  - Shows informative success/info messages to user
+  - Refreshes the PRD tree view to reflect changes
+  - Comprehensive error handling and logging
+
+**User experience:**
+- Command accessible via Command Palette: "Archive Completed Items"
+- Also available in sidebar toolbar with archive icon
+- Shows informative message: "Archived N completed item(s) to prd-archive-YYYY-MM-DD.json"
+- Shows "No completed items to archive" when nothing to archive
+- Tree view automatically refreshes to show updated item list
+
+**Verification:**
+- ✓ pnpm typecheck: TypeScript compilation successful (exit code 0)
+- ✓ pnpm test: All tests pass (exit code 0)
+- ✓ Command registered in package.json with icon and menu integration
+- ✓ Command handler implemented with comprehensive error handling
+- ✓ Integration with ArchiveManager and PrdFileManager
+
+**Steps completed:**
+1. ✓ Add 'Archive Completed Items' command to package.json contributions
+2. ✓ Implement command handler that calls archiveManager.archiveCompleted()
+3. ✓ Show success message with count of archived items and archive file name
+4. ✓ Reload PRD tree to reflect removed archived items
+5. ✓ Add command shortcut or menu option in PRD tree context menu
+
+**Item status:** completed, passes: true
+
+**Next steps:**
+- feature-009: Add archiving options and configuration settings
+- test-002: Add tests for PRD item archiving functionality
+- feature-011: Add Run PRD Queue command with loop options (already implemented)
+- feature-012: Detect completion per item and auto-advance
+

@@ -88,6 +88,11 @@
         "command": "ralph.runQueue",
         "title": "Run PRD Queue",
         "icon": "$(play-circle)"
+      },
+      {
+        "command": "ralph.archiveCompleted",
+        "title": "Archive Completed Items",
+        "icon": "$(archive)"
       }
     ],
     "menus": {
@@ -113,14 +118,19 @@
           "group": "navigation@3"
         },
         {
-          "command": "ralph.refresh",
+          "command": "ralph.archiveCompleted",
           "when": "view == ralph.prdExplorer",
           "group": "navigation@4"
         },
         {
-          "command": "ralph.addItem",
+          "command": "ralph.refresh",
           "when": "view == ralph.prdExplorer",
           "group": "navigation@5"
+        },
+        {
+          "command": "ralph.addItem",
+          "when": "view == ralph.prdExplorer",
+          "group": "navigation@6"
         }
       ],
       "view/item/context": [

@@ -4,6 +4,8 @@ import { DetailPanel } from './detailPanel';
 import { ConfigManager } from './config';
 import { Logger } from './logger';
 import { RunLoopManager } from './runLoopManager';
+import { ArchiveManager } from './archiveManager';
+import { PrdFileManager } from './prdFileManager';
 
 /**
  * Activates the Ralph extension
@@ -388,6 +390,69 @@ export function activate(context: vscode.ExtensionContext) {
           logger.error("Run queue failed", error);
           vscode.window.showErrorMessage(
             `Failed to run queue: ${error instanceof Error ? error.message : String(error)}`
+          );
+        }
+      }),
+    );
+
+    context.subscriptions.push(
+      vscode.commands.registerCommand("ralph.archiveCompleted", async () => {
+        if (!prdProvider) {
+          vscode.window.showErrorMessage("PRD viewer not initialized");
+          return;
+        }
+
+        logger.debug("Archive completed command invoked");
+
+        try {
+          // Get workspace path
+          const workspaceFolders = vscode.workspace.workspaceFolders;
+          if (!workspaceFolders) {
+            vscode.window.showWarningMessage("No workspace folder open");
+            return;
+          }
+
+          const workspacePath = workspaceFolders[0].uri.fsPath;
+          
+          // Initialize archive manager
+          const archiveManager = ArchiveManager.getInstance();
+          archiveManager.initialize(workspacePath);
+
+          // Get current items
+          const fileManager = PrdFileManager.getInstance();
+          const currentItems = fileManager.read();
+
+          // Archive completed items
+          const result = archiveManager.archiveCompleted(currentItems);
+
+          if (result.archivedCount === 0) {
+            vscode.window.showInformationMessage("No completed items to archive");
+            logger.info("No items to archive");
+            return;
+          }
+
+          // Save remaining items back to PRD file
+          fileManager.write(result.remainingItems);
+
+          // Show success message
+          const archiveFileName = result.archiveFile.split('/').pop() || result.archiveFile;
+          vscode.window.showInformationMessage(
+            `Archived ${result.archivedCount} completed item${result.archivedCount > 1 ? 's' : ''} to ${archiveFileName}`
+          );
+
+          logger.info("Archive completed successfully", {
+            archivedCount: result.archivedCount,
+            archiveFile: result.archiveFile,
+            remainingCount: result.remainingItems.length
+          });
+
+          // Refresh tree view
+          prdProvider.refresh();
+
+        } catch (error) {
+          logger.error("Archive failed", error);
+          vscode.window.showErrorMessage(
+            `Failed to archive items: ${error instanceof Error ? error.message : String(error)}`
           );
         }
       }),
