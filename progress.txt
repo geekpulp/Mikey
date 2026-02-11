@@ -263,3 +263,16 @@
   - Report includes prioritized recommendations with effort estimates
   - Extension compiles and type-checks successfully (pnpm typecheck ✓)
   - Report will inform future PRD items for improving codebase maintainability
+
+- 2026-02-11: Completed git-001: Create feature branch when starting work on an item
+  - Enhanced startWork() method in PrdTreeDataProvider to create feature branches
+  - Implemented git branch creation using format 'feature/{item-id}' (e.g., 'feature/git-001')
+  - Added automatic checkout to newly created feature branch
+  - Handles case when branch already exists (switches to it instead of failing)
+  - Updates item status from 'not-started' to 'in-progress' automatically after branch creation
+  - Added progress notification with steps: "Creating feature branch" and "Updating item status"
+  - Integrated git commands using execGitCommand() utility method (similar to git-005 implementation)
+  - Feature branch workflow now complete: create branch → update status → open Copilot chat
+  - User receives confirmation messages for branch creation/switching and work started
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm test ✓)
+  - Next: git-002 (Track changed files) or git-003 (View diff) would extend the git workflow

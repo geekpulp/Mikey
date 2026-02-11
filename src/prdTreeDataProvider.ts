@@ -211,10 +211,51 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
       return;
     }
 
-    // Build context for the chat session
-    const context = this.buildChatContext(item);
+    const workspaceRoot = workspaceFolders[0].uri.fsPath;
 
     try {
+      // Create and switch to feature branch
+      const branchName = `feature/${item.id}`;
+      
+      await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: `Starting work on ${item.id}`,
+        cancellable: false
+      }, async (progress) => {
+        progress.report({ message: 'Creating feature branch...' });
+        
+        try {
+          await this.execGitCommand(workspaceRoot, ['checkout', '-b', branchName]);
+          vscode.window.showInformationMessage(`✓ Created and switched to branch: ${branchName}`);
+        } catch (error) {
+          // Branch might already exist, try to switch to it
+          try {
+            await this.execGitCommand(workspaceRoot, ['checkout', branchName]);
+            vscode.window.showInformationMessage(`✓ Switched to existing branch: ${branchName}`);
+          } catch (switchError) {
+            throw new Error(`Failed to create or switch to branch: ${error}`);
+          }
+        }
+
+        progress.report({ message: 'Updating item status...' });
+        
+        // Update item status to 'in-progress'
+        const itemIndex = this.prdItems.findIndex(i => i.id === item.id);
+        if (itemIndex !== -1 && this.prdFilePath) {
+          this.prdItems[itemIndex].status = 'in-progress';
+          
+          fs.writeFileSync(
+            this.prdFilePath,
+            JSON.stringify(this.prdItems, null, "\t"),
+            "utf-8",
+          );
+          this._onDidChangeTreeData.fire();
+        }
+      });
+
+      // Build context for the chat session
+      const context = this.buildChatContext(item);
+
       // Clear any existing chat session and start fresh
       await vscode.commands.executeCommand('workbench.action.chat.clear');
       
@@ -232,9 +273,9 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
         query: context
       });
       
-      vscode.window.showInformationMessage(`Started work on ${item.id} in new chat session`);
+      vscode.window.showInformationMessage(`✓ Started work on ${item.id} in new chat session`);
     } catch (error) {
-      vscode.window.showErrorMessage(`Failed to start chat session: ${error}`);
+      vscode.window.showErrorMessage(`Failed to start work: ${error}`);
     }
   }
 
@@ -512,5 +553,20 @@ ${stepIndex !== undefined
           color: new vscode.ThemeColor("charts.gray"),
         };
     }
+  }
+
+  private async execGitCommand(cwd: string, args: string[]): Promise<string> {
+    const { promisify } = require('util');
+    const { exec } = require('child_process');
+    const execAsync = promisify(exec);
+    
+    const command = `git ${args.join(' ')}`;
+    const { stdout, stderr } = await execAsync(command, { cwd });
+    
+    if (stderr && !stderr.includes('Switched to branch') && !stderr.includes('Already up to date')) {
+      throw new Error(stderr);
+    }
+    
+    return stdout;
   }
 }

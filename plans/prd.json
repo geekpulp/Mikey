@@ -405,8 +405,8 @@
       "Verify the workspace switches to the new branch",
       "Verify item status changes to 'in-progress'"
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "git-002",
