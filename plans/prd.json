@@ -456,14 +456,29 @@
     "category": "git",
     "description": "Mark item for review and show all diffs",
     "steps": [
-      "With an in-progress item that has changed files",
-      "Click 'Submit for Review' button",
-      "Verify item status changes to 'in-review'",
-      "Verify all changed files are listed in the detail panel",
-      "Verify user can click through each file to review diffs"
+      {
+        "text": "With an in-progress item that has changed files",
+        "completed": true
+      },
+      {
+        "text": "Click 'Submit for Review' button",
+        "completed": true
+      },
+      {
+        "text": "Verify item status changes to 'in-review'",
+        "completed": true
+      },
+      {
+        "text": "Verify all changed files are listed in the detail panel",
+        "completed": true
+      },
+      {
+        "text": "Verify user can click through each file to review diffs",
+        "completed": true
+      }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "git-005",

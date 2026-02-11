@@ -43,6 +43,9 @@ export class DetailPanel {
 					case 'openFileDiff':
 						this.openFileDiff(message.filePath);
 						break;
+					case 'submitForReview':
+						this.submitForReview();
+						break;
 				}
 			},
 			null,
@@ -347,6 +350,20 @@ export class DetailPanel {
 			font-style: italic;
 			padding: 10px;
 		}
+		.submit-review-btn {
+			padding: 8px 16px;
+			background-color: var(--vscode-button-background);
+			color: var(--vscode-button-foreground);
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: 13px;
+			font-weight: 600;
+			margin-top: 10px;
+		}
+		.submit-review-btn:hover {
+			background-color: var(--vscode-button-hoverBackground);
+		}
 	</style>
 	<script>
 		const vscode = acquireVsCodeApi();
@@ -404,6 +421,12 @@ export class DetailPanel {
 				filePath: filePath
 			});
 		}
+		
+		function submitForReview() {
+			vscode.postMessage({
+				command: 'submitForReview'
+			});
+		}
 	<\/script>
 </head>
 <body>
@@ -434,6 +457,7 @@ export class DetailPanel {
 				</div>
 			</div>
 		</div>
+		${item.status === 'in-progress' ? '<button class="submit-review-btn" onclick="submitForReview()">📋 Submit for Review</button>' : ''}
 	</div>
 
 	<div class="section">
@@ -1088,6 +1112,74 @@ private async openFileDiff(filePath: string) {
 		
 	} catch (error) {
 		vscode.window.showErrorMessage(`Failed to open diff: ${error}`);
+	}
+}
+
+private async submitForReview(): Promise<void> {
+	if (!this._currentItem) {
+		return;
+	}
+
+	// Verify item is in "in-progress" status
+	if (this._currentItem.status !== 'in-progress') {
+		vscode.window.showWarningMessage('Only items in "in-progress" status can be submitted for review.');
+		return;
+	}
+
+	const workspaceFolders = vscode.workspace.workspaceFolders;
+	if (!workspaceFolders) {
+		vscode.window.showErrorMessage('No workspace folder found');
+		return;
+	}
+
+	// Get changed files to show in confirmation
+	const workspaceRoot = workspaceFolders[0].uri.fsPath;
+	const changedFiles = await this.getChangedFiles(workspaceRoot);
+	
+	// Build confirmation message
+	const filesMsg = changedFiles.length > 0 
+		? `\n\nChanged files (${changedFiles.length}):\n${changedFiles.slice(0, 5).map(f => `  • ${f}`).join('\n')}${changedFiles.length > 5 ? `\n  ... and ${changedFiles.length - 5} more` : ''}`
+		: '\n\nNo changed files detected.';
+	
+	const confirmation = await vscode.window.showInformationMessage(
+		`Submit "${this._currentItem.id}: ${this._currentItem.description}" for review?${filesMsg}`,
+		{ modal: true },
+		'Submit for Review'
+	);
+
+	if (confirmation !== 'Submit for Review') {
+		return;
+	}
+
+	// Change status to in-review
+	const prdPath = path.join(workspaceFolders[0].uri.fsPath, 'plans', 'prd.json');
+	
+	try {
+		// Read current PRD file
+		const content = fs.readFileSync(prdPath, 'utf-8');
+		const prdItems: PrdItem[] = JSON.parse(content);
+		
+		// Find the current item in the array
+		const itemIndex = prdItems.findIndex(item => item.id === this._currentItem!.id);
+		if (itemIndex === -1) {
+			vscode.window.showErrorMessage('Item not found in PRD file');
+			return;
+		}
+
+		// Update status
+		prdItems[itemIndex].status = 'in-review';
+
+		// Write updated PRD file
+		fs.writeFileSync(prdPath, JSON.stringify(prdItems, null, '\t'), 'utf-8');
+		
+		// Update current item reference and refresh view
+		this._currentItem = prdItems[itemIndex];
+		await this.update(prdItems[itemIndex]);
+		
+		vscode.window.showInformationMessage(`✓ Item "${this._currentItem.id}" submitted for review`);
+		
+	} catch (error) {
+		vscode.window.showErrorMessage(`Failed to submit for review: ${error}`);
 	}
 }
 }
