@@ -3,6 +3,7 @@ import { PrdTreeDataProvider, PrdItem } from './prdTreeDataProvider';
 import { DetailPanel } from './detailPanel';
 import { ConfigManager } from './config';
 import { Logger } from './logger';
+import { RunLoopManager } from './runLoopManager';
 
 /**
  * Activates the Ralph extension
@@ -296,6 +297,100 @@ export function activate(context: vscode.ExtensionContext) {
           await prdProvider.markStepComplete(itemId, stepIndex, completed);
         },
       ),
+    );
+
+    context.subscriptions.push(
+      vscode.commands.registerCommand("ralph.runQueue", async () => {
+        logger.debug("Run queue command invoked");
+        
+        // Prompt user for queue options
+        const statusOptions = [
+          { label: "Not Started", value: "not-started" },
+          { label: "In Progress", value: "in-progress" },
+          { label: "All Items", value: "all" },
+        ];
+        
+        const selectedStatus = await vscode.window.showQuickPick(statusOptions, {
+          placeHolder: "Select which items to process",
+        });
+        
+        if (!selectedStatus) {
+          logger.debug("Run queue cancelled: no status selected");
+          return;
+        }
+        
+        const categoryOptions = [
+          { label: "All Categories", value: "all" },
+          { label: "Setup", value: "setup" },
+          { label: "UI", value: "ui" },
+          { label: "Functional", value: "functional" },
+          { label: "Git", value: "git" },
+          { label: "Agent", value: "agent" },
+          { label: "Test", value: "test" },
+        ];
+        
+        const selectedCategory = await vscode.window.showQuickPick(categoryOptions, {
+          placeHolder: "Select category to process",
+        });
+        
+        if (!selectedCategory) {
+          logger.debug("Run queue cancelled: no category selected");
+          return;
+        }
+        
+        const stopOnFailureOptions = [
+          { label: "Continue on failure", value: false },
+          { label: "Stop on first failure", value: true },
+        ];
+        
+        const selectedStopOption = await vscode.window.showQuickPick(stopOnFailureOptions, {
+          placeHolder: "How should failures be handled?",
+        });
+        
+        if (!selectedStopOption) {
+          logger.debug("Run queue cancelled: no failure option selected");
+          return;
+        }
+        
+        logger.info("Starting run queue", {
+          status: selectedStatus.value,
+          category: selectedCategory.value,
+          stopOnFailure: selectedStopOption.value,
+        });
+        
+        const runLoopManager = new RunLoopManager();
+        
+        try {
+          await runLoopManager.startLoop({
+            statusFilter: selectedStatus.value as any,
+            categoryFilter: selectedCategory.value,
+            stopOnFailure: selectedStopOption.value,
+            onItemStart: (item) => {
+              logger.info("Starting item", { id: item.id });
+              if (prdProvider) {
+                prdProvider.refresh();
+              }
+            },
+            onItemComplete: (item, success) => {
+              logger.info("Item completed", { id: item.id, success });
+              if (prdProvider) {
+                prdProvider.refresh();
+              }
+            },
+            onLoopComplete: (processed, succeeded, failed) => {
+              logger.info("Loop completed", { processed, succeeded, failed });
+              if (prdProvider) {
+                prdProvider.refresh();
+              }
+            },
+          });
+        } catch (error) {
+          logger.error("Run queue failed", error);
+          vscode.window.showErrorMessage(
+            `Failed to run queue: ${error instanceof Error ? error.message : String(error)}`
+          );
+        }
+      }),
     );
 
     logger.info("All Ralph extension commands registered");

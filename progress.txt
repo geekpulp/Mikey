@@ -1228,3 +1228,63 @@ Verified and completed the refactoring of detailPanel.ts by confirming all extra
 **Next steps:**
 All PRD items are now completed. The project is ready for final review.
 
+
+## Completed feature-010: Add PRD run-loop manager to iterate across items
+
+**Date:** 2026-02-11
+
+**Summary:**
+Implemented a comprehensive run-loop manager that enables automated sequential processing of PRD items with configurable filters and options.
+
+**Changes made:**
+- Created src/runLoopManager.ts with RunLoopManager class
+- Implemented queue builder with status and category filters
+- Added sequential item processing with progress tracking
+- Integrated automatic status management (not-started → in-progress)
+- Added UI progress indicator with cancellation support
+- Implemented callbacks for item start, completion, and loop completion events
+- Registered ralph.runQueue command in extension.ts
+- Added command to package.json with icon
+- Added command to view/title menu for easy access
+
+**Implementation details:**
+- Queue builder filters items by status and/or category
+- Supports maxItems limit to process subset of queue
+- Updates item status to "in-progress" when processing starts
+- Integrates with existing ralph.startWork command to trigger Copilot Chat
+- Provides real-time progress feedback via VS Code notification
+- User can cancel operation at any time
+- Comprehensive logging for debugging and audit trail
+- Error handling with option to stop on first failure or continue
+
+**User experience:**
+- Command accessible via Command Palette: "Run PRD Queue"
+- Also available in sidebar toolbar with play-circle icon
+- Interactive prompts guide user through options:
+  1. Select items to process (not-started, in-progress, or all)
+  2. Select category filter (all or specific category)
+  3. Choose failure handling (continue or stop on failure)
+- Progress notification shows current item and completion percentage
+- Can cancel at any time via progress notification
+- Summary message shows results when complete
+
+**Verification:**
+- ✓ pnpm typecheck: TypeScript compilation successful
+- ✓ pnpm test: All tests pass (exit code 0)
+- ✓ RunLoopManager module created with proper exports
+- ✓ Command registered and integrated with extension
+- ✓ UI elements added to package.json
+
+**Steps completed:**
+1. ✓ Design a queue builder that filters items by status/category
+2. ✓ Implement run-loop manager that processes items sequentially
+3. ✓ Update PRD item status to in-progress when processing starts
+4. ✓ Advance to next item on completion or failure with logging
+5. ✓ Persist any status/step updates back to prd.json
+
+**Item status:** completed, passes: true
+
+**Next steps:**
+- Remaining items: feature-007, feature-008, feature-009, test-002, feature-011, feature-012, test-004
+- feature-011 is already partially addressed by this implementation (run queue command)
+- feature-012 (auto-completion detection) would enhance this further

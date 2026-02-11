@@ -83,6 +83,11 @@
       {
         "command": "ralph.markStepComplete",
         "title": "Mark Step Complete"
+      },
+      {
+        "command": "ralph.runQueue",
+        "title": "Run PRD Queue",
+        "icon": "$(play-circle)"
       }
     ],
     "menus": {
@@ -91,6 +96,11 @@
           "command": "ralph.runItem",
           "when": "view == ralph.prdExplorer",
           "group": "navigation@1"
+        },
+        {
+          "command": "ralph.runQueue",
+          "when": "view == ralph.prdExplorer",
+          "group": "navigation@2"
         },
         {
           "command": "ralph.filterByStatus",

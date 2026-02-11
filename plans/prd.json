@@ -721,18 +721,23 @@
     "description": "The user cannot add steps to a new PRD item via the UI. The add steps button is present, as in the steps area in the UI, but they dont seem to work. Clicking the + Add Step button appears to do nothing. Please address this issue",
     "steps": [
       {
+        "text": "Identify the issue in the add step button handler",
         "completed": true
       },
       {
+        "text": "Check event listeners and DOM manipulation code",
         "completed": true
       },
       {
+        "text": "Fix the step addition logic in the UI component",
         "completed": true
       },
       {
+        "text": "Test the add step functionality in the detail panel",
         "completed": true
       },
       {
+        "text": "Verify no regressions introduced by the fix",
         "completed": true
       }
     ],
@@ -1309,5 +1314,233 @@
     ],
     "status": "completed",
     "passes": true
+  },
+  {
+    "id": "feature-007",
+    "category": "functional",
+    "description": "Implement PRD item archiving system to keep prd.json lean by moving completed items to dated archive files",
+    "steps": [
+      {
+        "text": "Design archiving system: completed items → prd-archive-<YYYY-MM-DD>.json files",
+        "completed": false
+      },
+      {
+        "text": "Create archiveManager module to handle archive file operations",
+        "completed": false
+      },
+      {
+        "text": "Implement function to identify completable items (status: completed AND passes: true)",
+        "completed": false
+      },
+      {
+        "text": "Implement function to extract completable items from prd.json",
+        "completed": false
+      },
+      {
+        "text": "Implement function to save extracted items to prd-archive-<date>.json",
+        "completed": false
+      }
+    ],
+    "status": "not-started",
+    "passes": false
+  },
+  {
+    "id": "feature-008",
+    "category": "functional",
+    "description": "Add UI command to archive completed PRD items",
+    "steps": [
+      {
+        "text": "Add 'Archive Completed Items' command to package.json contributions",
+        "completed": false
+      },
+      {
+        "text": "Implement command handler that calls archiveManager.archiveCompleted()",
+        "completed": false
+      },
+      {
+        "text": "Show success message with count of archived items and archive file name",
+        "completed": false
+      },
+      {
+        "text": "Reload PRD tree to reflect removed archived items",
+        "completed": false
+      },
+      {
+        "text": "Add command shortcut or menu option in PRD tree context menu",
+        "completed": false
+      }
+    ],
+    "status": "not-started",
+    "passes": false
+  },
+  {
+    "id": "feature-009",
+    "category": "functional",
+    "description": "Add archiving options and configuration settings",
+    "steps": [
+      {
+        "text": "Add configuration setting for auto-archive on extension exit",
+        "completed": false
+      },
+      {
+        "text": "Add configuration setting for archive retention policy (days to keep)",
+        "completed": false
+      },
+      {
+        "text": "Implement auto-cleanup of old archive files based on retention setting",
+        "completed": false
+      },
+      {
+        "text": "Add option to archive items manually via command palette",
+        "completed": false
+      },
+      {
+        "text": "Document archiving feature in README with examples",
+        "completed": false
+      }
+    ],
+    "status": "not-started",
+    "passes": false
+  },
+  {
+    "id": "test-002",
+    "category": "test",
+    "description": "Add tests for PRD item archiving functionality",
+    "steps": [
+      {
+        "text": "Create test file for archiveManager module",
+        "completed": false
+      },
+      {
+        "text": "Write tests for identifying completed items",
+        "completed": false
+      },
+      {
+        "text": "Write tests for archive file creation and naming",
+        "completed": false
+      },
+      {
+        "text": "Write tests for archive file content validation",
+        "completed": false
+      },
+      {
+        "text": "Add integration tests for archiving workflow end-to-end",
+        "completed": false
+      }
+    ],
+    "status": "not-started",
+    "passes": false
+  },
+  {
+    "id": "feature-010",
+    "category": "functional",
+    "description": "Add PRD run-loop manager to iterate across items",
+    "steps": [
+      {
+        "text": "Design a queue builder that filters items by status/category",
+        "completed": true
+      },
+      {
+        "text": "Implement run-loop manager that processes items sequentially",
+        "completed": true
+      },
+      {
+        "text": "Update PRD item status to in-progress when processing starts",
+        "completed": true
+      },
+      {
+        "text": "Advance to next item on completion or failure with logging",
+        "completed": true
+      },
+      {
+        "text": "Persist any status/step updates back to prd.json",
+        "completed": true
+      }
+    ],
+    "status": "completed",
+    "passes": true
+  },
+  {
+    "id": "feature-011",
+    "category": "functional",
+    "description": "Add Run PRD Queue command with loop options",
+    "steps": [
+      {
+        "text": "Add command contribution and command registration",
+        "completed": false
+      },
+      {
+        "text": "Prompt for iterations per item, status filter, and category filter",
+        "completed": false
+      },
+      {
+        "text": "Wire command to run-loop manager",
+        "completed": false
+      },
+      {
+        "text": "Show progress UI with current item and iteration count",
+        "completed": false
+      },
+      {
+        "text": "Handle user cancelation gracefully",
+        "completed": false
+      }
+    ],
+    "status": "not-started",
+    "passes": false
+  },
+  {
+    "id": "feature-012",
+    "category": "functional",
+    "description": "Detect completion per item and auto-advance",
+    "steps": [
+      {
+        "text": "Implement completion detection (token, status, or steps complete)",
+        "completed": false
+      },
+      {
+        "text": "Mark item passes=true when completion is detected",
+        "completed": false
+      },
+      {
+        "text": "Mark item status=completed and refresh the tree",
+        "completed": false
+      },
+      {
+        "text": "Record completion in progress.txt",
+        "completed": false
+      },
+      {
+        "text": "Advance to next item automatically",
+        "completed": false
+      }
+    ],
+    "status": "not-started",
+    "passes": false
+  },
+  {
+    "id": "test-004",
+    "category": "test",
+    "description": "Add tests for PRD run-loop and queue execution",
+    "steps": [
+      {
+        "text": "Add unit tests for queue filtering and ordering",
+        "completed": false
+      },
+      {
+        "text": "Add unit tests for completion detection logic",
+        "completed": false
+      },
+      {
+        "text": "Add integration test for run-loop command end-to-end",
+        "completed": false
+      },
+      {
+        "text": "Verify cancellation behavior stops the loop",
+        "completed": false
+      }
+    ],
+    "status": "not-started",
+    "passes": false
   }
 ]
