@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Status, CATEGORIES, STATUS_MARKERS, THEME_COLORS } from './constants';
+import { Status, STATUS_MARKERS, THEME_COLORS } from './constants';
+import { ConfigManager } from './config';
 import { Logger } from './logger';
 import { validateUserInput } from './validation';
 import { PrdFileError, GitOperationError, EnvironmentError, getUserFriendlyMessage, isRalphError } from './errors';
@@ -195,7 +196,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
    * - Saves to prd.json file
    * - Refreshes the tree view
    * 
-   * @param category - The category for the new item (must be from CATEGORIES constant)
+   * @param category - The category for the new item (must be from available categories)
    * @param description - Human-readable description of the requirement (min 10 chars)
    * @throws {PrdFileError} If prd.json file not found or cannot be written
    * @throws {Error} If validation fails or JSON serialization fails
@@ -285,8 +286,10 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
         throw PrdFileError.notFound('prd.json');
       }
 
+      const config = ConfigManager.getInstance();
+      
       // Show category picker pre-selected with current category
-      const category = await vscode.window.showQuickPick(CATEGORIES, {
+      const category = await vscode.window.showQuickPick(config.getCategories(), {
         placeHolder: "Select category",
         title: `Edit Item: ${item.id}`,
       });

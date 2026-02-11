@@ -16,7 +16,7 @@
   ],
   "activationEvents": [
     "onView:ralph.prdExplorer",
-    "workspaceContains:**/plans/prd.json"
+    "workspaceContains:**/prd.json"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -126,6 +126,59 @@
           "type": "boolean",
           "default": false,
           "description": "Enable debug logging in the Ralph output channel"
+        },
+        "ralph.prdFilePath": {
+          "type": "string",
+          "default": "plans/prd.json",
+          "description": "Path to the PRD JSON file (relative to workspace root)"
+        },
+        "ralph.skillsDirectory": {
+          "type": "string",
+          "default": "skills",
+          "description": "Directory containing skill reference files"
+        },
+        "ralph.testSkillsDirectory": {
+          "type": "string",
+          "default": "test/skills",
+          "description": "Directory containing test skill files"
+        },
+        "ralph.promptsDirectory": {
+          "type": "string",
+          "default": "prompts",
+          "description": "Directory containing prompt templates"
+        },
+        "ralph.featureBranchPrefix": {
+          "type": "string",
+          "default": "feature/",
+          "description": "Prefix for feature branches created when starting work on items"
+        },
+        "ralph.mainBranch": {
+          "type": "string",
+          "default": "main",
+          "description": "Name of the main/default branch for git operations"
+        },
+        "ralph.categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "setup",
+            "ui",
+            "functional",
+            "git",
+            "agent",
+            "polish",
+            "test",
+            "refactor",
+            "quality",
+            "security",
+            "Bug",
+            "Action",
+            "Docs",
+            "Audit"
+          ],
+          "description": "Available categories for PRD items. Customize this list to match your project's needs."
         }
       }
     }

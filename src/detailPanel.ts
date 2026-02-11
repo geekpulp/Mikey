@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { PrdItem, PrdStep } from './prdTreeDataProvider';
-import { Status, MessageCommand, FILE_PATHS } from './constants';
+import { Status, MessageCommand } from './constants';
 import { Logger } from './logger';
 import { validateStep, sanitizeInput } from './validation';
 import { PrdFileError, GitOperationError, EnvironmentError, getUserFriendlyMessage, isRalphError } from './errors';

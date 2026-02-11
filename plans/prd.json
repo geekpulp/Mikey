@@ -805,16 +805,37 @@
     "category": "refactor",
     "description": "Extract configuration management",
     "steps": [
-      "Define VS Code workspace configuration schema for categories",
-      "Define configuration for PRD file path",
-      "Define configuration for permission profiles",
-      "Move hardcoded values from extension.ts to configuration",
-      "Move hardcoded values from prdTreeDataProvider.ts to configuration",
-      "Add migration logic for existing users",
-      "Document configuration options in README"
+      {
+        "text": "Define VS Code workspace configuration schema for categories",
+        "completed": true
+      },
+      {
+        "text": "Define configuration for PRD file path",
+        "completed": true
+      },
+      {
+        "text": "Define configuration for permission profiles",
+        "completed": true
+      },
+      {
+        "text": "Move hardcoded values from extension.ts to configuration",
+        "completed": true
+      },
+      {
+        "text": "Move hardcoded values from prdTreeDataProvider.ts to configuration",
+        "completed": true
+      },
+      {
+        "text": "Add migration logic for existing users",
+        "completed": true
+      },
+      {
+        "text": "Document configuration options in README",
+        "completed": true
+      }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "refactor-004",

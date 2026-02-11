@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { PrdItem } from './prdTreeDataProvider';
 import { STATUS_MARKERS } from './constants';
+import { ConfigManager } from './config';
 import { Logger } from './logger';
 
 const logger = Logger.getInstance();
@@ -15,6 +16,7 @@ const logger = Logger.getInstance();
  * @returns Formatted context string for chat
  */
 export function buildChatContext(item: PrdItem, workspaceRoot: string, stepIndex?: number): string {
+	const config = ConfigManager.getInstance();
 	const progressFile = path.join(workspaceRoot, 'progress.txt');
 	
 	let progressContent = '';
@@ -24,8 +26,7 @@ export function buildChatContext(item: PrdItem, workspaceRoot: string, stepIndex
 
 	// Load prompt template
 	let promptTemplate = '';
-	const config = vscode.workspace.getConfiguration('mikey');
-	const templatePath = config.get<string>('promptTemplate', 'prompts/default.txt');
+	const templatePath = config.getPromptTemplate();
 	const fullTemplatePath = path.join(workspaceRoot, templatePath);
 	
 	if (fs.existsSync(fullTemplatePath)) {
@@ -82,9 +83,10 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
  * @returns Formatted skill context string
  */
 export function loadSkillReferences(workspaceRoot: string, item: PrdItem): string {
-	const skillsDir = path.join(workspaceRoot, 'skills');
+	const config = ConfigManager.getInstance();
+	const skillsDir = path.join(workspaceRoot, config.getSkillsDirectory());
 	if (!fs.existsSync(skillsDir)) {
-		const testSkillsDir = path.join(workspaceRoot, 'test', 'skills');
+		const testSkillsDir = path.join(workspaceRoot, config.getTestSkillsDirectory());
 		if (fs.existsSync(testSkillsDir)) {
 			return loadSkillsFromDirectory(testSkillsDir, item);
 		}

@@ -213,6 +213,88 @@ All Mikey commands are accessible via the Command Palette (`Cmd+Shift+P` / `Ctrl
 - **Mikey: Run PRD Item** - Execute automated workflow for the item
 - **Mikey: Refresh** - Manually refresh the PRD items view
 
+## Configuration
+
+Mikey can be customized through VS Code settings. Access settings via:
+- **File > Preferences > Settings** (Windows/Linux)
+- **Code > Settings > Settings** (Mac)
+- Search for "Mikey" or "Ralph" in the settings search bar
+
+### Available Settings
+
+#### File Paths
+
+- **`ralph.prdFilePath`** (default: `"plans/prd.json"`)  
+  Path to the PRD JSON file relative to workspace root. Change this if you want to store your PRD file in a different location.
+  
+  Example: `"docs/requirements.json"`
+
+- **`ralph.skillsDirectory`** (default: `"skills"`)  
+  Directory containing skill reference files used for context when starting work.
+  
+  Example: `"documentation/skills"`
+
+- **`ralph.testSkillsDirectory`** (default: `"test/skills"`)  
+  Directory containing test skill files (fallback if main skills directory doesn't exist).
+
+- **`ralph.promptsDirectory`** (default: `"prompts"`)  
+  Directory containing prompt templates.
+
+- **`mikey.promptTemplate`** (default: `"prompts/default.txt"`)  
+  Path to the prompt template file used when starting work on items.
+
+#### Git Configuration
+
+- **`ralph.featureBranchPrefix`** (default: `"feature/"`)  
+  Prefix used when creating feature branches for new work.
+  
+  Example: `"feat/"` or `"work/"`
+
+- **`ralph.mainBranch`** (default: `"main"`)  
+  Name of your main/default branch for git operations.
+  
+  Example: `"master"` or `"develop"`
+
+#### Categories
+
+- **`ralph.categories`** (default: `["setup", "ui", "functional", "git", "agent", "polish", "test", "refactor", "quality", "security", "Bug", "Action", "Docs", "Audit"]`)  
+  Available categories for PRD items. Customize this list to match your project's workflow.
+  
+  Example:
+  ```json
+  "ralph.categories": [
+    "feature",
+    "bugfix",
+    "enhancement",
+    "documentation",
+    "infrastructure"
+  ]
+  ```
+
+#### Debug Settings
+
+- **`ralph.debugMode`** (default: `false`)  
+  Enable debug logging in the Ralph output channel.
+
+### Example Configuration
+
+Add these to your workspace settings (`.vscode/settings.json`) to customize Mikey for your project:
+
+```json
+{
+  "ralph.prdFilePath": "requirements/prd.json",
+  "ralph.mainBranch": "develop",
+  "ralph.featureBranchPrefix": "feat/",
+  "ralph.categories": [
+    "feature",
+    "bugfix",
+    "enhancement",
+    "docs"
+  ],
+  "ralph.debugMode": true
+}
+```
+
 ## Troubleshooting
 
 ### Enabling Debug Logging

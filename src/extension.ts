@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { PrdTreeDataProvider, PrdItem } from './prdTreeDataProvider';
 import { DetailPanel } from './detailPanel';
-import { CATEGORIES } from './constants';
+import { ConfigManager } from './config';
 import { Logger } from './logger';
 
 /**
@@ -25,6 +25,7 @@ import { Logger } from './logger';
  */
 export function activate(context: vscode.ExtensionContext) {
   const logger = Logger.getInstance();
+  const config = ConfigManager.getInstance();
   logger.info('Ralph extension activated');
 
   const prdProvider = new PrdTreeDataProvider(context);
@@ -50,7 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand('ralph.addItem', async () => {
       logger.debug('Add item command invoked');
-      const category = await vscode.window.showQuickPick(CATEGORIES, {
+      const category = await vscode.window.showQuickPick(config.getCategories(), {
         placeHolder: 'Select category for the new item'
       });
       
@@ -137,4 +138,5 @@ export function deactivate() {
   const logger = Logger.getInstance();
   logger.info('Ralph extension deactivated');
   logger.dispose();
+  ConfigManager.resetInstance();
 }

@@ -5,6 +5,7 @@ import { PrdItem } from './prdTreeDataProvider';
 import { PrdFileError } from './errors';
 import { Logger } from './logger';
 import { validatePrdFile } from './validation';
+import { ConfigManager } from './config';
 
 /**
  * Service for managing PRD file operations
@@ -46,7 +47,8 @@ export class PrdFileManager {
 	 * @returns The path to the prd.json file if found, undefined otherwise
 	 */
 	public initialize(workspacePath: string): string | undefined {
-		const prdPath = path.join(workspacePath, 'plans', 'prd.json');
+		const config = ConfigManager.getInstance();
+		const prdPath = path.join(workspacePath, config.getPrdFilePath());
 		
 		if (!fs.existsSync(prdPath)) {
 			this.logger.warn('PRD file not found', { path: prdPath });

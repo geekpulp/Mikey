@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { promisify } from 'util';
 import { exec } from 'child_process';
-import { GIT } from './constants';
+import { ConfigManager } from './config';
 
 const execAsync = promisify(exec);
 
@@ -100,18 +100,19 @@ export async function openFileDiff(filePath: string): Promise<void> {
 			return;
 		}
 		
+		const config = ConfigManager.getInstance();
 		const fileUri = vscode.Uri.file(path.join(workspaceRoot, filePath));
 		const currentBranch = await getCurrentBranch(workspaceRoot);
 		
 		// Create a URI for the file on the main branch for comparison
 		const mainUri = fileUri.with({
-			scheme: GIT.scheme,
+			scheme: 'git',
 			path: fileUri.path,
-			query: JSON.stringify({ ref: GIT.mainBranch, path: filePath })
+			query: JSON.stringify({ ref: config.getMainBranch(), path: filePath })
 		});
 		
 		// Open diff view
-		await vscode.commands.executeCommand('vscode.diff', mainUri, fileUri, `${filePath} (main ↔ ${currentBranch})`);
+		await vscode.commands.executeCommand('vscode.diff', mainUri, fileUri, `${filePath} (${config.getMainBranch()} ↔ ${currentBranch})`);
 		
 	} catch (error) {
 		vscode.window.showErrorMessage(`Failed to open diff: ${error}`);

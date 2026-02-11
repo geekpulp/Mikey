@@ -864,3 +864,75 @@
     5. ✓ Updates automatically (called in loadPrdFile after every reload)
   - Polish-004 now complete with passes: true
   - Next: Remaining not-started items are ui-004 (drag-and-drop), polish-001/002 (filters), polish-003 (keyboard shortcuts), and refactor-003 (config management)
+
+- 2026-02-11: Completed refactor-003: Extract configuration management
+  - Created comprehensive ConfigManager service (src/config.ts):
+    * Singleton pattern for centralized configuration access
+    * Type-safe RalphConfiguration interface with all settings
+    * Automatic loading from VS Code workspace settings (ralph.* and mikey.*)
+    * Watch for configuration changes and reload automatically
+    * Getter methods for all configuration values
+    * Default values for all settings with fallback support
+    * Proper disposal handling
+  - Added configuration schema to package.json:
+    * ralph.prdFilePath - Configurable PRD file location (default: plans/prd.json)
+    * ralph.skillsDirectory - Configurable skills directory (default: skills)
+    * ralph.testSkillsDirectory - Configurable test skills directory (default: test/skills)
+    * ralph.promptsDirectory - Configurable prompts directory (default: prompts)
+    * ralph.featureBranchPrefix - Configurable git branch prefix (default: feature/)
+    * ralph.mainBranch - Configurable main branch name (default: main)
+    * ralph.categories - Customizable category list with sensible defaults
+    * All settings include descriptions and type validation
+  - Updated extension.ts to use ConfigManager:
+    * Removed hardcoded CATEGORIES import
+    * Initialize ConfigManager on activation
+    * Use config.getCategories() for category picker
+    * Dispose ConfigManager on deactivation
+  - Updated prdTreeDataProvider.ts to use ConfigManager:
+    * Removed hardcoded CATEGORIES import
+    * Use config.getCategories() in editItem()
+    * Updated JSDoc to reference configurable categories
+  - Updated prdFileManager.ts to use ConfigManager:
+    * Use config.getPrdFilePath() for dynamic file location
+    * Support custom PRD file paths anywhere in workspace
+  - Updated gitOperations.ts to use ConfigManager:
+    * Removed hardcoded GIT constant usage
+    * Use config.getMainBranch() for dynamic main branch
+    * Support custom branch naming conventions
+  - Updated stepManager.ts to use ConfigManager:
+    * Removed hardcoded vscode.workspace.getConfiguration() calls
+    * Use config.getPromptTemplate() for template path
+    * Use config.getSkillsDirectory() and getTestSkillsDirectory()
+    * Cleaner code with centralized configuration
+  - Updated detailPanel.ts:
+    * Removed unused FILE_PATHS import
+    * Cleaned up imports
+  - Updated package.json activation events:
+    * Changed from workspaceContains:**/plans/prd.json to **/prd.json
+    * Now activates for any prd.json location in workspace
+  - Created comprehensive test suite (config.test.ts):
+    * 15+ test cases covering all ConfigManager methods
+    * Tests for singleton pattern and instance management
+    * Tests for all configuration getters
+    * Tests for default values
+    * Tests for configuration immutability (returns copies)
+    * Tests for proper disposal and reset
+  - Added comprehensive documentation to README.md:
+    * New "Configuration" section with all available settings
+    * Detailed descriptions for each configuration option
+    * Examples showing how to customize settings
+    * Example workspace configuration showing common customizations
+    * Instructions on how to access settings in VS Code
+  - Benefits of this refactoring:
+    * Users can now customize PRD file location, categories, branch names, etc.
+    * No need to modify code to change file paths or categories
+    * Configuration lives in VS Code settings (workspace or user level)
+    * Type-safe access to all configuration throughout codebase
+    * Centralized configuration reduces duplication and errors
+    * Automatic reload when settings change
+    * Better support for different project structures and workflows
+    * Migration path is automatic - defaults match old hardcoded values
+  - Extension compiles successfully (pnpm typecheck ✓)
+  - All 7 acceptance criteria met and steps marked as completed
+  - Refactor-003 now complete with passes: true
+  - Next: Polish features (polish-001, polish-002, polish-003) or ui-004 (drag-and-drop) to enhance user experience
