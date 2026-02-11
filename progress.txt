@@ -1382,3 +1382,66 @@ Implemented a comprehensive UI command to archive completed PRD items using the 
 - feature-011: Add Run PRD Queue command with loop options (already implemented)
 - feature-012: Detect completion per item and auto-advance
 
+
+
+## Completed feature-012: Detect completion per item and auto-advance
+
+**Date:** 2026-02-11
+
+**Summary:**
+Implemented a comprehensive completion detection system that enables automatic detection and advancement across PRD items.
+
+**Changes made:**
+- Created src/completionDetector.ts with CompletionDetector class
+- Implemented multiple completion detection methods:
+  1. Token detection: Looks for `<promise>COMPLETE</promise>` in progress.txt
+  2. Steps completion: Checks if all steps in item are marked as completed
+  3. Status check: Verifies if item is already marked completed with passes=true
+- Added automatic item completion marking (status=completed, passes=true)
+- Implemented progress.txt recording for completed items
+- Added getNextItem() method to find next not-started or in-progress item
+- Implemented checkAndAdvance() for periodic completion checking
+- Integrated completion detector into RunLoopManager
+- Added waitForCompletion() polling mechanism (5-second intervals, 5-minute timeout)
+- Updated processItem() to use completion detection and auto-record
+- Added initialize() method to RunLoopManager for workspace context
+- Updated extension.ts to initialize RunLoopManager with workspace path
+
+**Implementation details:**
+- Singleton pattern not used for CompletionDetector (allows multiple instances if needed)
+- Completion detection uses configurable options for flexibility
+- Three detection methods can be enabled/disabled independently
+- Polling mechanism checks every 5 seconds for up to 5 minutes
+- Cancellation support via CancellationToken
+- Comprehensive logging for debugging and audit trail
+- Auto-advancement finds next not-started or in-progress item
+- Notifications shown when items complete
+
+**User experience:**
+- Run queue now automatically detects when items are complete
+- No manual intervention needed to advance to next item
+- Visual feedback via VS Code notifications
+- Progress recorded in progress.txt automatically
+- Tree view refreshes on item completion
+
+**Verification:**
+- ✓ pnpm typecheck: TypeScript compilation successful (exit code 0)
+- ✓ pnpm test: All tests pass (exit code 0)
+- ✓ CompletionDetector module created with all detection methods
+- ✓ Integration with RunLoopManager complete
+- ✓ Extension initialization updated
+
+**Steps completed:**
+1. ✓ Implement completion detection (token, status, or steps complete)
+2. ✓ Mark item passes=true when completion is detected
+3. ✓ Mark item status=completed and refresh the tree
+4. ✓ Record completion in progress.txt
+5. ✓ Advance to next item automatically
+
+**Item status:** completed, passes: true
+
+**Next steps:**
+- feature-009: Add archiving options and configuration settings
+- test-002: Add tests for PRD item archiving functionality
+- feature-011: Add Run PRD Queue command with loop options (mostly done via feature-010)
+- test-004: Add tests for PRD run-loop and queue execution

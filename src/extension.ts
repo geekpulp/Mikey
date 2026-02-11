@@ -362,6 +362,17 @@ export function activate(context: vscode.ExtensionContext) {
         
         const runLoopManager = new RunLoopManager();
         
+        // Get workspace path
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders) {
+          vscode.window.showErrorMessage("No workspace folder open");
+          return;
+        }
+        const workspacePath = workspaceFolders[0].uri.fsPath;
+        
+        // Initialize with workspace context
+        runLoopManager.initialize(workspacePath);
+        
         try {
           await runLoopManager.startLoop({
             statusFilter: selectedStatus.value as any,

@@ -1496,27 +1496,27 @@
     "steps": [
       {
         "text": "Implement completion detection (token, status, or steps complete)",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Mark item passes=true when completion is detected",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Mark item status=completed and refresh the tree",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Record completion in progress.txt",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Advance to next item automatically",
-        "completed": false
+        "completed": true
       }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "test-004",

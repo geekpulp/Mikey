@@ -3,6 +3,7 @@ import { PrdItem } from './prdTreeDataProvider';
 import { PrdFileManager } from './prdFileManager';
 import { Logger } from './logger';
 import { Status } from './constants';
+import { CompletionDetector } from './completionDetector';
 
 /**
  * Options for configuring the run loop
@@ -57,6 +58,7 @@ export interface ProcessingResult {
 export class RunLoopManager {
 	private logger = Logger.getInstance();
 	private fileManager = PrdFileManager.getInstance();
+	private completionDetector = new CompletionDetector();
 	private isRunning = false;
 	private cancellationToken?: vscode.CancellationTokenSource;
 
@@ -93,6 +95,16 @@ export class RunLoopManager {
 		});
 		
 		return items;
+	}
+
+	/**
+	 * Initializes the run loop manager with workspace context
+	 * 
+	 * @param workspaceRoot - Root path of the workspace
+	 */
+	public initialize(workspaceRoot: string): void {
+		this.completionDetector.initialize(workspaceRoot);
+		this.logger.info('RunLoopManager initialized', { workspaceRoot });
 	}
 
 	/**
@@ -245,16 +257,19 @@ export class RunLoopManager {
 
 			this.logger.info('Item status updated to in-progress', { id: item.id });
 
-			// TODO: This is where we would integrate with GitHub Copilot Chat
-			// For now, we'll just show the item in a detail panel and wait for manual completion
-			
 			// Execute the "Start Work" command which opens Copilot Chat
 			await vscode.commands.executeCommand('ralph.startWork', item);
 
-			// For now, we'll mark it as needs review and let the user complete it manually
-			// In a future iteration, we could add completion detection
+			// Wait for completion detection
+			const detectionResult = await this.waitForCompletion(item);
 			
-			const success = true; // Assume success for now
+			const success = detectionResult.isComplete;
+			
+			// If detected as complete, mark it and record
+			if (success) {
+				await this.completionDetector.markItemComplete(item.id, true);
+				await this.completionDetector.recordCompletion(item, detectionResult);
+			}
 			
 			// Call completion callback
 			if (options.onItemComplete) {
@@ -278,6 +293,51 @@ export class RunLoopManager {
 				error: error as Error
 			};
 		}
+	}
+
+	/**
+	 * Waits for item completion detection
+	 * Polls periodically to check if the item is complete
+	 * 
+	 * @param item - The item being worked on
+	 * @returns Detection result
+	 */
+	private async waitForCompletion(item: PrdItem): Promise<any> {
+		const maxWaitTime = 5 * 60 * 1000; // 5 minutes max
+		const pollInterval = 5000; // Check every 5 seconds
+		const startTime = Date.now();
+
+		this.logger.info('Waiting for completion detection', { itemId: item.id });
+
+		while (Date.now() - startTime < maxWaitTime) {
+			// Check if cancelled
+			if (this.cancellationToken?.token.isCancellationRequested) {
+				return { isComplete: false, reason: 'Cancelled by user', method: 'none' };
+			}
+
+			// Check for completion
+			const result = this.completionDetector.detectCompletion(item);
+			
+			if (result.isComplete) {
+				this.logger.info('Completion detected', { 
+					itemId: item.id, 
+					method: result.method,
+					reason: result.reason 
+				});
+				return result;
+			}
+
+			// Wait before next check
+			await new Promise(resolve => setTimeout(resolve, pollInterval));
+		}
+
+		// Timeout - assume not complete
+		this.logger.warn('Completion detection timed out', { itemId: item.id });
+		return { 
+			isComplete: false, 
+			reason: 'Timeout waiting for completion', 
+			method: 'none' 
+		};
 	}
 
 	/**
