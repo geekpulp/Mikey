@@ -503,14 +503,29 @@
     "category": "agent",
     "description": "Start Work triggers Copilot chat with item context",
     "steps": [
-      "Select a PRD item and click 'Start Work'",
-      "Verify GitHub Copilot Chat opens (or extension chat panel)",
-      "Verify the chat is pre-populated with context about the item",
-      "Verify context includes: description, steps, category, and relevant workspace info",
-      "Verify agent can reference the PRD item in responses"
+      {
+        "text": "Select a PRD item and click 'Start Work'",
+        "completed": true
+      },
+      {
+        "text": "Verify GitHub Copilot Chat opens (or extension chat panel)",
+        "completed": true
+      },
+      {
+        "text": "Verify the chat is pre-populated with context about the item",
+        "completed": true
+      },
+      {
+        "text": "Verify context includes: description, steps, category, and relevant workspace info",
+        "completed": true
+      },
+      {
+        "text": "Verify agent can reference the PRD item in responses",
+        "completed": true
+      }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "agent-002",
