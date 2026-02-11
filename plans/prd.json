@@ -413,14 +413,29 @@
     "category": "git",
     "description": "Track changed files for in-progress item",
     "steps": [
-      "Start work on an item (creates feature branch)",
-      "Make changes to files in the workspace",
-      "Open the detail panel for the in-progress item",
-      "Verify a 'Changed Files' section shows modified files",
-      "Verify the list updates as more files are changed"
+      {
+        "text": "Start work on an item (creates feature branch)",
+        "completed": true
+      },
+      {
+        "text": "Make changes to files in the workspace",
+        "completed": true
+      },
+      {
+        "text": "Open the detail panel for the in-progress item",
+        "completed": true
+      },
+      {
+        "text": "Verify a 'Changed Files' section shows modified files",
+        "completed": true
+      },
+      {
+        "text": "Verify the list updates as more files are changed",
+        "completed": true
+      }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "git-003",

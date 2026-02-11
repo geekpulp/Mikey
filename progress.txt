@@ -276,3 +276,19 @@
   - User receives confirmation messages for branch creation/switching and work started
   - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm test ✓)
   - Next: git-002 (Track changed files) or git-003 (View diff) would extend the git workflow
+
+- 2026-02-11: Completed git-002: Track changed files for in-progress item
+  - Added "Changed Files" section to detail panel that displays modified files
+  - Implemented getChangedFiles() method that detects files changed between feature branch and main
+  - Tracks both committed changes (via git diff main...HEAD) and uncommitted changes (via git status)
+  - Files are deduplicated and sorted for clean display
+  - Changed Files section only appears when on a feature branch (not on main/master/develop)
+  - Added clickable file list items that open VS Code's native diff view
+  - Implemented openFileDiff() method to compare files between main and current branch
+  - Each file shows with a 📝 icon and full path
+  - Section header shows count of changed files (e.g., "Changed Files (5)")
+  - Added CSS styling for file items with hover effects
+  - Made _getHtmlForWebview() and update() methods async to fetch git data
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm test ✓)
+  - Changed files list updates each time the detail panel is opened or refreshed
+  - Next: git-003 (View diff) is already implemented as part of this feature via clickable files

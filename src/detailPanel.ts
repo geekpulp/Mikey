@@ -40,6 +40,9 @@ export class DetailPanel {
 					case 'startWorkOnStep':
 						this.startWorkOnStep(message.stepIndex);
 						break;
+					case 'openFileDiff':
+						this.openFileDiff(message.filePath);
+						break;
 				}
 			},
 			null,
@@ -72,10 +75,10 @@ export class DetailPanel {
 		DetailPanel.currentPanel.update(item);
 	}
 
-	public update(item: PrdItem) {
+	public async update(item: PrdItem) {
 		this._currentItem = item;
 		this._panel.title = `[${item.id}] ${item.description}`;
-		this._panel.webview.html = this._getHtmlForWebview(item);
+		this._panel.webview.html = await this._getHtmlForWebview(item);
 	}
 
 	public dispose() {
@@ -91,10 +94,15 @@ export class DetailPanel {
 		}
 	}
 
-	private _getHtmlForWebview(item: PrdItem): string {
+	private async _getHtmlForWebview(item: PrdItem): Promise<string> {
 		const statusBadgeColor = this._getStatusColor(item.status);
 		
 		const stepsHtml = this._renderSteps(item.steps);
+		
+		// Get changed files if applicable
+		const workspaceRoot = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+		const changedFiles = workspaceRoot ? await this.getChangedFiles(workspaceRoot) : [];
+		const changedFilesHtml = this._renderChangedFiles(changedFiles);
 
 		return `<!DOCTYPE html>
 <html lang="en">
@@ -303,6 +311,42 @@ export class DetailPanel {
 		.step-btn.delete:hover {
 			opacity: 0.8;
 		}
+		.changed-files-list {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+		}
+		.file-item {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 8px 12px;
+			margin-bottom: 4px;
+			background-color: var(--vscode-editor-background);
+			border-radius: 4px;
+			border: 1px solid var(--vscode-panel-border);
+			cursor: pointer;
+			transition: background-color 0.15s;
+		}
+		.file-item:hover {
+			background-color: var(--vscode-list-hoverBackground);
+		}
+		.file-icon {
+			color: var(--vscode-gitDecoration-modifiedResourceForeground);
+			font-size: 14px;
+			flex-shrink: 0;
+		}
+		.file-path {
+			flex: 1;
+			font-family: var(--vscode-editor-font-family);
+			font-size: 13px;
+			color: var(--vscode-foreground);
+		}
+		.no-changes {
+			color: var(--vscode-descriptionForeground);
+			font-style: italic;
+			padding: 10px;
+		}
 	</style>
 	<script>
 		const vscode = acquireVsCodeApi();
@@ -353,6 +397,13 @@ export class DetailPanel {
 				stepIndex: stepIndex
 			});
 		}
+		
+		function openFileDiff(filePath) {
+			vscode.postMessage({
+				command: 'openFileDiff',
+				filePath: filePath
+			});
+		}
 	<\/script>
 </head>
 <body>
@@ -392,6 +443,8 @@ export class DetailPanel {
 		</div>
 		${stepsHtml}
 	</div>
+
+	${changedFilesHtml}
 </body>
 </html>`;
 	}
@@ -423,6 +476,28 @@ export class DetailPanel {
 		}).join('');
 
 		return `<ul class="steps-list">${stepItems}</ul>`;
+	}
+
+	private _renderChangedFiles(files: string[]): string {
+		if (!files || files.length === 0) {
+			return '';
+		}
+
+		const fileItems = files.map(file => {
+			return `
+				<li class="file-item" onclick="openFileDiff('${this._escapeHtml(file)}')">
+					<span class="file-icon">📝</span>
+					<span class="file-path">${this._escapeHtml(file)}</span>
+				</li>
+			`;
+		}).join('');
+
+		return `
+			<div class="section">
+				<div class="section-title">Changed Files (${files.length})</div>
+				<ul class="changed-files-list">${fileItems}</ul>
+			</div>
+		`;
 	}
 
 	private _getStatusColor(status: string): string {
@@ -949,5 +1024,70 @@ private async execGitCommand(cwd: string, args: string[]): Promise<string> {
 	}
 	
 	return stdout;
+}
+
+private async getChangedFiles(workspaceRoot: string): Promise<string[]> {
+	try {
+		const currentBranch = await this.getCurrentBranch(workspaceRoot);
+		
+		// Only show changed files if we're on a feature branch
+		if (!this.isFeatureBranch(currentBranch)) {
+			return [];
+		}
+		
+		// Get files changed between current branch and main
+		const diffOutput = await this.execGitCommand(workspaceRoot, ['diff', '--name-only', 'main...HEAD']);
+		
+		// Also get uncommitted changes
+		const statusOutput = await this.execGitCommand(workspaceRoot, ['status', '--porcelain']);
+		
+		const changedFiles = new Set<string>();
+		
+		// Add files from diff with main
+		diffOutput.split('\n').forEach(file => {
+			if (file.trim()) {
+				changedFiles.add(file.trim());
+			}
+		});
+		
+		// Add uncommitted files
+		statusOutput.split('\n').forEach(line => {
+			const match = line.match(/^\s*[MADRCU?]+\s+(.+)$/);
+			if (match) {
+				changedFiles.add(match[1].trim());
+			}
+		});
+		
+		return Array.from(changedFiles).sort();
+	} catch (error) {
+		// If there's an error (e.g., main branch doesn't exist), return empty array
+		return [];
+	}
+}
+
+private async openFileDiff(filePath: string) {
+	try {
+		const workspaceRoot = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+		if (!workspaceRoot) {
+			vscode.window.showErrorMessage('No workspace folder found');
+			return;
+		}
+		
+		const fileUri = vscode.Uri.file(path.join(workspaceRoot, filePath));
+		const currentBranch = await this.getCurrentBranch(workspaceRoot);
+		
+		// Create a URI for the file on the main branch for comparison
+		const mainUri = fileUri.with({
+			scheme: 'git',
+			path: fileUri.path,
+			query: JSON.stringify({ ref: 'main', path: filePath })
+		});
+		
+		// Open diff view
+		await vscode.commands.executeCommand('vscode.diff', mainUri, fileUri, `${filePath} (main ↔ ${currentBranch})`);
+		
+	} catch (error) {
+		vscode.window.showErrorMessage(`Failed to open diff: ${error}`);
+	}
 }
 }
