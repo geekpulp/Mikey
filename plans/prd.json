@@ -639,8 +639,8 @@
       "Verify only UI category items are shown",
       "Select multiple categories and verify combined results"
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "polish-003",

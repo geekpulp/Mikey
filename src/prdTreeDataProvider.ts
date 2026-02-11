@@ -83,6 +83,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
   private logger = Logger.getInstance();
   private fileManager = PrdFileManager.getInstance();
   private statusFilter: Status | 'all' = 'all';
+  private categoryFilter: string | 'all' = 'all';
 
   /**
    * Creates a new PRD tree data provider
@@ -216,6 +217,37 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
    */
   getStatusFilter(): Status | 'all' {
     return this.statusFilter;
+  }
+
+  /**
+   * Sets the category filter for the tree view
+   * 
+   * This method:
+   * - Updates the internal category filter state
+   * - Triggers a tree refresh to show only items matching the filter
+   * - Supports filtering by specific category or showing all items
+   * 
+   * @param filter - The category to filter by, or 'all' to show all items
+   * 
+   * @example
+   * ```typescript
+   * prdProvider.setCategoryFilter('ui'); // Show only UI items
+   * prdProvider.setCategoryFilter('all'); // Show all items
+   * ```
+   */
+  setCategoryFilter(filter: string | 'all'): void {
+    this.logger.debug('Setting category filter', { filter });
+    this.categoryFilter = filter;
+    this._onDidChangeTreeData.fire();
+  }
+
+  /**
+   * Gets the current category filter
+   * 
+   * @returns The current filter value ('all' or a specific category)
+   */
+  getCategoryFilter(): string | 'all' {
+    return this.categoryFilter;
   }
 
   /**
@@ -937,9 +969,14 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
       const categories = new Map<string, PrdItem[]>();
       
       // Filter items by status if filter is active
-      const filteredItems = this.statusFilter === 'all' 
+      let filteredItems = this.statusFilter === 'all' 
         ? this.prdItems 
         : this.prdItems.filter(item => item.status === this.statusFilter);
+      
+      // Also filter by category if filter is active
+      if (this.categoryFilter !== 'all') {
+        filteredItems = filteredItems.filter(item => item.category === this.categoryFilter);
+      }
       
       filteredItems.forEach((item) => {
         if (!categories.has(item.category)) {

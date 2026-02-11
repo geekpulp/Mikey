@@ -78,6 +78,38 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
+    vscode.commands.registerCommand('ralph.filterByCategory', async () => {
+      logger.debug('Filter by category command invoked');
+      
+      const currentFilter = prdProvider.getCategoryFilter();
+      const categories = config.getCategories();
+      
+      const filterOptions = [
+        { label: 'All Categories', value: 'all', description: currentFilter === 'all' ? '(current)' : '' },
+        ...categories.map(cat => ({
+          label: cat.charAt(0).toUpperCase() + cat.slice(1),
+          value: cat,
+          description: currentFilter === cat ? '(current)' : ''
+        }))
+      ];
+      
+      const selected = await vscode.window.showQuickPick(filterOptions, {
+        placeHolder: 'Filter PRD items by category'
+      });
+      
+      if (selected) {
+        logger.info('Setting category filter', { filter: selected.value });
+        prdProvider.setCategoryFilter(selected.value);
+        vscode.window.showInformationMessage(
+          selected.value === 'all' 
+            ? 'Showing all categories' 
+            : `Showing only ${selected.label} items`
+        );
+      }
+    })
+  );
+
+  context.subscriptions.push(
     vscode.commands.registerCommand('ralph.addItem', async () => {
       logger.debug('Add item command invoked');
       const category = await vscode.window.showQuickPick(config.getCategories(), {

@@ -973,3 +973,43 @@
   - Extension compiles successfully (pnpm typecheck ✓)
   - Polish-001 now complete with passes: true
   - Next: Remaining items are ui-004 (drag-and-drop), polish-002 (filter by category), and polish-003 (keyboard shortcuts)
+
+- 2026-02-11: Completed polish-002: Filter items by category in sidebar
+  - Added category filter functionality to PrdTreeDataProvider:
+    * Private categoryFilter property to track current filter (defaults to 'all')
+    * setCategoryFilter() method to update filter and refresh tree view
+    * getCategoryFilter() method to retrieve current filter value
+    * Modified getChildren() to filter items by category after status filtering
+    * Both status and category filters can be applied simultaneously
+  - Added ralph.filterByCategory command to extension.ts:
+    * Shows quick pick menu with filter options (All Categories + configured categories)
+    * Displays current filter selection with "(current)" indicator
+    * Shows confirmation message when filter is applied
+    * Uses config.getCategories() for dynamic category list
+    * Integrates with logger for debugging
+  - Updated package.json:
+    * Added ralph.filterByCategory command with tag icon
+    * Added command to view/title menu (navigation@3)
+    * Renumbered navigation items (refresh: @4, addItem: @5)
+  - Implementation details:
+    * Filter button appears in tree view toolbar with tag icon
+    * Clicking shows dropdown with all category options
+    * Selecting a filter immediately updates the tree to show only matching items
+    * Categories with no matching items are hidden
+    * "All Categories" option clears the filter and shows everything
+    * Filter state persists until changed or extension reloads
+    * Works in combination with status filter for powerful filtering
+  - User experience:
+    * Quick access via toolbar button next to status filter
+    * Clear visual feedback of current filter
+    * Instant tree updates when filter changes
+    * Intuitive filter options with capitalized category labels
+  - All 5 acceptance criteria verified:
+    1. ✓ Sidebar displays items in multiple categories
+    2. ✓ Category filter dropdown accessible in view toolbar
+    3. ✓ Selecting 'ui' shows only UI category items
+    4. ✓ Other categories work similarly
+    5. ✓ Multiple filters work together (status + category)
+  - Extension compiles successfully (pnpm typecheck ✓)
+  - Polish-002 now complete with passes: true
+  - Next: Remaining items are ui-004 (drag-and-drop) and polish-003 (keyboard shortcuts)
