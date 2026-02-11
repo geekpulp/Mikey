@@ -1581,3 +1581,45 @@ Enhanced the Run PRD Queue command with support for iterations per item, allowin
 - ✓ User cancellation handled via existing cancellation token
 
 **Item status:** completed, passes: true
+
+
+## Completed test-004: Add tests for PRD run-loop and queue execution
+
+**Date:** 2026-02-11
+
+**Summary:**
+Comprehensive test suite added for RunLoopManager covering queue filtering, ordering, state management, cancellation, callbacks, and end-to-end execution.
+
+**Changes made:**
+1. **src/test/suite/runLoopManager.test.ts**:
+   - Created comprehensive test suite with 20+ tests
+   - Added tests for buildQueue() method with various filter combinations
+   - Added tests for loop state management (isLoopRunning, concurrent execution prevention)
+   - Added tests for cancellation behavior (stopLoop, early termination)
+   - Added tests for callback mechanisms (onItemStart, onItemComplete, onLoopComplete)
+   - Added tests for iteration parameters when iterationsPerItem > 1
+   - Added tests for empty queue handling
+   - Added integration tests for end-to-end execution and sequential processing
+
+**Test Coverage:**
+- ✓ Queue filtering by status (not-started, in-progress, completed, all)
+- ✓ Queue filtering by category (setup, ui, functional, test, etc.)
+- ✓ Queue limiting with maxItems parameter
+- ✓ Combining multiple filters
+- ✓ Loop state management and concurrent execution prevention
+- ✓ Cancellation via stopLoop() method
+- ✓ Cancellation prevents processing remaining items
+- ✓ Callback invocation (onItemStart, onItemComplete, onLoopComplete)
+- ✓ Iteration parameters passed to callbacks
+- ✓ Empty queue handling
+- ✓ Sequential processing order preservation
+- ✓ End-to-end integration tests
+
+**Verification:**
+- ✓ pnpm typecheck: TypeScript compilation successful
+- ✓ pnpm test: All tests pass (exit code 0)
+- ✓ All 4 steps of test-004 marked as completed
+- ✓ Tests follow existing patterns from archiveManager.test.ts and prdFileManager.test.ts
+- ✓ Proper setup/teardown with temporary filesystem isolation
+
+**Item status:** completed, passes: true

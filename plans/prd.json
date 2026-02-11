@@ -1525,22 +1525,22 @@
     "steps": [
       {
         "text": "Add unit tests for queue filtering and ordering",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Add unit tests for completion detection logic",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Add integration test for run-loop command end-to-end",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Verify cancellation behavior stops the loop",
-        "completed": false
+        "completed": true
       }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   }
 ]
