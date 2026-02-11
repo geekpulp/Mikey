@@ -877,16 +877,37 @@
     "category": "test",
     "description": "Add integration tests",
     "steps": [
-      "Write test for extension activation",
-      "Write test for command registration and execution",
-      "Write test for tree view rendering",
-      "Write test for detail panel interactions",
-      "Write test for file watcher behavior",
-      "Run integration tests in Extension Development Host",
-      "Verify all tests pass consistently"
+      {
+        "text": "Write test for extension activation",
+        "completed": true
+      },
+      {
+        "text": "Write test for command registration and execution",
+        "completed": true
+      },
+      {
+        "text": "Write test for tree view rendering",
+        "completed": true
+      },
+      {
+        "text": "Write test for detail panel interactions",
+        "completed": true
+      },
+      {
+        "text": "Write test for file watcher behavior",
+        "completed": true
+      },
+      {
+        "text": "Run integration tests in Extension Development Host",
+        "completed": true
+      },
+      {
+        "text": "Verify all tests pass consistently",
+        "completed": true
+      }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "quality-001",
