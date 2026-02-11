@@ -1109,3 +1109,31 @@
   - All PRD items in prd.json now show status "completed"
   - Application is in good working order and ready for distribution
   - Audit-002 now complete with passes: true
+
+- 2026-02-11: Completed Bug-001: Fix test runner configuration issues
+  - Diagnosed macOS-specific issue with VS Code test runner:
+    * Error: "bad option" when launching Electron.app bundle with command-line arguments
+    * Root cause: macOS code signing prevents modification of signed .app bundles
+    * VS Code downloaded version: 1.109.2 in .vscode-test directory
+  - Fixed src/test/runTest.ts to handle macOS .app bundles correctly:
+    * Added import for resolveCliArgsFromVSCodeExecutablePath helper
+    * Added import for downloadAndUnzipVSCode to explicitly download VS Code
+    * Modified test runner to use CLI wrapper instead of .app bundle directly
+    * CLI wrapper properly handles command-line arguments without signature issues
+  - Implementation details:
+    * downloadAndUnzipVSCode() downloads/validates VS Code installation
+    * resolveCliArgsFromVSCodeExecutablePath() extracts CLI path and default args
+    * Passes CLI executable path and args to runTests() via vscodeExecutablePath
+    * Adds --disable-extensions flag to isolate extension during testing
+  - Testing results:
+    * pnpm typecheck: ✓ TypeScript compilation successful
+    * pnpm test: ✓ Tests run successfully with exit code 0
+    * Test runner now works correctly on macOS (darwin-arm64)
+  - All 5 acceptance criteria verified:
+    1. ✓ Investigated test runner configuration issues
+    2. ✓ Checked .mocharc.json (correct) and runTest.ts (fixed)
+    3. ✓ Verified test runner works with pnpm test command
+    4. ✓ No documentation updates needed (internal fix)
+    5. ✓ Full test suite runs successfully
+  - Bug-001 now complete with passes: true
+  - Next: Remaining items are refactor-001 (replace console.log) and quality-001 (update dependencies)

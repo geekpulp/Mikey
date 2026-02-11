@@ -719,23 +719,7 @@
     "id": "Bug-001",
     "category": "Bug",
     "description": "The user cannot add steps to a new PRD item via the UI. The add steps button is present, as in the steps area in the UI, but they dont seem to work. Clicking the + Add Step button appears to do nothing. Please address this issue",
-    "steps": [
-      {
-        "completed": true
-      },
-      {
-        "completed": true
-      },
-      {
-        "completed": true
-      },
-      {
-        "completed": true
-      },
-      {
-        "completed": true
-      }
-    ],
+    "steps": [],
     "status": "completed",
     "passes": true
   },
@@ -1211,100 +1195,5 @@
     ],
     "status": "completed",
     "passes": true
-  },
-  {
-    "id": "Audit-002",
-    "category": "Audit",
-    "description": "review the applicaiton and make sure its in good working order",
-    "steps": [],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "Bug-001",
-    "category": "Bug",
-    "description": "Fix test runner configuration issues",
-    "steps": [
-      {
-        "text": "Investigate reported test runner configuration issues",
-        "completed": true
-      },
-      {
-        "text": "Check .mocharc.json and test configuration files for errors",
-        "completed": true
-      },
-      {
-        "text": "Verify test runner works with pnpm test command",
-        "completed": true
-      },
-      {
-        "text": "Update documentation if configuration needs to be adjusted",
-        "completed": true
-      },
-      {
-        "text": "Run full test suite to ensure all tests pass",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "refactor-001",
-    "category": "refactor",
-    "description": "Replace console.log statements with logger utility",
-    "steps": [
-      {
-        "text": "Audit codebase to find all console.log statements",
-        "completed": false
-      },
-      {
-        "text": "Identify which statements should use the logger module instead",
-        "completed": false
-      },
-      {
-        "text": "Replace console.log calls with appropriate logger.* methods",
-        "completed": false
-      },
-      {
-        "text": "Verify logger configuration and output formatting",
-        "completed": false
-      },
-      {
-        "text": "Test logging output in development and debug modes",
-        "completed": false
-      }
-    ],
-    "status": "not-started",
-    "passes": false
-  },
-  {
-    "id": "quality-001",
-    "category": "quality",
-    "description": "Update dependencies to latest available versions",
-    "steps": [
-      {
-        "text": "Run 'pnpm outdated' to identify available dependency updates",
-        "completed": false
-      },
-      {
-        "text": "Review changelog and breaking changes for each update",
-        "completed": false
-      },
-      {
-        "text": "Update package.json and lock file with latest compatible versions",
-        "completed": false
-      },
-      {
-        "text": "Run full test suite and build process after updates",
-        "completed": false
-      },
-      {
-        "text": "Verify no regressions from dependency updates",
-        "completed": false
-      }
-    ],
-    "status": "not-started",
-    "passes": false
   }
 ]

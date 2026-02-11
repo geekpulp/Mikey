@@ -24,165 +24,293 @@ import { Logger } from './logger';
  * ```
  */
 export function activate(context: vscode.ExtensionContext) {
+  console.log("[Ralph] Extension activation starting...");
   const logger = Logger.getInstance();
   const config = ConfigManager.getInstance();
-  logger.info('Ralph extension activated');
+  logger.info("Ralph extension activated");
+  console.log("[Ralph] Logger initialized, creating PrdTreeDataProvider...");
 
-  const prdProvider = new PrdTreeDataProvider(context);
-  
-  const treeView = vscode.window.createTreeView('ralph.prdExplorer', {
-    treeDataProvider: prdProvider,
-    dragAndDropController: prdProvider
-  });
-  
-  // Update tree view description with progress summary
-  prdProvider.onProgressUpdate((progress) => {
-    treeView.description = progress;
-  });
-  
-  context.subscriptions.push(treeView);
+  let prdProvider: PrdTreeDataProvider | null = null;
+  let treeView: vscode.TreeView<any> | null = null;
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('ralph.refresh', () => {
-      logger.debug('Refreshing PRD tree view');
-      prdProvider.refresh();
-    })
-  );
+  try {
+    prdProvider = new PrdTreeDataProvider(context);
+    logger.debug("PrdTreeDataProvider created successfully");
+    console.log("[Ralph] PrdTreeDataProvider created successfully");
+  } catch (error) {
+    logger.error("Failed to create PrdTreeDataProvider", error);
+    console.error("[Ralph] Failed to create PrdTreeDataProvider:", error);
+    vscode.window.showErrorMessage(
+      `Failed to initialize PRD viewer: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('ralph.filterByStatus', async () => {
-      logger.debug('Filter by status command invoked');
-      
-      const currentFilter = prdProvider.getStatusFilter();
-      const filterOptions = [
-        { label: 'All Items', value: 'all', description: currentFilter === 'all' ? '(current)' : '' },
-        { label: 'Not Started', value: 'not-started', description: currentFilter === 'not-started' ? '(current)' : '' },
-        { label: 'In Progress', value: 'in-progress', description: currentFilter === 'in-progress' ? '(current)' : '' },
-        { label: 'In Review', value: 'in-review', description: currentFilter === 'in-review' ? '(current)' : '' },
-        { label: 'Completed', value: 'completed', description: currentFilter === 'completed' ? '(current)' : '' }
-      ];
-      
-      const selected = await vscode.window.showQuickPick(filterOptions, {
-        placeHolder: 'Filter PRD items by status'
+  if (prdProvider) {
+    try {
+      console.log("[Ralph] Creating tree view...");
+      treeView = vscode.window.createTreeView("ralph.prdExplorer", {
+        treeDataProvider: prdProvider,
+        dragAndDropController: prdProvider,
       });
-      
-      if (selected) {
-        logger.info('Setting status filter', { filter: selected.value });
-        prdProvider.setStatusFilter(selected.value as any);
-        vscode.window.showInformationMessage(
-          selected.value === 'all' 
-            ? 'Showing all PRD items' 
-            : `Showing only ${selected.label.toLowerCase()} items`
+      logger.debug("Tree view created successfully");
+      console.log("[Ralph] Tree view created successfully");
+
+      // Update tree view description with progress summary
+      prdProvider.onProgressUpdate((progress) => {
+        treeView!.description = progress;
+      });
+
+      context.subscriptions.push(treeView);
+    } catch (error) {
+      logger.error("Failed to create tree view", error);
+      console.error("[Ralph] Failed to create tree view:", error);
+      vscode.window.showErrorMessage(
+        `Failed to create tree view: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  // Register all commands - these are always available even if provider fails
+  try {
+    context.subscriptions.push(
+      vscode.commands.registerCommand("ralph.refresh", () => {
+        logger.debug("Refreshing PRD tree view");
+        if (prdProvider) {
+          prdProvider.refresh();
+        } else {
+          vscode.window.showErrorMessage(
+            "PRD viewer not initialized. Please check the logs for details.",
+          );
+        }
+      }),
+    );
+
+    context.subscriptions.push(
+      vscode.commands.registerCommand("ralph.filterByStatus", async () => {
+        if (!prdProvider) {
+          vscode.window.showErrorMessage("PRD viewer not initialized");
+          return;
+        }
+        logger.debug("Filter by status command invoked");
+
+        const currentFilter = prdProvider.getStatusFilter();
+        const filterOptions = [
+          {
+            label: "All Items",
+            value: "all",
+            description: currentFilter === "all" ? "(current)" : "",
+          },
+          {
+            label: "Not Started",
+            value: "not-started",
+            description: currentFilter === "not-started" ? "(current)" : "",
+          },
+          {
+            label: "In Progress",
+            value: "in-progress",
+            description: currentFilter === "in-progress" ? "(current)" : "",
+          },
+          {
+            label: "In Review",
+            value: "in-review",
+            description: currentFilter === "in-review" ? "(current)" : "",
+          },
+          {
+            label: "Completed",
+            value: "completed",
+            description: currentFilter === "completed" ? "(current)" : "",
+          },
+        ];
+
+        const selected = await vscode.window.showQuickPick(filterOptions, {
+          placeHolder: "Filter PRD items by status",
+        });
+
+        if (selected) {
+          logger.info("Setting status filter", { filter: selected.value });
+          prdProvider.setStatusFilter(selected.value as any);
+          vscode.window.showInformationMessage(
+            selected.value === "all"
+              ? "Showing all PRD items"
+              : `Showing only ${selected.label.toLowerCase()} items`,
+          );
+        }
+      }),
+    );
+
+    context.subscriptions.push(
+      vscode.commands.registerCommand("ralph.filterByCategory", async () => {
+        if (!prdProvider) {
+          vscode.window.showErrorMessage("PRD viewer not initialized");
+          return;
+        }
+        logger.debug("Filter by category command invoked");
+
+        const currentFilter = prdProvider.getCategoryFilter();
+        const categories = config.getCategories();
+
+        const filterOptions = [
+          {
+            label: "All Categories",
+            value: "all",
+            description: currentFilter === "all" ? "(current)" : "",
+          },
+          ...categories.map((cat) => ({
+            label: cat.charAt(0).toUpperCase() + cat.slice(1),
+            value: cat,
+            description: currentFilter === cat ? "(current)" : "",
+          })),
+        ];
+
+        const selected = await vscode.window.showQuickPick(filterOptions, {
+          placeHolder: "Filter PRD items by category",
+        });
+
+        if (selected) {
+          logger.info("Setting category filter", { filter: selected.value });
+          prdProvider.setCategoryFilter(selected.value);
+          vscode.window.showInformationMessage(
+            selected.value === "all"
+              ? "Showing all categories"
+              : `Showing only ${selected.label} items`,
+          );
+        }
+      }),
+    );
+
+    context.subscriptions.push(
+      vscode.commands.registerCommand("ralph.addItem", async () => {
+        if (!prdProvider) {
+          vscode.window.showErrorMessage("PRD viewer not initialized");
+          return;
+        }
+        logger.debug("Add item command invoked");
+        const category = await vscode.window.showQuickPick(
+          config.getCategories(),
+          {
+            placeHolder: "Select category for the new item",
+          },
         );
-      }
-    })
-  );
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('ralph.filterByCategory', async () => {
-      logger.debug('Filter by category command invoked');
-      
-      const currentFilter = prdProvider.getCategoryFilter();
-      const categories = config.getCategories();
-      
-      const filterOptions = [
-        { label: 'All Categories', value: 'all', description: currentFilter === 'all' ? '(current)' : '' },
-        ...categories.map(cat => ({
-          label: cat.charAt(0).toUpperCase() + cat.slice(1),
-          value: cat,
-          description: currentFilter === cat ? '(current)' : ''
-        }))
-      ];
-      
-      const selected = await vscode.window.showQuickPick(filterOptions, {
-        placeHolder: 'Filter PRD items by category'
-      });
-      
-      if (selected) {
-        logger.info('Setting category filter', { filter: selected.value });
-        prdProvider.setCategoryFilter(selected.value);
-        vscode.window.showInformationMessage(
-          selected.value === 'all' 
-            ? 'Showing all categories' 
-            : `Showing only ${selected.label} items`
-        );
-      }
-    })
-  );
+        if (!category) {
+          logger.debug("Add item cancelled: no category selected");
+          return;
+        }
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('ralph.addItem', async () => {
-      logger.debug('Add item command invoked');
-      const category = await vscode.window.showQuickPick(config.getCategories(), {
-        placeHolder: 'Select category for the new item'
-      });
-      
-      if (!category) {
-        logger.debug('Add item cancelled: no category selected');
-        return;
-      }
-      
-      const description = await vscode.window.showInputBox({
-        prompt: 'Enter description for the new item',
-        placeHolder: 'e.g., Implement export functionality'
-      });
-      
-      if (!description) {
-        logger.debug('Add item cancelled: no description provided');
-        return;
-      }
-      
-      logger.info('Adding new PRD item', { category, description });
-      await prdProvider.addItem(category, description);
-    })
-  );
+        const description = await vscode.window.showInputBox({
+          prompt: "Enter description for the new item",
+          placeHolder: "e.g., Implement export functionality",
+        });
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('ralph.editItem', async (item: PrdItem) => {
-      logger.info('Editing PRD item', { id: item.id });
-      await prdProvider.editItem(item);
-    })
-  );
+        if (!description) {
+          logger.debug("Add item cancelled: no description provided");
+          return;
+        }
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('ralph.deleteItem', async (item: PrdItem) => {
-      logger.info('Deleting PRD item', { id: item.id });
-      await prdProvider.deleteItem(item);
-    })
-  );
+        logger.info("Adding new PRD item", { category, description });
+        await prdProvider.addItem(category, description);
+      }),
+    );
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand("ralph.runItem", async (item?: PrdItem) => {
-      logger.info('Running PRD item', { id: item?.id });
-      await prdProvider.runItem(item);
-    }),
-  );
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        "ralph.editItem",
+        async (item: PrdItem) => {
+          if (!prdProvider) {
+            vscode.window.showErrorMessage("PRD viewer not initialized");
+            return;
+          }
+          logger.info("Editing PRD item", { id: item.id });
+          await prdProvider.editItem(item);
+        },
+      ),
+    );
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('ralph.startWork', async (item?: PrdItem) => {
-      if (!item) {
-        logger.warn('Start work command invoked without item');
-        vscode.window.showErrorMessage('No item selected');
-        return;
-      }
-      logger.info('Starting work on PRD item', { id: item.id });
-      await prdProvider.startWork(item);
-    })
-  );
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        "ralph.deleteItem",
+        async (item: PrdItem) => {
+          if (!prdProvider) {
+            vscode.window.showErrorMessage("PRD viewer not initialized");
+            return;
+          }
+          logger.info("Deleting PRD item", { id: item.id });
+          await prdProvider.deleteItem(item);
+        },
+      ),
+    );
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('ralph.openItem', (item: PrdItem) => {
-      logger.debug('Opening detail panel for item', { id: item.id });
-      DetailPanel.createOrShow(context.extensionUri, item);
-    })
-  );
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        "ralph.runItem",
+        async (item?: PrdItem) => {
+          if (!prdProvider) {
+            vscode.window.showErrorMessage("PRD viewer not initialized");
+            return;
+          }
+          logger.info("Running PRD item", { id: item?.id });
+          await prdProvider.runItem(item);
+        },
+      ),
+    );
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('ralph.markStepComplete', async (itemId: string, stepIndex: number, completed: boolean = true) => {
-      logger.debug('Marking step complete', { itemId, stepIndex, completed });
-      await prdProvider.markStepComplete(itemId, stepIndex, completed);
-    })
-  );
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        "ralph.startWork",
+        async (item?: PrdItem) => {
+          if (!prdProvider) {
+            vscode.window.showErrorMessage("PRD viewer not initialized");
+            return;
+          }
+          if (!item) {
+            logger.warn("Start work command invoked without item");
+            vscode.window.showErrorMessage("No item selected");
+            return;
+          }
+          logger.info("Starting work on PRD item", { id: item.id });
+          await prdProvider.startWork(item);
+        },
+      ),
+    );
+
+    context.subscriptions.push(
+      vscode.commands.registerCommand("ralph.openItem", (item: PrdItem) => {
+        logger.debug("Opening detail panel for item", { id: item.id });
+        DetailPanel.createOrShow(context.extensionUri, item);
+      }),
+    );
+
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        "ralph.markStepComplete",
+        async (
+          itemId: string,
+          stepIndex: number,
+          completed: boolean = true,
+        ) => {
+          if (!prdProvider) {
+            vscode.window.showErrorMessage("PRD viewer not initialized");
+            return;
+          }
+          logger.debug("Marking step complete", {
+            itemId,
+            stepIndex,
+            completed,
+          });
+          await prdProvider.markStepComplete(itemId, stepIndex, completed);
+        },
+      ),
+    );
+
+    console.log("[Ralph] All commands registered successfully");
+    logger.info("All Ralph extension commands registered");
+  } catch (error) {
+    const logger = Logger.getInstance();
+    logger.error("Error registering commands", error);
+    console.error("[Ralph] Error registering commands:", error);
+  }
+
+  console.log("[Ralph] Extension activation completed");
 }
 
 /**

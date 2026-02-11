@@ -95,9 +95,20 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
    * @param context - The extension context for managing subscriptions and state
    */
   constructor(private context: vscode.ExtensionContext) {
-    this.logger.debug('Initializing PrdTreeDataProvider');
-    this.loadPrdFile();
-    this.watchPrdFile();
+    try {
+      this.logger.debug("Initializing PrdTreeDataProvider");
+      this.loadPrdFile();
+      this.watchPrdFile();
+      this.logger.debug("PrdTreeDataProvider initialized successfully");
+    } catch (error) {
+      this.logger.error(
+        "Error during PrdTreeDataProvider initialization",
+        error,
+      );
+      // Ensure onDidChangeTreeData event is properly initialized even on error
+      this.prdItems = [];
+      this._onDidChangeTreeData.fire();
+    }
   }
 
   private loadPrdFile(): void {
@@ -919,38 +930,45 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
    * - Clicking a PRD item opens the detail panel
    */
   getTreeItem(element: TreeNode): vscode.TreeItem {
-    if (element instanceof CategoryNode) {
+    try {
+      if (element instanceof CategoryNode) {
+        const treeItem = new vscode.TreeItem(
+          element.category.toUpperCase(),
+          vscode.TreeItemCollapsibleState.Expanded,
+        );
+        treeItem.iconPath = new vscode.ThemeIcon("folder");
+        treeItem.contextValue = "category";
+        return treeItem;
+      }
+
+      const item = element as PrdItem;
       const treeItem = new vscode.TreeItem(
-        element.category.toUpperCase(),
-        vscode.TreeItemCollapsibleState.Expanded,
+        `[${item.id}] ${item.description}`,
+        vscode.TreeItemCollapsibleState.None,
       );
-      treeItem.iconPath = new vscode.ThemeIcon("folder");
-      treeItem.contextValue = "category";
+
+      treeItem.tooltip = `Category: ${item.category}\nStatus: ${item.status}\nPasses: ${item.passes}`;
+      treeItem.description = item.status;
+
+      // Set icon based on status with color
+      const { icon, color } = this.getStatusIcon(item.status);
+      treeItem.iconPath = new vscode.ThemeIcon(icon, color);
+      treeItem.contextValue = "prdItem";
+
+      // Make item clickable - opens detail panel
+      treeItem.command = {
+        command: "ralph.openItem",
+        title: "Open Item Details",
+        arguments: [item],
+      };
+
       return treeItem;
+    } catch (error) {
+      this.logger.error("Error in getTreeItem", error);
+      const errorItem = new vscode.TreeItem("Error loading item");
+      errorItem.iconPath = new vscode.ThemeIcon("error");
+      return errorItem;
     }
-
-    const item = element as PrdItem;
-    const treeItem = new vscode.TreeItem(
-      `[${item.id}] ${item.description}`,
-      vscode.TreeItemCollapsibleState.None,
-    );
-
-    treeItem.tooltip = `Category: ${item.category}\nStatus: ${item.status}\nPasses: ${item.passes}`;
-    treeItem.description = item.status;
-
-    // Set icon based on status with color
-    const { icon, color } = this.getStatusIcon(item.status);
-    treeItem.iconPath = new vscode.ThemeIcon(icon, color);
-    treeItem.contextValue = "prdItem";
-
-    // Make item clickable - opens detail panel
-    treeItem.command = {
-      command: "ralph.openItem",
-      title: "Open Item Details",
-      arguments: [item],
-    };
-
-    return treeItem;
   }
 
   /**
@@ -968,43 +986,51 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
    * - Items are grouped by category and categories are sorted alphabetically
    */
   getChildren(element?: TreeNode): Thenable<TreeNode[]> {
-    if (!element) {
-      // Root level: return category nodes
-      const categories = new Map<string, PrdItem[]>();
-      
-      // Filter items by status if filter is active
-      let filteredItems = this.statusFilter === 'all' 
-        ? this.prdItems 
-        : this.prdItems.filter(item => item.status === this.statusFilter);
-      
-      // Also filter by category if filter is active
-      if (this.categoryFilter !== 'all') {
-        filteredItems = filteredItems.filter(item => item.category === this.categoryFilter);
-      }
-      
-      filteredItems.forEach((item) => {
-        if (!categories.has(item.category)) {
-          categories.set(item.category, []);
+    try {
+      if (!element) {
+        // Root level: return category nodes
+        const categories = new Map<string, PrdItem[]>();
+
+        // Filter items by status if filter is active
+        let filteredItems =
+          this.statusFilter === "all"
+            ? this.prdItems
+            : this.prdItems.filter((item) => item.status === this.statusFilter);
+
+        // Also filter by category if filter is active
+        if (this.categoryFilter !== "all") {
+          filteredItems = filteredItems.filter(
+            (item) => item.category === this.categoryFilter,
+          );
         }
-        categories.get(item.category)!.push(item);
-      });
 
-      const categoryNodes: CategoryNode[] = [];
-      categories.forEach((items, category) => {
-        categoryNodes.push(new CategoryNode(category, items));
-      });
+        filteredItems.forEach((item) => {
+          if (!categories.has(item.category)) {
+            categories.set(item.category, []);
+          }
+          categories.get(item.category)!.push(item);
+        });
 
-      // Sort categories by name
-      categoryNodes.sort((a, b) => a.category.localeCompare(b.category));
-      return Promise.resolve(categoryNodes);
+        const categoryNodes: CategoryNode[] = [];
+        categories.forEach((items, category) => {
+          categoryNodes.push(new CategoryNode(category, items));
+        });
+
+        // Sort categories by name
+        categoryNodes.sort((a, b) => a.category.localeCompare(b.category));
+        return Promise.resolve(categoryNodes);
+      }
+
+      if (element instanceof CategoryNode) {
+        // Return items in this category (already filtered at root level)
+        return Promise.resolve(element.items);
+      }
+
+      return Promise.resolve([]);
+    } catch (error) {
+      this.logger.error("Error in getChildren", error);
+      return Promise.resolve([]);
     }
-
-    if (element instanceof CategoryNode) {
-      // Return items in this category (already filtered at root level)
-      return Promise.resolve(element.items);
-    }
-
-    return Promise.resolve([]);
   }
 
   private getStatusIcon(status: string): {

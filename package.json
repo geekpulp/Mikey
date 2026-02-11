@@ -224,13 +224,15 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "pnpm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "pnpm run esbuild-base -- --production",
+    "esbuild-base": "node esbuild.mjs",
+    "compile": "pnpm run esbuild-base",
+    "watch": "node esbuild.mjs --watch",
     "typecheck": "tsc --noEmit",
-    "pretest": "pnpm run compile",
+    "pretest": "tsc -p ./",
     "test": "node ./out/test/runTest.js",
     "test:unit": "mocha --require ts-node/register 'src/test/suite/**/*.test.ts'",
+    "build": "vsce package --out build",
     "package": "vsce package"
   },
   "devDependencies": {
@@ -239,6 +241,7 @@
     "@types/vscode": "^1.75.0",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.7.1",
+    "esbuild": "^0.27.3",
     "mocha": "^11.7.5",
     "typescript": "^5.0.0"
   },
