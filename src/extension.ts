@@ -4,6 +4,25 @@ import { DetailPanel } from './detailPanel';
 import { CATEGORIES } from './constants';
 import { Logger } from './logger';
 
+/**
+ * Activates the Ralph extension
+ * 
+ * This is the main entry point for the extension. It:
+ * - Initializes the logger
+ * - Creates and registers the PRD tree data provider
+ * - Registers all extension commands
+ * - Sets up file watchers and event handlers
+ * 
+ * @param context - The extension context provided by VS Code, used for managing subscriptions and extension state
+ * 
+ * @example
+ * ```typescript
+ * // Called automatically by VS Code when extension activates
+ * // Activation events defined in package.json:
+ * // - onView:ralph.prdExplorer
+ * // - workspaceContains:plans/prd.json
+ * ```
+ */
 export function activate(context: vscode.ExtensionContext) {
   const logger = Logger.getInstance();
   logger.info('Ralph extension activated');
@@ -96,6 +115,17 @@ export function activate(context: vscode.ExtensionContext) {
   );
 }
 
+/**
+ * Deactivates the Ralph extension
+ * 
+ * This function is called when the extension is deactivated. It:
+ * - Logs the deactivation event
+ * - Disposes of the logger and its resources
+ * 
+ * @remarks
+ * VS Code automatically disposes of all subscriptions registered via context.subscriptions,
+ * so we only need to handle custom cleanup here.
+ */
 export function deactivate() {
   const logger = Logger.getInstance();
   logger.info('Ralph extension deactivated');

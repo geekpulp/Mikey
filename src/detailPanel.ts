@@ -7,13 +7,38 @@ import { Logger } from './logger';
 import { validateStep, sanitizeInput } from './validation';
 import { PrdFileError, GitOperationError, EnvironmentError, getUserFriendlyMessage, isRalphError } from './errors';
 
+/**
+ * Manages the webview panel for displaying PRD item details
+ * 
+ * This class provides a detailed view of a single PRD item in a VS Code webview panel.
+ * It handles:
+ * - Rendering item details (description, status, steps, changed files)
+ * - Step completion toggling via checkboxes
+ * - Status changes via dropdown
+ * - Step CRUD operations (add, edit, delete)
+ * - Git workflow integration (start work on steps, view diffs, submit for review)
+ * - Real-time updates when the PRD file changes
+ * - Security through CSP, input validation, and message sanitization
+ * 
+ * @remarks
+ * This is a singleton - only one detail panel can be open at a time.
+ * When opening a new item, the existing panel is reused and updated.
+ * The panel persists across tab changes but is disposed when explicitly closed.
+ */
 export class DetailPanel {
+	/** Singleton instance of the current detail panel */
 	public static currentPanel: DetailPanel | undefined;
 	private readonly _panel: vscode.WebviewPanel;
 	private _disposables: vscode.Disposable[] = [];
 	private _currentItem: PrdItem | undefined;
 	private logger = Logger.getInstance();
 
+	/**
+	 * Private constructor - use createOrShow() to instantiate
+	 * 
+	 * @param panel - The VS Code webview panel to manage
+	 * @param extensionUri - The extension's URI for loading resources
+	 */
 	private constructor(panel: vscode.WebviewPanel, private extensionUri: vscode.Uri) {
 		this._panel = panel;
 		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
@@ -81,6 +106,26 @@ export class DetailPanel {
 		);
 	}
 
+	/**
+	 * Creates a new detail panel or reveals the existing one
+	 * 
+	 * This is the main entry point for displaying PRD item details.
+	 * Implements the singleton pattern - only one panel exists at a time.
+	 * 
+	 * @param extensionUri - The extension's URI for loading resources
+	 * @param item - The PRD item to display
+	 * 
+	 * @remarks
+	 * - If a panel already exists, it will be revealed and updated with the new item
+	 * - If no panel exists, a new one is created
+	 * - The panel opens in the active editor column or Column One by default
+	 * - Content is retained when panel is hidden (retainContextWhenHidden)
+	 * 
+	 * @example
+	 * ```typescript
+	 * DetailPanel.createOrShow(context.extensionUri, prdItem);
+	 * ```
+	 */
 	public static createOrShow(extensionUri: vscode.Uri, item: PrdItem) {
 		const logger = Logger.getInstance();
 		logger.debug('Creating or showing detail panel', { id: item.id });

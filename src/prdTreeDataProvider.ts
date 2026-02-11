@@ -6,11 +6,27 @@ import { Logger } from './logger';
 import { validatePrdFile, validateUserInput } from './validation';
 import { PrdFileError, GitOperationError, EnvironmentError, getUserFriendlyMessage, isRalphError } from './errors';
 
+/**
+ * Represents a step within a PRD item
+ * 
+ * @property text - The description of the step
+ * @property completed - Optional flag indicating whether the step is complete
+ */
 export interface PrdStep {
 	text: string;
 	completed?: boolean;
 }
 
+/**
+ * Represents a Product Requirements Document (PRD) item
+ * 
+ * @property id - Unique identifier in format 'category-XXX' (e.g., 'ui-001')
+ * @property category - The category this item belongs to (setup, ui, functional, git, agent, etc.)
+ * @property description - Human-readable description of the requirement
+ * @property steps - Array of steps (can be strings or PrdStep objects with completion status)
+ * @property status - Current status of the item (not-started, in-progress, in-review, completed)
+ * @property passes - Boolean flag indicating if acceptance criteria pass
+ */
 export interface PrdItem {
 	id: string;
 	category: string;
@@ -20,6 +36,10 @@ export interface PrdItem {
 	passes: boolean;
 }
 
+/**
+ * Represents a category grouping node in the tree view
+ * Contains a category name and all PRD items belonging to that category
+ */
 export class CategoryNode {
 	constructor(
 		public readonly category: string,
@@ -27,8 +47,24 @@ export class CategoryNode {
 	) {}
 }
 
+/**
+ * Union type representing either a category node or a PRD item node in the tree
+ */
 export type TreeNode = CategoryNode | PrdItem;
 
+/**
+ * Tree data provider for displaying PRD items in VS Code sidebar
+ * 
+ * This class manages the hierarchical tree view of PRD items, grouped by category.
+ * It handles:
+ * - Loading and watching the prd.json file
+ * - CRUD operations on PRD items
+ * - Git workflow integration (branches, commits, merges)
+ * - GitHub Copilot Chat integration for AI-assisted development
+ * - File change tracking for in-progress items
+ * 
+ * @implements vscode.TreeDataProvider<TreeNode>
+ */
 export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
   private _onDidChangeTreeData: vscode.EventEmitter<
     TreeNode | undefined | null | void
@@ -41,6 +77,11 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
   private prdFilePath: string | undefined;
   private logger = Logger.getInstance();
 
+  /**
+   * Creates a new PRD tree data provider
+   * 
+   * @param context - The extension context for managing subscriptions and state
+   */
   constructor(private context: vscode.ExtensionContext) {
     this.logger.debug('Initializing PrdTreeDataProvider');
     this.loadPrdFile();
@@ -145,10 +186,39 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     this.context.subscriptions.push(watcher);
   }
 
+  /**
+   * Refreshes the tree view by reloading the PRD file
+   * 
+   * This method is typically called when:
+   * - User triggers manual refresh via command
+   * - External changes to prd.json are detected
+   * - After CRUD operations to ensure UI is in sync
+   */
   refresh(): void {
     this.loadPrdFile();
   }
 
+  /**
+   * Adds a new PRD item to the prd.json file
+   * 
+   * This method:
+   * - Validates the user input (category and description)
+   * - Generates a unique ID in format 'category-XXX'
+   * - Creates a new PRD item with default values (not-started status, no steps)
+   * - Saves to prd.json file
+   * - Refreshes the tree view
+   * 
+   * @param category - The category for the new item (must be from CATEGORIES constant)
+   * @param description - Human-readable description of the requirement (min 10 chars)
+   * @throws {PrdFileError} If prd.json file not found or cannot be written
+   * @throws {Error} If validation fails or JSON serialization fails
+   * 
+   * @example
+   * ```typescript
+   * await prdProvider.addItem('ui', 'Add dark mode theme selector');
+   * // Creates item with ID 'ui-005' and status 'not-started'
+   * ```
+   */
   async addItem(category: string, description: string): Promise<void> {
     try {
       if (!this.prdFilePath) {
@@ -200,6 +270,31 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     }
   }
 
+  /**
+   * Edits an existing PRD item
+   * 
+   * This method:
+   * - Prompts user to edit category and description
+   * - Validates the new input
+   * - Updates the item in memory
+   * - Saves changes to prd.json file
+   * - Refreshes the tree view
+   * 
+   * @param item - The PRD item to edit
+   * @throws {PrdFileError} If prd.json file not found or cannot be written
+   * @throws {Error} If validation fails or item not found
+   * 
+   * @remarks
+   * The item ID is NOT changed during edit - only category and description can be modified.
+   * If the user cancels any input dialog, no changes are made.
+   * Changes are rolled back if file write fails.
+   * 
+   * @example
+   * ```typescript
+   * const item = prdItems.find(i => i.id === 'ui-003');
+   * await prdProvider.editItem(item);
+   * ```
+   */
   async editItem(item: PrdItem): Promise<void> {
     try {
       if (!this.prdFilePath) {
@@ -276,6 +371,29 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     }
   }
 
+  /**
+   * Deletes a PRD item from the prd.json file
+   * 
+   * This method:
+   * - Shows a confirmation dialog to prevent accidental deletion
+   * - Removes the item from the in-memory array
+   * - Saves changes to prd.json file
+   * - Refreshes the tree view
+   * 
+   * @param item - The PRD item to delete
+   * @throws {PrdFileError} If prd.json file not found or cannot be written
+   * 
+   * @remarks
+   * If the user cancels the confirmation dialog, no changes are made.
+   * Changes are rolled back if file write fails.
+   * This operation cannot be undone (except via git if committed).
+   * 
+   * @example
+   * ```typescript
+   * const item = prdItems.find(i => i.id === 'ui-003');
+   * await prdProvider.deleteItem(item); // Shows confirmation dialog
+   * ```
+   */
   async deleteItem(item: PrdItem): Promise<void> {
     try {
       if (!this.prdFilePath) {
@@ -331,6 +449,33 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     }
   }
 
+  /**
+   * Starts work on a PRD item
+   * 
+   * This method orchestrates the workflow for beginning work on a PRD item:
+   * 1. Creates a new git feature branch (format: feature/item-id)
+   * 2. Updates item status to 'in-progress'
+   * 3. Opens GitHub Copilot Chat with contextual information
+   * 4. Provides the AI with item details, steps, and skill references
+   * 
+   * @param item - The PRD item to start working on
+   * @throws {EnvironmentError} If no workspace folder is open
+   * @throws {GitOperationError} If git operations fail (branch creation, status update)
+   * @throws {PrdFileError} If prd.json cannot be updated
+   * 
+   * @remarks
+   * - If the feature branch already exists, it will switch to it instead of creating
+   * - The status update is saved to prd.json before opening Copilot Chat
+   * - Copilot Chat receives full context including steps, skill references, and prompts
+   * - A fresh chat session is created for each item to avoid context pollution
+   * 
+   * @example
+   * ```typescript
+   * const item = prdItems.find(i => i.id === 'ui-003');
+   * await prdProvider.startWork(item);
+   * // Creates branch 'feature/ui-003', updates status, opens Copilot Chat
+   * ```
+   */
   async startWork(item: PrdItem): Promise<void> {
     try {
       const workspaceFolders = vscode.workspace.workspaceFolders;
@@ -712,6 +857,20 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
     return `${category}-${String(nextNumber).padStart(3, "0")}`;
   }
 
+  /**
+   * Gets the tree item representation for a node
+   * 
+   * Required by VS Code TreeDataProvider interface. Converts either a CategoryNode
+   * or PrdItem into a TreeItem for display in the sidebar.
+   * 
+   * @param element - The node to convert (CategoryNode or PrdItem)
+   * @returns A VS Code TreeItem configured with icon, label, tooltip, and command
+   * 
+   * @remarks
+   * - Category nodes are collapsible folders shown in uppercase
+   * - PRD items show status icon with color (green=completed, blue=in-progress, etc.)
+   * - Clicking a PRD item opens the detail panel
+   */
   getTreeItem(element: TreeNode): vscode.TreeItem {
     if (element instanceof CategoryNode) {
       const treeItem = new vscode.TreeItem(
@@ -747,6 +906,20 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
     return treeItem;
   }
 
+  /**
+   * Gets the children of a tree node
+   * 
+   * Required by VS Code TreeDataProvider interface. Returns the hierarchical structure
+   * of the tree view.
+   * 
+   * @param element - The parent node (undefined for root, CategoryNode for category items)
+   * @returns Promise resolving to array of child nodes
+   * 
+   * @remarks
+   * - Root level returns CategoryNode objects (one per category)
+   * - Category level returns PrdItem objects in that category
+   * - Items are grouped by category and categories are sorted alphabetically
+   */
   getChildren(element?: TreeNode): Thenable<TreeNode[]> {
     if (!element) {
       // Root level: return category nodes
@@ -816,6 +989,34 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
     return stdout;
   }
 
+  /**
+   * Marks a step as complete or incomplete
+   * 
+   * This method:
+   * - Finds the item and step by index
+   * - Converts string steps to object format if needed
+   * - Updates the completion status
+   * - Saves changes to prd.json
+   * - Refreshes the tree view
+   * 
+   * @param itemId - The ID of the PRD item containing the step
+   * @param stepIndex - The zero-based index of the step to update
+   * @param completed - Whether the step should be marked as complete (default: true)
+   * @throws {Error} If item not found or step index out of range
+   * 
+   * @remarks
+   * Steps can be either strings or objects with {text, completed} format.
+   * This method automatically converts string steps to object format.
+   * 
+   * @example
+   * ```typescript
+   * // Mark the first step of ui-003 as complete
+   * await prdProvider.markStepComplete('ui-003', 0, true);
+   * 
+   * // Unmark the second step
+   * await prdProvider.markStepComplete('ui-003', 1, false);
+   * ```
+   */
   async markStepComplete(itemId: string, stepIndex: number, completed: boolean = true): Promise<void> {
     if (!this.prdFilePath) {
       vscode.window.showErrorMessage('No PRD file found');

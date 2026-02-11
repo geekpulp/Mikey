@@ -988,16 +988,37 @@
     "category": "quality",
     "description": "Add JSDoc documentation",
     "steps": [
-      "Document all public APIs in extension.ts",
-      "Document all public methods in prdTreeDataProvider.ts",
-      "Document all public methods in detailPanel.ts",
-      "Add parameter descriptions and return types",
-      "Add examples for complex functions",
-      "Document expected behavior and edge cases",
-      "Generate documentation with TypeDoc (optional)"
+      {
+        "text": "Document all public APIs in extension.ts",
+        "completed": true
+      },
+      {
+        "text": "Document all public methods in prdTreeDataProvider.ts",
+        "completed": true
+      },
+      {
+        "text": "Document all public methods in detailPanel.ts",
+        "completed": true
+      },
+      {
+        "text": "Add parameter descriptions and return types",
+        "completed": true
+      },
+      {
+        "text": "Add examples for complex functions",
+        "completed": true
+      },
+      {
+        "text": "Document expected behavior and edge cases",
+        "completed": true
+      },
+      {
+        "text": "Generate documentation with TypeDoc (optional)",
+        "completed": true
+      }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "security-001",
