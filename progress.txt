@@ -216,3 +216,15 @@
   - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm test ✓)
   - Note: Both terminal-based automation (ralph.runItem) and chat-based workflow (ralph.startWork) are now available
   - Next: Continue with remaining PRD items (Audit-001, Docs-001, or git-001 would be good next steps)
+- 2026-02-11: Completed Bug-003: Fixed chat session handling to create fresh sessions
+  - Issue: When starting work on PRD items or individual steps, the extension was appending to the current Copilot chat session instead of creating a new one
+  - This could cause context window bloat and confusion between different work items
+  - Solution: Added `workbench.action.chat.clear` command before opening chat
+  - Now both `startWork` (for full PRD items) and `startWorkOnStep` (for individual steps) clear the existing chat session first
+  - This ensures each work item and each step gets a fresh chat session with its own isolated context
+  - Updated both prdTreeDataProvider.ts and detailPanel.ts to use the new workflow:
+    1. Clear existing chat session
+    2. Focus on Copilot Chat panel  
+    3. Open chat with fresh context
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm test ✓)
+  - Each session now starts with proper context including: item details, steps, progress history, and specific task
