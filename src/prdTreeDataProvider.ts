@@ -67,7 +67,7 @@ export type TreeNode = CategoryNode | PrdItem;
  * 
  * @implements vscode.TreeDataProvider<TreeNode>
  */
-export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
+export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, vscode.TreeDragAndDropController<TreeNode> {
   private _onDidChangeTreeData: vscode.EventEmitter<
     TreeNode | undefined | null | void
   > = new vscode.EventEmitter<TreeNode | undefined | null | void>();
@@ -84,6 +84,10 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
   private fileManager = PrdFileManager.getInstance();
   private statusFilter: Status | 'all' = 'all';
   private categoryFilter: string | 'all' = 'all';
+
+  // Drag and drop support
+  readonly dropMimeTypes = ['application/vnd.code.tree.ralph.prdExplorer'];
+  readonly dragMimeTypes = ['application/vnd.code.tree.ralph.prdExplorer'];
 
   /**
    * Creates a new PRD tree data provider
@@ -1114,6 +1118,133 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
       vscode.window.showInformationMessage(`✓ Marked step ${stepIndex + 1} of ${itemId} as ${status}`);
     } catch (error) {
       vscode.window.showErrorMessage(`Failed to mark step complete: ${error}`);
+    }
+  }
+
+  /**
+   * Handles drag operation - puts dragged items into data transfer
+   * 
+   * This method is called when user starts dragging an item.
+   * Only PrdItem nodes can be dragged (not category nodes).
+   * 
+   * @param source - Array of tree nodes being dragged
+   * @param dataTransfer - Data transfer object to populate with drag data
+   */
+  async handleDrag(source: TreeNode[], dataTransfer: vscode.DataTransfer): Promise<void> {
+    // Only allow dragging PrdItem nodes (not categories)
+    const prdItems = source.filter((item): item is PrdItem => !(item instanceof CategoryNode));
+    
+    if (prdItems.length === 0) {
+      this.logger.debug('Drag started but no valid items to drag');
+      return;
+    }
+
+    this.logger.debug('Drag started', { itemIds: prdItems.map(i => i.id) });
+    
+    // Store the dragged items in the data transfer
+    dataTransfer.set(
+      'application/vnd.code.tree.ralph.prdExplorer',
+      new vscode.DataTransferItem(prdItems)
+    );
+  }
+
+  /**
+   * Handles drop operation - reorders items in the tree
+   * 
+   * This method is called when user drops an item.
+   * It reorders the items in prdItems array and saves to file.
+   * 
+   * @param target - The tree node where items are being dropped (can be undefined for root)
+   * @param dataTransfer - Data transfer object containing the dragged items
+   */
+  async handleDrop(target: TreeNode | undefined, dataTransfer: vscode.DataTransfer): Promise<void> {
+    try {
+      const transferItem = dataTransfer.get('application/vnd.code.tree.ralph.prdExplorer');
+      if (!transferItem) {
+        this.logger.debug('Drop failed: no transfer data');
+        return;
+      }
+
+      const draggedItems = transferItem.value as PrdItem[];
+      if (!draggedItems || draggedItems.length === 0) {
+        this.logger.debug('Drop failed: no dragged items');
+        return;
+      }
+
+      // We only support dropping a single item
+      const draggedItem = draggedItems[0];
+      this.logger.debug('Drop operation', { 
+        draggedItemId: draggedItem.id,
+        targetId: target instanceof CategoryNode ? `category:${target.category}` : (target as PrdItem)?.id 
+      });
+
+      // Find the index of the dragged item
+      const draggedIndex = this.prdItems.findIndex(item => item.id === draggedItem.id);
+      if (draggedIndex === -1) {
+        this.logger.warn('Dragged item not found in items array', { itemId: draggedItem.id });
+        return;
+      }
+
+      let targetIndex: number;
+
+      if (!target) {
+        // Dropped at root - move to end
+        targetIndex = this.prdItems.length - 1;
+      } else if (target instanceof CategoryNode) {
+        // Dropped on a category - move to end of that category
+        const categoryItems = this.prdItems.filter(item => item.category === target.category);
+        if (categoryItems.length === 0) {
+          targetIndex = this.prdItems.length - 1;
+        } else {
+          const lastItemInCategory = categoryItems[categoryItems.length - 1];
+          targetIndex = this.prdItems.findIndex(item => item.id === lastItemInCategory.id);
+        }
+      } else {
+        // Dropped on another item - insert after that item
+        targetIndex = this.prdItems.findIndex(item => item.id === (target as PrdItem).id);
+      }
+
+      if (targetIndex === -1) {
+        this.logger.warn('Target position not found');
+        return;
+      }
+
+      // Don't reorder if dropped on itself
+      if (draggedIndex === targetIndex) {
+        this.logger.debug('Item dropped on itself, no reordering needed');
+        return;
+      }
+
+      // Perform the reordering
+      const reorderedItems = [...this.prdItems];
+      const [movedItem] = reorderedItems.splice(draggedIndex, 1);
+      
+      // Adjust target index if we removed an item before it
+      const adjustedTargetIndex = draggedIndex < targetIndex ? targetIndex : targetIndex + 1;
+      reorderedItems.splice(adjustedTargetIndex, 0, movedItem);
+
+      this.logger.info('Reordering items', {
+        itemId: draggedItem.id,
+        from: draggedIndex,
+        to: adjustedTargetIndex
+      });
+
+      // Update in-memory array
+      this.prdItems = reorderedItems;
+
+      // Save to file
+      if (this.prdFilePath) {
+        this.fileManager.write(this.prdItems);
+        this.logger.info('PRD file updated with new order');
+      }
+
+      // Refresh the tree view
+      this._onDidChangeTreeData.fire();
+      
+      vscode.window.showInformationMessage(`Moved ${draggedItem.id} to new position`);
+    } catch (error) {
+      this.logger.error('Failed to handle drop', error);
+      vscode.window.showErrorMessage(`Failed to reorder items: ${getUserFriendlyMessage(error)}`);
     }
   }
 }

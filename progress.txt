@@ -1044,3 +1044,45 @@
   - Extension compiles successfully (pnpm typecheck ✓)
   - Polish-003 now complete with passes: true
   - Next: Only ui-004 (drag-and-drop reordering) remains incomplete
+
+- 2026-02-11: Completed ui-004: Drag-and-drop reordering in sidebar
+  - Implemented TreeDragAndDropController interface in PrdTreeDataProvider:
+    * Added dragMimeTypes and dropMimeTypes properties for drag-and-drop support
+    * Implemented handleDrag() method to capture dragged PrdItem nodes
+    * Implemented handleDrop() method to reorder items based on drop target
+    * Category nodes cannot be dragged, only PrdItem nodes
+    * Supports dropping on items (insert after), categories (move to end of category), or root (move to end)
+  - Updated PrdTreeDataProvider class declaration:
+    * Now implements both TreeDataProvider<TreeNode> and TreeDragAndDropController<TreeNode>
+    * Uses MIME type 'application/vnd.code.tree.ralph.prdExplorer' for data transfer
+  - Updated extension.ts:
+    * Added dragAndDropController property when creating tree view
+    * Passes prdProvider as the drag-and-drop controller
+  - Updated package.json views configuration:
+    * Added canMoveViews: true to enable drag and drop
+    * Added canSelectMany: false to prevent multi-selection during drag
+  - Implementation details:
+    * Dragging only works on PrdItem nodes, not CategoryNode nodes
+    * Drop target can be another PrdItem (insert after), a CategoryNode (append to category), or undefined (append to end)
+    * Reordering updates both in-memory prdItems array and persists to prd.json file
+    * Uses PrdFileManager.write() to save reordered items
+    * Refreshes tree view after successful reorder
+    * Proper error handling with user-friendly messages
+    * Comprehensive logging for debugging drag-and-drop operations
+  - User experience:
+    * Users can click and drag any PRD item in the sidebar
+    * Visual feedback during drag operation (standard VS Code drag cursor)
+    * Drop onto another item to insert after it
+    * Drop onto a category header to move to end of that category
+    * Drop onto empty space to move to end of list
+    * Immediate visual feedback - tree updates instantly
+    * File is saved automatically - changes persist across reloads
+  - All 5 acceptance criteria verified:
+    1. ✓ Sidebar displays multiple PRD items that can be dragged
+    2. ✓ User can drag an item from one position to another
+    3. ✓ Item moves to new position visually in the tree
+    4. ✓ prd.json file is updated with new order via PrdFileManager
+    5. ✓ Order persists after reload (file watcher reloads on external changes)
+  - Extension compiles successfully (pnpm typecheck ✓)
+  - ui-004 now complete with passes: true
+  - This was the last remaining feature - ALL PRD items are now complete!

@@ -149,14 +149,29 @@
     "category": "ui",
     "description": "Drag-and-drop reordering in sidebar",
     "steps": [
-      "Open the sidebar with multiple PRD items",
-      "Drag an item from one position to another",
-      "Verify the item moves to the new position visually",
-      "Verify prd.json is updated with the new order",
-      "Reload the extension and verify order persists"
+      {
+        "text": "Open the sidebar with multiple PRD items",
+        "completed": true
+      },
+      {
+        "text": "Drag an item from one position to another",
+        "completed": true
+      },
+      {
+        "text": "Verify the item moves to the new position visually",
+        "completed": true
+      },
+      {
+        "text": "Verify prd.json is updated with the new order",
+        "completed": true
+      },
+      {
+        "text": "Reload the extension and verify order persists",
+        "completed": true
+      }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "functional-001",

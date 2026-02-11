@@ -33,7 +33,9 @@
       "ralph": [
         {
           "id": "ralph.prdExplorer",
-          "name": "PRD Items"
+          "name": "PRD Items",
+          "canMoveViews": true,
+          "canSelectMany": false
         }
       ]
     },

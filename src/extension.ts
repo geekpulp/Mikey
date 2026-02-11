@@ -31,7 +31,8 @@ export function activate(context: vscode.ExtensionContext) {
   const prdProvider = new PrdTreeDataProvider(context);
   
   const treeView = vscode.window.createTreeView('ralph.prdExplorer', {
-    treeDataProvider: prdProvider
+    treeDataProvider: prdProvider,
+    dragAndDropController: prdProvider
   });
   
   // Update tree view description with progress summary
