@@ -228,3 +228,22 @@
     3. Open chat with fresh context
   - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm test ✓)
   - Each session now starts with proper context including: item details, steps, progress history, and specific task
+- 2026-02-11: Completed Docs-001: Updated documentation for extension users
+  - Completely rewrote README.md with comprehensive user documentation
+  - Added clear "What Does Mikey Do?" section explaining core features
+  - Documented all requirements: VS Code 1.75+, GitHub Copilot, Git, prd.json file
+  - Provided detailed installation instructions for both VSIX package and source installation
+  - Added step-by-step setup guide including PRD file structure and field descriptions
+  - Documented complete user workflows for:
+    * Managing PRD items (add, edit, delete)
+    * Working with steps (add, edit, delete, mark complete)
+    * Tracking progress (status changes, passes toggle)
+    * AI-powered development with Copilot Chat integration
+    * Git integration for auto-merge on completion
+  - Added troubleshooting section covering common issues
+  - Documented all available commands accessible via Command Palette
+  - Added development section for contributors with build instructions
+  - Included project structure overview for developers
+  - README is now production-ready for users installing and using the extension
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm test ✓)
+  - Next: Audit-001 (code audit) or implementing remaining git/agent/polish features would be good next steps
