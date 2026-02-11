@@ -445,6 +445,16 @@ export function activate(context: vscode.ExtensionContext) {
           // Save remaining items back to PRD file
           fileManager.write(result.remainingItems);
 
+          // Cleanup old archives based on retention policy
+          const config = vscode.workspace.getConfiguration('ralph');
+          const retentionDays = config.get<number>('archiving.retentionDays', 90);
+          if (retentionDays > 0) {
+            const deletedCount = archiveManager.cleanupOldArchives(retentionDays);
+            if (deletedCount > 0) {
+              logger.info('Cleaned up old archives', { deletedCount });
+            }
+          }
+
           // Show success message
           const archiveFileName = result.archiveFile.split('/').pop() || result.archiveFile;
           vscode.window.showInformationMessage(
@@ -483,6 +493,8 @@ export function activate(context: vscode.ExtensionContext) {
  * 
  * This function is called when the extension is deactivated. It:
  * - Logs the deactivation event
+ * - Auto-archives completed items if enabled in configuration
+ * - Cleans up old archive files based on retention policy
  * - Disposes of the logger and its resources
  * 
  * @remarks
@@ -492,6 +504,47 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
   const logger = Logger.getInstance();
   logger.info('Ralph extension deactivated');
+
+  try {
+    const config = vscode.workspace.getConfiguration('ralph');
+    const autoArchiveOnExit = config.get<boolean>('archiving.autoArchiveOnExit', false);
+    const retentionDays = config.get<number>('archiving.retentionDays', 90);
+
+    if (autoArchiveOnExit) {
+      logger.info('Auto-archiving on exit enabled');
+
+      const workspaceFolders = vscode.workspace.workspaceFolders;
+      if (workspaceFolders) {
+        const workspacePath = workspaceFolders[0].uri.fsPath;
+        const archiveManager = ArchiveManager.getInstance();
+        archiveManager.initialize(workspacePath);
+
+        // Archive completed items
+        const fileManager = PrdFileManager.getInstance();
+        const currentItems = fileManager.read();
+        const result = archiveManager.archiveCompleted(currentItems);
+
+        if (result.archivedCount > 0) {
+          fileManager.write(result.remainingItems);
+          logger.info('Auto-archived on exit', {
+            archivedCount: result.archivedCount,
+            archiveFile: result.archiveFile
+          });
+        }
+
+        // Cleanup old archives
+        if (retentionDays > 0) {
+          const deletedCount = archiveManager.cleanupOldArchives(retentionDays);
+          if (deletedCount > 0) {
+            logger.info('Cleaned up old archives on exit', { deletedCount });
+          }
+        }
+      }
+    }
+  } catch (error) {
+    logger.error('Error during auto-archive on exit', error);
+  }
+
   logger.dispose();
   ConfigManager.resetInstance();
 }

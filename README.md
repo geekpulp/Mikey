@@ -271,6 +271,31 @@ Mikey can be customized through VS Code settings. Access settings via:
   ]
   ```
 
+#### Archiving
+
+- **`ralph.archiving.autoArchiveOnExit`** (default: `false`)  
+  Automatically archive completed items when the extension is deactivated or VS Code exits. When enabled, items with status "completed" and passes set to true are moved to dated archive files in the `plans/` directory.
+  
+  Example: `true`
+
+- **`ralph.archiving.retentionDays`** (default: `90`)  
+  Number of days to retain archive files before automatic cleanup. Set to 0 to keep archives forever. When archiving occurs (manually or on exit), archive files older than this many days are automatically deleted.
+  
+  Example: `30` (delete archives older than 30 days)
+
+**Archiving Workflow:**
+1. Completed items (status: "completed" AND passes: true) can be archived using the **Archive Completed Items** command from the sidebar toolbar
+2. Archives are saved as `prd-archive-YYYY-MM-DD.json` in the `plans/` directory
+3. If auto-archive is enabled, archiving happens automatically when you close VS Code
+4. Old archive files are cleaned up based on the retention policy
+5. Multiple items archived on the same day are merged into a single archive file
+
+**Manual Archiving:**
+- Click the Archive icon (📦) in the sidebar toolbar
+- Or use Command Palette: **Mikey: Archive Completed Items**
+- Completed items are removed from `prd.json` and moved to today's archive file
+- The sidebar refreshes to show only remaining items
+
 #### Debug Settings
 
 - **`ralph.debugMode`** (default: `false`)  

@@ -239,6 +239,17 @@
             "Audit"
           ],
           "description": "Available categories for PRD items. Customize this list to match your project's needs."
+        },
+        "ralph.archiving.autoArchiveOnExit": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically archive completed items when the extension is deactivated or VS Code exits"
+        },
+        "ralph.archiving.retentionDays": {
+          "type": "number",
+          "default": 90,
+          "minimum": 1,
+          "description": "Number of days to retain archive files before automatic cleanup (0 means keep forever)"
         }
       }
     }

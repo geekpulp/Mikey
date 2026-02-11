@@ -249,4 +249,55 @@ export class ArchiveManager {
 			throw new Error(`Failed to load archive: ${error}`);
 		}
 	}
+
+	/**
+	 * Cleans up archive files older than the specified retention period
+	 * 
+	 * @param retentionDays - Number of days to retain archive files (0 = keep forever)
+	 * @returns Number of files deleted
+	 */
+	public cleanupOldArchives(retentionDays: number): number {
+		if (retentionDays <= 0) {
+			this.logger.debug('Archive cleanup skipped (retention disabled)');
+			return 0;
+		}
+
+		const archiveFiles = this.listArchiveFiles();
+		if (archiveFiles.length === 0) {
+			return 0;
+		}
+
+		const cutoffDate = new Date();
+		cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+		const cutoffTime = cutoffDate.getTime();
+
+		let deletedCount = 0;
+
+		for (const archiveFile of archiveFiles) {
+			try {
+				const stats = fs.statSync(archiveFile);
+				const fileDate = stats.mtime.getTime();
+
+				if (fileDate < cutoffTime) {
+					fs.unlinkSync(archiveFile);
+					deletedCount++;
+					this.logger.info('Deleted old archive file', {
+						path: archiveFile,
+						age: Math.floor((Date.now() - fileDate) / (1000 * 60 * 60 * 24)) + ' days'
+					});
+				}
+			} catch (error) {
+				this.logger.error('Failed to delete archive file', { path: archiveFile, error });
+			}
+		}
+
+		if (deletedCount > 0) {
+			this.logger.info('Archive cleanup completed', {
+				deletedCount,
+				retentionDays
+			});
+		}
+
+		return deletedCount;
+	}
 }

@@ -1445,3 +1445,45 @@ Implemented a comprehensive completion detection system that enables automatic d
 - test-002: Add tests for PRD item archiving functionality
 - feature-011: Add Run PRD Queue command with loop options (mostly done via feature-010)
 - test-004: Add tests for PRD run-loop and queue execution
+
+## Completed feature-009: Add archiving options and configuration settings
+
+Implemented comprehensive archiving configuration and automation:
+
+1. **Configuration Settings Added**:
+   - `ralph.archiving.autoArchiveOnExit` (default: false) - Enables automatic archiving when VS Code exits
+   - `ralph.archiving.retentionDays` (default: 90) - Controls how long to keep archive files
+
+2. **Archive Cleanup Functionality**:
+   - Added `cleanupOldArchives()` method to ArchiveManager
+   - Automatically deletes archive files older than the retention period
+   - Cleanup runs during manual archiving and auto-archive on exit
+   - Logs all cleanup operations for visibility
+
+3. **Auto-Archive on Exit**:
+   - Extended `deactivate()` function in extension.ts
+   - When enabled, automatically archives completed items on extension shutdown
+   - Respects retention policy and cleans up old archives
+   - All operations are logged for debugging
+
+4. **Manual Archive Enhancement**:
+   - Updated `ralph.archiveCompleted` command to trigger cleanup
+   - Ensures retention policy is enforced on every archive operation
+
+5. **Documentation**:
+   - Added comprehensive archiving section to README
+   - Documented configuration settings with examples
+   - Explained archiving workflow and file format
+   - Included manual archiving instructions
+
+**Implementation Notes**:
+- The manual archive command already existed (feature-008)
+- Archive file format: `prd-archive-YYYY-MM-DD.json` in plans/ directory
+- Items are archived when status="completed" AND passes=true
+- Multiple items archived on same day are merged into single file
+- Cleanup uses file modification time to determine age
+
+**Testing**:
+- All type checks pass (pnpm typecheck)
+- All existing tests pass (pnpm test)
+- No breaking changes to existing functionality

@@ -1380,27 +1380,27 @@
     "steps": [
       {
         "text": "Add configuration setting for auto-archive on extension exit",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Add configuration setting for archive retention policy (days to keep)",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Implement auto-cleanup of old archive files based on retention setting",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Add option to archive items manually via command palette",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Document archiving feature in README with examples",
-        "completed": false
+        "completed": true
       }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "test-002",
