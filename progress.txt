@@ -345,3 +345,23 @@
   - All 5 acceptance criteria verified: item in-progress, click file, diff opens, shows main vs branch, scrollable
   - Git-003 now complete with passes: true
   - Next: agent-002 (Agent receives project prompt template) or ui-004 (Drag-and-drop reordering) would be good next features
+
+- 2026-02-11: Completed agent-002: Agent receives project prompt template
+  - Added configuration setting "mikey.promptTemplate" in package.json to allow users to specify which prompt template to use
+  - Default value is "prompts/default.txt" relative to workspace root
+  - Modified buildChatContext() in both prdTreeDataProvider.ts and detailPanel.ts to:
+    * Read the configured prompt template path from VS Code configuration
+    * Load the prompt template file from the workspace
+    * Append the prompt template content under "# Agent Instructions" section in chat context
+  - Template is only added if the file exists, gracefully handles missing files
+  - This enables agents to receive consistent, project-specific instructions when starting work
+  - Agent context now includes: PRD item details, progress history, task description, and agent instructions from template
+  - Users can customize agent behavior by changing mikey.promptTemplate setting to point to different templates:
+    * prompts/default.txt - standard workflow
+    * prompts/safe-write-only.txt - write-only mode
+    * prompts/wordpress-plugin-agent.txt - WordPress-specific
+    * prompts/pest-coverage.txt - test coverage focused
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm test ✓)
+  - All acceptance criteria verified: agent context includes prompt, prompt selected via config, works with different templates
+  - Agent-002 now complete with passes: true
+  - Next: agent-003 (Agent can update step completion status) would extend agent capabilities

@@ -553,8 +553,8 @@
       "Verify agent responses align with the prompt's instructions",
       "Test with different prompt templates (default.txt, safe-write-only.txt)"
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "agent-003",

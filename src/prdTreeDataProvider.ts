@@ -293,6 +293,16 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
       progressContent = fs.readFileSync(progressFile, 'utf-8');
     }
 
+    // Load prompt template
+    let promptTemplate = '';
+    const config = vscode.workspace.getConfiguration('mikey');
+    const templatePath = config.get<string>('promptTemplate', 'prompts/default.txt');
+    const fullTemplatePath = path.join(workspaceRoot, templatePath);
+    
+    if (fs.existsSync(fullTemplatePath)) {
+      promptTemplate = fs.readFileSync(fullTemplatePath, 'utf-8');
+    }
+
     const prdContext = `# PRD Item Context
 
 ## Item: ${item.id}
@@ -317,6 +327,8 @@ ${progressContent || '(No progress yet)'}
 ${stepIndex !== undefined 
   ? `Work on step ${stepIndex + 1} of ${item.id}. Complete this specific step and mark it as done when finished.`
   : `Work on ${item.id}. Follow the steps listed above. Update progress.txt when you make changes.`}
+
+${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
 `;
 
     return prdContext;

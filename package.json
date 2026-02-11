@@ -109,6 +109,16 @@
           "group": "inline@4"
         }
       ]
+    },
+    "configuration": {
+      "title": "Mikey",
+      "properties": {
+        "mikey.promptTemplate": {
+          "type": "string",
+          "default": "prompts/default.txt",
+          "description": "Path to the prompt template file to use when starting work on items (relative to workspace root)"
+        }
+      }
     }
   },
   "scripts": {
