@@ -719,7 +719,28 @@
     "id": "Bug-001",
     "category": "Bug",
     "description": "The user cannot add steps to a new PRD item via the UI. The add steps button is present, as in the steps area in the UI, but they dont seem to work. Clicking the + Add Step button appears to do nothing. Please address this issue",
-    "steps": [],
+    "steps": [
+      {
+        "text": "Identify the issue in the add step button handler",
+        "completed": true
+      },
+      {
+        "text": "Check event listeners and DOM manipulation code",
+        "completed": true
+      },
+      {
+        "text": "Fix the step addition logic in the UI component",
+        "completed": true
+      },
+      {
+        "text": "Test the add step functionality in the detail panel",
+        "completed": true
+      },
+      {
+        "text": "Verify no regressions introduced by the fix",
+        "completed": true
+      }
+    ],
     "status": "completed",
     "passes": true
   },
@@ -788,7 +809,10 @@
         "text": "Update detailPanel.ts to import and use new modules",
         "completed": true
       },
-      "Test all functionality to ensure refactoring didn't break anything"
+      {
+        "text": "Test all functionality to ensure refactoring didn't break anything",
+        "completed": true
+      }
     ],
     "status": "completed",
     "passes": true
@@ -1190,6 +1214,329 @@
       },
       {
         "text": "Document security measures in code comments",
+        "completed": true
+      }
+    ],
+    "status": "completed",
+    "passes": true
+  },
+  {
+    "id": "Audit-002",
+    "category": "Audit",
+    "description": "review the applicaiton and make sure its in good working order",
+    "steps": [],
+    "status": "completed",
+    "passes": true
+  },
+  {
+    "id": "Bug-001",
+    "category": "Bug",
+    "description": "Fix test runner configuration issues",
+    "steps": [
+      {
+        "text": "Investigate reported test runner configuration issues",
+        "completed": true
+      },
+      {
+        "text": "Check .mocharc.json and test configuration files for errors",
+        "completed": true
+      },
+      {
+        "text": "Verify test runner works with pnpm test command",
+        "completed": true
+      },
+      {
+        "text": "Update documentation if configuration needs to be adjusted",
+        "completed": true
+      },
+      {
+        "text": "Run full test suite to ensure all tests pass",
+        "completed": true
+      }
+    ],
+    "status": "completed",
+    "passes": true
+  },
+  {
+    "id": "refactor-001",
+    "category": "refactor",
+    "description": "Replace console.log statements with logger utility",
+    "steps": [
+      {
+        "text": "Audit codebase to find all console.log statements",
+        "completed": true
+      },
+      {
+        "text": "Identify which statements should use the logger module instead",
+        "completed": true
+      },
+      {
+        "text": "Replace console.log calls with appropriate logger.* methods",
+        "completed": true
+      },
+      {
+        "text": "Verify logger configuration and output formatting",
+        "completed": true
+      },
+      {
+        "text": "Test logging output in development and debug modes",
+        "completed": true
+      }
+    ],
+    "status": "completed",
+    "passes": true
+  },
+  {
+    "id": "quality-001",
+    "category": "quality",
+    "description": "Update dependencies to latest available versions",
+    "steps": [
+      {
+        "text": "Run 'pnpm outdated' to identify available dependency updates",
+        "completed": true
+      },
+      {
+        "text": "Review changelog and breaking changes for each update",
+        "completed": true
+      },
+      {
+        "text": "Update package.json and lock file with latest compatible versions",
+        "completed": true
+      },
+      {
+        "text": "Run full test suite and build process after updates",
+        "completed": true
+      },
+      {
+        "text": "Verify no regressions from dependency updates",
+        "completed": true
+      }
+    ],
+    "status": "completed",
+    "passes": true
+  },
+  {
+    "id": "feature-007",
+    "category": "functional",
+    "description": "Implement PRD item archiving system to keep prd.json lean by moving completed items to dated archive files",
+    "steps": [
+      {
+        "text": "Design archiving system: completed items → prd-archive-<YYYY-MM-DD>.json files",
+        "completed": true
+      },
+      {
+        "text": "Create archiveManager module to handle archive file operations",
+        "completed": true
+      },
+      {
+        "text": "Implement function to identify completable items (status: completed AND passes: true)",
+        "completed": true
+      },
+      {
+        "text": "Implement function to extract completable items from prd.json",
+        "completed": true
+      },
+      {
+        "text": "Implement function to save extracted items to prd-archive-<date>.json",
+        "completed": true
+      }
+    ],
+    "status": "completed",
+    "passes": true
+  },
+  {
+    "id": "feature-008",
+    "category": "functional",
+    "description": "Add UI command to archive completed PRD items",
+    "steps": [
+      {
+        "text": "Add 'Archive Completed Items' command to package.json contributions",
+        "completed": true
+      },
+      {
+        "text": "Implement command handler that calls archiveManager.archiveCompleted()",
+        "completed": true
+      },
+      {
+        "text": "Show success message with count of archived items and archive file name",
+        "completed": true
+      },
+      {
+        "text": "Reload PRD tree to reflect removed archived items",
+        "completed": true
+      },
+      {
+        "text": "Add command shortcut or menu option in PRD tree context menu",
+        "completed": true
+      }
+    ],
+    "status": "completed",
+    "passes": true
+  },
+  {
+    "id": "feature-009",
+    "category": "functional",
+    "description": "Add archiving options and configuration settings",
+    "steps": [
+      {
+        "text": "Add configuration setting for auto-archive on extension exit",
+        "completed": true
+      },
+      {
+        "text": "Add configuration setting for archive retention policy (days to keep)",
+        "completed": true
+      },
+      {
+        "text": "Implement auto-cleanup of old archive files based on retention setting",
+        "completed": true
+      },
+      {
+        "text": "Add option to archive items manually via command palette",
+        "completed": true
+      },
+      {
+        "text": "Document archiving feature in README with examples",
+        "completed": true
+      }
+    ],
+    "status": "completed",
+    "passes": true
+  },
+  {
+    "id": "test-002",
+    "category": "test",
+    "description": "Add tests for PRD item archiving functionality",
+    "steps": [
+      {
+        "text": "Create test file for archiveManager module",
+        "completed": true
+      },
+      {
+        "text": "Write tests for identifying completed items",
+        "completed": true
+      },
+      {
+        "text": "Write tests for archive file creation and naming",
+        "completed": true
+      },
+      {
+        "text": "Write tests for archive file content validation",
+        "completed": true
+      },
+      {
+        "text": "Add integration tests for archiving workflow end-to-end",
+        "completed": true
+      }
+    ],
+    "status": "completed",
+    "passes": true
+  },
+  {
+    "id": "feature-010",
+    "category": "functional",
+    "description": "Add PRD run-loop manager to iterate across items",
+    "steps": [
+      {
+        "text": "Design a queue builder that filters items by status/category",
+        "completed": true
+      },
+      {
+        "text": "Implement run-loop manager that processes items sequentially",
+        "completed": true
+      },
+      {
+        "text": "Update PRD item status to in-progress when processing starts",
+        "completed": true
+      },
+      {
+        "text": "Advance to next item on completion or failure with logging",
+        "completed": true
+      },
+      {
+        "text": "Persist any status/step updates back to prd.json",
+        "completed": true
+      }
+    ],
+    "status": "completed",
+    "passes": true
+  },
+  {
+    "id": "feature-011",
+    "category": "functional",
+    "description": "Add Run PRD Queue command with loop options",
+    "steps": [
+      {
+        "text": "Add command contribution and command registration",
+        "completed": true
+      },
+      {
+        "text": "Prompt for iterations per item, status filter, and category filter",
+        "completed": true
+      },
+      {
+        "text": "Wire command to run-loop manager",
+        "completed": true
+      },
+      {
+        "text": "Show progress UI with current item and iteration count",
+        "completed": true
+      },
+      {
+        "text": "Handle user cancelation gracefully",
+        "completed": true
+      }
+    ],
+    "status": "completed",
+    "passes": true
+  },
+  {
+    "id": "feature-012",
+    "category": "functional",
+    "description": "Detect completion per item and auto-advance",
+    "steps": [
+      {
+        "text": "Implement completion detection (token, status, or steps complete)",
+        "completed": true
+      },
+      {
+        "text": "Mark item passes=true when completion is detected",
+        "completed": true
+      },
+      {
+        "text": "Mark item status=completed and refresh the tree",
+        "completed": true
+      },
+      {
+        "text": "Record completion in progress.txt",
+        "completed": true
+      },
+      {
+        "text": "Advance to next item automatically",
+        "completed": true
+      }
+    ],
+    "status": "completed",
+    "passes": true
+  },
+  {
+    "id": "test-004",
+    "category": "test",
+    "description": "Add tests for PRD run-loop and queue execution",
+    "steps": [
+      {
+        "text": "Add unit tests for queue filtering and ordering",
+        "completed": true
+      },
+      {
+        "text": "Add unit tests for completion detection logic",
+        "completed": true
+      },
+      {
+        "text": "Add integration test for run-loop command end-to-end",
+        "completed": true
+      },
+      {
+        "text": "Verify cancellation behavior stops the loop",
         "completed": true
       }
     ],

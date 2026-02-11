@@ -9,7 +9,7 @@
     "url": "https://github.com/geekpulp/Mikey"
   },
   "engines": {
-    "vscode": "^1.75.0"
+    "vscode": "^1.109.0"
   },
   "categories": [
     "Other"
