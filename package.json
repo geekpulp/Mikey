@@ -148,5 +148,8 @@
     "@vscode/vsce": "^3.7.1",
     "mocha": "^11.7.5",
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
   }
 }

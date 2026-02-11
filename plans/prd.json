@@ -983,16 +983,37 @@
 		"category": "security",
 		"description": "Add input validation",
 		"steps": [
-			"Install Zod or similar validation library",
-			"Define schema for PRD item structure",
-			"Define schema for step structure",
-			"Validate PRD file content on load",
-			"Validate user inputs for ID, description, category",
-			"Add validation error messages for users",
-			"Test with malformed PRD files and invalid inputs"
+			{
+				"text": "Install Zod or similar validation library",
+				"completed": true
+			},
+			{
+				"text": "Define schema for PRD item structure",
+				"completed": true
+			},
+			{
+				"text": "Define schema for step structure",
+				"completed": true
+			},
+			{
+				"text": "Validate PRD file content on load",
+				"completed": true
+			},
+			{
+				"text": "Validate user inputs for ID, description, category",
+				"completed": true
+			},
+			{
+				"text": "Add validation error messages for users",
+				"completed": true
+			},
+			{
+				"text": "Test with malformed PRD files and invalid inputs",
+				"completed": true
+			}
 		],
-		"status": "not-started",
-		"passes": false
+		"status": "completed",
+		"passes": true
 	},
 	{
 		"id": "security-002",

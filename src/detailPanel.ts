@@ -4,6 +4,7 @@ import * as path from 'path';
 import { PrdItem, PrdStep } from './prdTreeDataProvider';
 import { Status, MessageCommand, STATUS_MARKERS, THEME_COLORS, GIT, FILE_PATHS } from './constants';
 import { Logger } from './logger';
+import { validateStep, sanitizeInput } from './validation';
 
 export class DetailPanel {
 	public static currentPanel: DetailPanel | undefined;
@@ -715,7 +716,15 @@ export class DetailPanel {
 			prompt: 'Enter the step description',
 			placeHolder: 'e.g., Implement user authentication',
 			validateInput: (value) => {
-				return value.trim() ? null : 'Step text cannot be empty';
+				if (!value || value.trim().length === 0) {
+					return 'Step text cannot be empty';
+				}
+				// Validate using Zod schema
+				const validation = validateStep(value.trim());
+				if (!validation.success) {
+					return validation.error;
+				}
+				return null;
 			}
 		});
 
@@ -743,8 +752,16 @@ export class DetailPanel {
 				return;
 			}
 
+			// Validate and sanitize step text
+			const sanitized = stepText.trim();
+			const validation = validateStep(sanitized);
+			if (!validation.success) {
+				vscode.window.showErrorMessage(`Invalid step: ${validation.error}`);
+				return;
+			}
+
 			// Add new step (as string initially)
-			prdItems[itemIndex].steps.push(stepText.trim());
+			prdItems[itemIndex].steps.push(sanitized);
 
 			// Write updated PRD file
 			fs.writeFileSync(prdPath, JSON.stringify(prdItems, null, '\t'), 'utf-8');
@@ -779,7 +796,15 @@ export class DetailPanel {
 			prompt: 'Edit the step description',
 			value: currentText,
 			validateInput: (value) => {
-				return value.trim() ? null : 'Step text cannot be empty';
+				if (!value || value.trim().length === 0) {
+					return 'Step text cannot be empty';
+				}
+				// Validate using Zod schema
+				const validation = validateStep(value.trim());
+				if (!validation.success) {
+					return validation.error;
+				}
+				return null;
 			}
 		});
 
@@ -807,12 +832,20 @@ export class DetailPanel {
 				return;
 			}
 
+			// Validate and sanitize step text
+			const sanitized = stepText.trim();
+			const validation = validateStep(sanitized);
+			if (!validation.success) {
+				vscode.window.showErrorMessage(`Invalid step: ${validation.error}`);
+				return;
+			}
+
 			// Update step text, preserving completed status if it's an object
 			const existingStep = prdItems[itemIndex].steps[stepIndex];
 			if (typeof existingStep === 'string') {
-				prdItems[itemIndex].steps[stepIndex] = stepText.trim();
+				prdItems[itemIndex].steps[stepIndex] = sanitized;
 			} else {
-				existingStep.text = stepText.trim();
+				existingStep.text = sanitized;
 			}
 
 			// Write updated PRD file

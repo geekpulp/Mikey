@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Status, CATEGORIES, STATUS_MARKERS, THEME_COLORS } from './constants';
 import { Logger } from './logger';
+import { validatePrdFile, validateUserInput } from './validation';
 
 export interface PrdStep {
 	text: string;
@@ -63,8 +64,33 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
       try {
         this.logger.debug('Loading PRD file', { path: prdPath });
         const content = fs.readFileSync(prdPath, "utf-8");
-        this.prdItems = JSON.parse(content);
-        this.logger.info('PRD file loaded successfully', { itemCount: this.prdItems.length });
+        const parsedData = JSON.parse(content);
+        
+        // Validate PRD file content
+        const validationResult = validatePrdFile(parsedData);
+        if (!validationResult.success) {
+          this.logger.error('PRD file validation failed', { error: validationResult.error, errors: validationResult.errors });
+          vscode.window.showErrorMessage(
+            `PRD file validation failed: ${validationResult.error}`,
+            'View Details'
+          ).then(selection => {
+            if (selection === 'View Details' && validationResult.errors) {
+              const details = validationResult.errors
+                .map(e => `• ${e.path}: ${e.message}`)
+                .join('\n');
+              vscode.window.showErrorMessage(
+                `Validation errors:\n${details}`,
+                { modal: true }
+              );
+            }
+          });
+          // Still load the data but log the issues
+          this.prdItems = parsedData;
+        } else {
+          this.prdItems = validationResult.data!;
+          this.logger.info('PRD file loaded and validated successfully', { itemCount: this.prdItems.length });
+        }
+        
         this._onDidChangeTreeData.fire();
       } catch (error) {
         this.logger.error('Failed to load PRD file', error);
@@ -103,11 +129,19 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
       return;
     }
 
+    // Validate user input
+    const validation = validateUserInput({ category, description });
+    if (!validation.success) {
+      this.logger.warn('Invalid input for new PRD item', { error: validation.error });
+      vscode.window.showErrorMessage(`Invalid input: ${validation.error}`);
+      return;
+    }
+
     const newId = this.generateUniqueId(category);
     const newItem: PrdItem = {
       id: newId,
-      category,
-      description,
+      category: validation.data!.category,
+      description: validation.data!.description,
       steps: [],
       status: Status.NotStarted,
       passes: false,
@@ -157,6 +191,14 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
       return; // User cancelled
     }
 
+    // Validate user input
+    const validation = validateUserInput({ category, description });
+    if (!validation.success) {
+      this.logger.warn('Invalid input for editing PRD item', { error: validation.error });
+      vscode.window.showErrorMessage(`Invalid input: ${validation.error}`);
+      return;
+    }
+
     // Find and update the item
     const itemIndex = this.prdItems.findIndex((i) => i.id === item.id);
     if (itemIndex === -1) {
@@ -165,8 +207,8 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
       return;
     }
 
-    this.prdItems[itemIndex].category = category;
-    this.prdItems[itemIndex].description = description;
+    this.prdItems[itemIndex].category = validation.data!.category;
+    this.prdItems[itemIndex].description = validation.data!.description;
 
     try {
       this.logger.info('Updating PRD item', { id: item.id, category, description });
