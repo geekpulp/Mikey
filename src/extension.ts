@@ -75,6 +75,12 @@ export function activate(context: vscode.ExtensionContext) {
       DetailPanel.createOrShow(context.extensionUri, item);
     })
   );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('ralph.markStepComplete', async (itemId: string, stepIndex: number, completed: boolean = true) => {
+      await prdProvider.markStepComplete(itemId, stepIndex, completed);
+    })
+  );
 }
 
 export function deactivate() {}

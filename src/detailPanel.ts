@@ -968,6 +968,13 @@ ${item.steps.map((step, idx) => {
 ## Progress History
 ${progressContent || '(No progress yet)'}
 
+## Available Commands
+You can mark steps as complete by using the VS Code command:
+\`\`\`
+await vscode.commands.executeCommand('ralph.markStepComplete', '${item.id}', stepIndex, true);
+\`\`\`
+Where stepIndex is 0-based (0 for first step, 1 for second, etc.)
+
 ## Task
 ${stepIndex !== undefined 
 	? `Work on step ${stepIndex + 1} of ${item.id}. Complete this specific step and mark it as done when finished.`

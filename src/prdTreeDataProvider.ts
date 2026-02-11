@@ -323,6 +323,13 @@ ${item.steps.map((step, idx) => {
 ## Progress History
 ${progressContent || '(No progress yet)'}
 
+## Available Commands
+You can mark steps as complete by using the VS Code command:
+\`\`\`
+await vscode.commands.executeCommand('ralph.markStepComplete', '${item.id}', stepIndex, true);
+\`\`\`
+Where stepIndex is 0-based (0 for first step, 1 for second, etc.)
+
 ## Task
 ${stepIndex !== undefined 
   ? `Work on step ${stepIndex + 1} of ${item.id}. Complete this specific step and mark it as done when finished.`
@@ -580,5 +587,48 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
     }
     
     return stdout;
+  }
+
+  async markStepComplete(itemId: string, stepIndex: number, completed: boolean = true): Promise<void> {
+    if (!this.prdFilePath) {
+      vscode.window.showErrorMessage('No PRD file found');
+      return;
+    }
+
+    try {
+      const itemIndex = this.prdItems.findIndex(i => i.id === itemId);
+      if (itemIndex === -1) {
+        vscode.window.showErrorMessage(`Item ${itemId} not found`);
+        return;
+      }
+
+      const item = this.prdItems[itemIndex];
+      if (stepIndex < 0 || stepIndex >= item.steps.length) {
+        vscode.window.showErrorMessage(`Step index ${stepIndex} is out of range for item ${itemId}`);
+        return;
+      }
+
+      // Convert step to object format if it's a string
+      const currentStep = item.steps[stepIndex];
+      if (typeof currentStep === 'string') {
+        item.steps[stepIndex] = { text: currentStep, completed };
+      } else {
+        item.steps[stepIndex] = { ...currentStep, completed };
+      }
+
+      // Save to file
+      fs.writeFileSync(
+        this.prdFilePath,
+        JSON.stringify(this.prdItems, null, '\t'),
+        'utf-8'
+      );
+
+      this._onDidChangeTreeData.fire();
+      
+      const status = completed ? 'completed' : 'incomplete';
+      vscode.window.showInformationMessage(`✓ Marked step ${stepIndex + 1} of ${itemId} as ${status}`);
+    } catch (error) {
+      vscode.window.showErrorMessage(`Failed to mark step complete: ${error}`);
+    }
   }
 }

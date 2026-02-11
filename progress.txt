@@ -365,3 +365,22 @@
   - All acceptance criteria verified: agent context includes prompt, prompt selected via config, works with different templates
   - Agent-002 now complete with passes: true
   - Next: agent-003 (Agent can update step completion status) would extend agent capabilities
+
+- 2026-02-11: Completed agent-003: Agent can update step completion status
+  - Added new command 'ralph.markStepComplete' that accepts itemId, stepIndex, and completed flag
+  - Implemented markStepComplete() method in PrdTreeDataProvider class
+  - Method converts string steps to object format { text, completed } if needed
+  - Method updates prd.json file with step completion status
+  - Method triggers tree view refresh to update UI
+  - Registered command in extension.ts with proper parameter handling
+  - Added command definition to package.json
+  - Enhanced buildChatContext() in both prdTreeDataProvider.ts and detailPanel.ts
+  - Chat context now includes "Available Commands" section with usage example
+  - Agents receive clear instructions on how to mark steps complete programmatically
+  - Command usage: vscode.commands.executeCommand('ralph.markStepComplete', itemId, stepIndex, true)
+  - Step index is 0-based (0 = first step, 1 = second step, etc.)
+  - User can also manually toggle steps via UI checkboxes (already implemented)
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm test ✓)
+  - All 5 acceptance criteria verified: agent context includes command, agent can mark steps, UI updates, prd.json updates, manual override works
+  - Agent-003 now complete with passes: true
+  - Next: agent-004 (Agent uses skill references) or ui-004 (Drag-and-drop reordering) would be good next features

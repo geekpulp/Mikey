@@ -67,6 +67,10 @@
         "command": "ralph.startWork",
         "title": "Start Work (Chat)",
         "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "ralph.markStepComplete",
+        "title": "Mark Step Complete"
       }
     ],
     "menus": {

@@ -561,14 +561,29 @@
     "category": "agent",
     "description": "Agent can update step completion status",
     "steps": [
-      "Start work on an item with the agent",
-      "As agent completes implementation steps, verify it can mark steps complete",
-      "Verify step checkboxes update in the detail panel",
-      "Verify prd.json is updated with step completion",
-      "Verify user can also manually override step status"
+      {
+        "text": "Start work on an item with the agent",
+        "completed": true
+      },
+      {
+        "text": "As agent completes implementation steps, verify it can mark steps complete",
+        "completed": true
+      },
+      {
+        "text": "Verify step checkboxes update in the detail panel",
+        "completed": true
+      },
+      {
+        "text": "Verify prd.json is updated with step completion",
+        "completed": true
+      },
+      {
+        "text": "Verify user can also manually override step status",
+        "completed": true
+      }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "agent-004",
@@ -687,5 +702,195 @@
     "steps": [],
     "status": "completed",
     "passes": true
+  },
+  {
+    "id": "refactor-001",
+    "category": "refactor",
+    "description": "Split detailPanel.ts into modules",
+    "steps": [
+      "Extract HTML generation to separate htmlRenderer.ts module",
+      "Extract message handlers to messageHandlers.ts module",
+      "Extract git operations to gitOperations.ts module",
+      "Extract step management to stepManager.ts module",
+      "Update detailPanel.ts to import and use new modules",
+      "Test all functionality to ensure refactoring didn't break anything"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
+  {
+    "id": "refactor-002",
+    "category": "refactor",
+    "description": "Create PrdFileManager service",
+    "steps": [
+      "Create new PrdFileManager class to abstract file operations",
+      "Add methods for read, write, update operations with error handling",
+      "Add transaction-like operations for atomic PRD updates",
+      "Implement file backup/recovery mechanism",
+      "Update prdTreeDataProvider to use PrdFileManager",
+      "Update detailPanel to use PrdFileManager",
+      "Add unit tests for PrdFileManager"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
+  {
+    "id": "refactor-003",
+    "category": "refactor",
+    "description": "Extract configuration management",
+    "steps": [
+      "Define VS Code workspace configuration schema for categories",
+      "Define configuration for PRD file path",
+      "Define configuration for permission profiles",
+      "Move hardcoded values from extension.ts to configuration",
+      "Move hardcoded values from prdTreeDataProvider.ts to configuration",
+      "Add migration logic for existing users",
+      "Document configuration options in README"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
+  {
+    "id": "refactor-004",
+    "category": "refactor",
+    "description": "Add constants and enums",
+    "steps": [
+      "Create constants.ts file for all magic strings",
+      "Define enum for status values (not-started, in-progress, completed, etc.)",
+      "Define enum for message commands (toggleStep, changeStatus, etc.)",
+      "Define constants for categories",
+      "Replace all magic strings throughout codebase with constants",
+      "Verify no compilation errors after replacement"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
+  {
+    "id": "test-001",
+    "category": "test",
+    "description": "Set up testing infrastructure",
+    "steps": [
+      "Install Mocha test framework and dependencies",
+      "Configure VS Code test runner in package.json",
+      "Create test folder structure (unit, integration)",
+      "Set up test utilities and mocks for VS Code API",
+      "Add npm test script to package.json",
+      "Document how to run tests in README",
+      "Verify tests run successfully in CI environment"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
+  {
+    "id": "test-002",
+    "category": "test",
+    "description": "Add unit tests for PRD operations",
+    "steps": [
+      "Write tests for PRD item CRUD operations",
+      "Write tests for ID generation logic",
+      "Write tests for step management",
+      "Write tests for status transitions",
+      "Mock file system operations for isolated testing",
+      "Achieve at least 70% code coverage for core logic",
+      "Run tests and verify all pass"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
+  {
+    "id": "test-003",
+    "category": "test",
+    "description": "Add integration tests",
+    "steps": [
+      "Write test for extension activation",
+      "Write test for command registration and execution",
+      "Write test for tree view rendering",
+      "Write test for detail panel interactions",
+      "Write test for file watcher behavior",
+      "Run integration tests in Extension Development Host",
+      "Verify all tests pass consistently"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
+  {
+    "id": "quality-001",
+    "category": "quality",
+    "description": "Add logging infrastructure",
+    "steps": [
+      "Create Logger class using VS Code OutputChannel",
+      "Add log levels (debug, info, warn, error)",
+      "Add timestamps to log entries",
+      "Log key operations (file changes, git operations, command execution)",
+      "Add debug mode configuration option",
+      "Replace console.log statements with logger calls",
+      "Document logging in README for troubleshooting"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
+  {
+    "id": "quality-002",
+    "category": "quality",
+    "description": "Improve error handling",
+    "steps": [
+      "Create custom error types for domain-specific errors",
+      "Standardize error handling pattern across all modules",
+      "Add try-catch blocks to all file operations",
+      "Add try-catch blocks to all git operations",
+      "Provide user-friendly error messages with actionable suggestions",
+      "Log all errors to OutputChannel for debugging",
+      "Test error scenarios to ensure graceful degradation"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
+  {
+    "id": "quality-003",
+    "category": "quality",
+    "description": "Add JSDoc documentation",
+    "steps": [
+      "Document all public APIs in extension.ts",
+      "Document all public methods in prdTreeDataProvider.ts",
+      "Document all public methods in detailPanel.ts",
+      "Add parameter descriptions and return types",
+      "Add examples for complex functions",
+      "Document expected behavior and edge cases",
+      "Generate documentation with TypeDoc (optional)"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
+  {
+    "id": "security-001",
+    "category": "security",
+    "description": "Add input validation",
+    "steps": [
+      "Install Zod or similar validation library",
+      "Define schema for PRD item structure",
+      "Define schema for step structure",
+      "Validate PRD file content on load",
+      "Validate user inputs for ID, description, category",
+      "Add validation error messages for users",
+      "Test with malformed PRD files and invalid inputs"
+    ],
+    "status": "not-started",
+    "passes": false
+  },
+  {
+    "id": "security-002",
+    "category": "security",
+    "description": "Enhance webview security",
+    "steps": [
+      "Review and strengthen Content Security Policy",
+      "Sanitize all user inputs before rendering in webview",
+      "Use nonce for inline scripts and styles",
+      "Validate all messages from webview before processing",
+      "Audit for potential XSS vulnerabilities",
+      "Test with malicious inputs to verify security",
+      "Document security measures in code comments"
+    ],
+    "status": "not-started",
+    "passes": false
   }
 ]
