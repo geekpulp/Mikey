@@ -5,6 +5,7 @@ import { PrdItem, PrdStep } from './prdTreeDataProvider';
 import { Status, MessageCommand, STATUS_MARKERS, THEME_COLORS, GIT, FILE_PATHS } from './constants';
 import { Logger } from './logger';
 import { validateStep, sanitizeInput } from './validation';
+import { PrdFileError, GitOperationError, EnvironmentError, getUserFriendlyMessage, isRalphError } from './errors';
 
 export class DetailPanel {
 	public static currentPanel: DetailPanel | undefined;

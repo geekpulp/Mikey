@@ -4,6 +4,7 @@ import * as path from 'path';
 import { Status, CATEGORIES, STATUS_MARKERS, THEME_COLORS } from './constants';
 import { Logger } from './logger';
 import { validatePrdFile, validateUserInput } from './validation';
+import { PrdFileError, GitOperationError, EnvironmentError, getUserFriendlyMessage, isRalphError } from './errors';
 
 export interface PrdStep {
 	text: string;
@@ -47,31 +48,46 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
   }
 
   private loadPrdFile(): void {
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    if (!workspaceFolders) {
-      this.logger.warn('No workspace folders found');
-      return;
-    }
+    try {
+      const workspaceFolders = vscode.workspace.workspaceFolders;
+      if (!workspaceFolders) {
+        const error = EnvironmentError.noWorkspace();
+        this.logger.warn(error.getLogMessage());
+        return;
+      }
 
-    const prdPath = path.join(
-      workspaceFolders[0].uri.fsPath,
-      "plans",
-      "prd.json",
-    );
+      const prdPath = path.join(
+        workspaceFolders[0].uri.fsPath,
+        "plans",
+        "prd.json",
+      );
 
-    if (fs.existsSync(prdPath)) {
+      if (!fs.existsSync(prdPath)) {
+        const error = PrdFileError.notFound(prdPath);
+        this.logger.warn(error.getLogMessage());
+        return;
+      }
+
       this.prdFilePath = prdPath;
+
       try {
         this.logger.debug('Loading PRD file', { path: prdPath });
         const content = fs.readFileSync(prdPath, "utf-8");
-        const parsedData = JSON.parse(content);
+        
+        let parsedData;
+        try {
+          parsedData = JSON.parse(content);
+        } catch (parseError) {
+          throw PrdFileError.parseError(prdPath, parseError as Error);
+        }
         
         // Validate PRD file content
         const validationResult = validatePrdFile(parsedData);
         if (!validationResult.success) {
-          this.logger.error('PRD file validation failed', { error: validationResult.error, errors: validationResult.errors });
+          const error = PrdFileError.validationError(validationResult.error || 'Unknown validation error');
+          this.logger.error(error.getLogMessage(), { errors: validationResult.errors });
           vscode.window.showErrorMessage(
-            `PRD file validation failed: ${validationResult.error}`,
+            error.getUserMessage(),
             'View Details'
           ).then(selection => {
             if (selection === 'View Details' && validationResult.errors) {
@@ -93,11 +109,22 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
         
         this._onDidChangeTreeData.fire();
       } catch (error) {
-        this.logger.error('Failed to load PRD file', error);
-        vscode.window.showErrorMessage(`Failed to load PRD file: ${error}`);
+        if (isRalphError(error)) {
+          this.logger.error(error.getLogMessage());
+          vscode.window.showErrorMessage(error.getUserMessage());
+        } else if (error instanceof Error) {
+          const prdError = PrdFileError.readError(prdPath, error);
+          this.logger.error(prdError.getLogMessage());
+          vscode.window.showErrorMessage(prdError.getUserMessage());
+        } else {
+          this.logger.error('Unexpected error loading PRD file', error);
+          vscode.window.showErrorMessage(`Failed to load PRD file: ${String(error)}`);
+        }
       }
-    } else {
-      this.logger.warn('PRD file not found', { path: prdPath });
+    } catch (error) {
+      // Catch any unexpected errors at the top level
+      this.logger.error('Unexpected error in loadPrdFile', error);
+      vscode.window.showErrorMessage(getUserFriendlyMessage(error));
     }
   }
 
@@ -123,163 +150,196 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
   }
 
   async addItem(category: string, description: string): Promise<void> {
-    if (!this.prdFilePath) {
-      this.logger.error('Cannot add item: No PRD file found');
-      vscode.window.showErrorMessage("No PRD file found");
-      return;
-    }
-
-    // Validate user input
-    const validation = validateUserInput({ category, description });
-    if (!validation.success) {
-      this.logger.warn('Invalid input for new PRD item', { error: validation.error });
-      vscode.window.showErrorMessage(`Invalid input: ${validation.error}`);
-      return;
-    }
-
-    const newId = this.generateUniqueId(category);
-    const newItem: PrdItem = {
-      id: newId,
-      category: validation.data!.category,
-      description: validation.data!.description,
-      steps: [],
-      status: Status.NotStarted,
-      passes: false,
-    };
-
-    this.prdItems.push(newItem);
-
     try {
-      this.logger.info('Adding new PRD item', { id: newId, category, description });
-      fs.writeFileSync(
-        this.prdFilePath,
-        JSON.stringify(this.prdItems, null, "\t"),
-        "utf-8",
-      );
-      this._onDidChangeTreeData.fire();
-      vscode.window.showInformationMessage(`Added item: ${newId}`);
+      if (!this.prdFilePath) {
+        throw PrdFileError.notFound('prd.json');
+      }
+
+      // Validate user input
+      const validation = validateUserInput({ category, description });
+      if (!validation.success) {
+        this.logger.warn('Invalid input for new PRD item', { error: validation.error });
+        vscode.window.showErrorMessage(`Invalid input: ${validation.error}`);
+        return;
+      }
+
+      const newId = this.generateUniqueId(category);
+      const newItem: PrdItem = {
+        id: newId,
+        category: validation.data!.category,
+        description: validation.data!.description,
+        steps: [],
+        status: Status.NotStarted,
+        passes: false,
+      };
+
+      this.prdItems.push(newItem);
+
+      try {
+        this.logger.info('Adding new PRD item', { id: newId, category, description });
+        fs.writeFileSync(
+          this.prdFilePath,
+          JSON.stringify(this.prdItems, null, "\t"),
+          "utf-8",
+        );
+        this._onDidChangeTreeData.fire();
+        vscode.window.showInformationMessage(`Added item: ${newId}`);
+      } catch (error) {
+        // Rollback the in-memory change
+        this.prdItems.pop();
+        throw PrdFileError.writeError(this.prdFilePath, error as Error);
+      }
     } catch (error) {
-      this.logger.error('Failed to add PRD item', error);
-      vscode.window.showErrorMessage(`Failed to add item: ${error}`);
+      if (isRalphError(error)) {
+        this.logger.error(error.getLogMessage());
+        vscode.window.showErrorMessage(error.getUserMessage());
+      } else {
+        this.logger.error('Failed to add PRD item', error);
+        vscode.window.showErrorMessage(getUserFriendlyMessage(error));
+      }
     }
   }
 
   async editItem(item: PrdItem): Promise<void> {
-    if (!this.prdFilePath) {
-      vscode.window.showErrorMessage("No PRD file found");
-      return;
-    }
-
-    // Show category picker pre-selected with current category
-    const category = await vscode.window.showQuickPick(CATEGORIES, {
-      placeHolder: "Select category",
-      title: `Edit Item: ${item.id}`,
-    });
-
-    if (!category) {
-      return; // User cancelled
-    }
-
-    // Show description input pre-filled with current description
-    const description = await vscode.window.showInputBox({
-      prompt: "Enter description",
-      value: item.description,
-      placeHolder: "e.g., Implement export functionality",
-    });
-
-    if (!description) {
-      return; // User cancelled
-    }
-
-    // Validate user input
-    const validation = validateUserInput({ category, description });
-    if (!validation.success) {
-      this.logger.warn('Invalid input for editing PRD item', { error: validation.error });
-      vscode.window.showErrorMessage(`Invalid input: ${validation.error}`);
-      return;
-    }
-
-    // Find and update the item
-    const itemIndex = this.prdItems.findIndex((i) => i.id === item.id);
-    if (itemIndex === -1) {
-      this.logger.error('Item not found during edit', { id: item.id });
-      vscode.window.showErrorMessage(`Item ${item.id} not found`);
-      return;
-    }
-
-    this.prdItems[itemIndex].category = validation.data!.category;
-    this.prdItems[itemIndex].description = validation.data!.description;
-
     try {
-      this.logger.info('Updating PRD item', { id: item.id, category, description });
-      fs.writeFileSync(
-        this.prdFilePath,
-        JSON.stringify(this.prdItems, null, "\t"),
-        "utf-8",
-      );
-      this._onDidChangeTreeData.fire();
-      vscode.window.showInformationMessage(`Updated item: ${item.id}`);
+      if (!this.prdFilePath) {
+        throw PrdFileError.notFound('prd.json');
+      }
+
+      // Show category picker pre-selected with current category
+      const category = await vscode.window.showQuickPick(CATEGORIES, {
+        placeHolder: "Select category",
+        title: `Edit Item: ${item.id}`,
+      });
+
+      if (!category) {
+        return; // User cancelled
+      }
+
+      // Show description input pre-filled with current description
+      const description = await vscode.window.showInputBox({
+        prompt: "Enter description",
+        value: item.description,
+        placeHolder: "e.g., Implement export functionality",
+      });
+
+      if (!description) {
+        return; // User cancelled
+      }
+
+      // Validate user input
+      const validation = validateUserInput({ category, description });
+      if (!validation.success) {
+        this.logger.warn('Invalid input for editing PRD item', { error: validation.error });
+        vscode.window.showErrorMessage(`Invalid input: ${validation.error}`);
+        return;
+      }
+
+      // Find and update the item
+      const itemIndex = this.prdItems.findIndex((i) => i.id === item.id);
+      if (itemIndex === -1) {
+        this.logger.error('Item not found during edit', { id: item.id });
+        vscode.window.showErrorMessage(`Item ${item.id} not found`);
+        return;
+      }
+
+      // Store original values for rollback
+      const originalCategory = this.prdItems[itemIndex].category;
+      const originalDescription = this.prdItems[itemIndex].description;
+
+      this.prdItems[itemIndex].category = validation.data!.category;
+      this.prdItems[itemIndex].description = validation.data!.description;
+
+      try {
+        this.logger.info('Updating PRD item', { id: item.id, category, description });
+        fs.writeFileSync(
+          this.prdFilePath,
+          JSON.stringify(this.prdItems, null, "\t"),
+          "utf-8",
+        );
+        this._onDidChangeTreeData.fire();
+        vscode.window.showInformationMessage(`Updated item: ${item.id}`);
+      } catch (error) {
+        // Rollback the in-memory changes
+        this.prdItems[itemIndex].category = originalCategory;
+        this.prdItems[itemIndex].description = originalDescription;
+        throw PrdFileError.writeError(this.prdFilePath, error as Error);
+      }
     } catch (error) {
-      this.logger.error('Failed to update PRD item', error);
-      vscode.window.showErrorMessage(`Failed to update item: ${error}`);
+      if (isRalphError(error)) {
+        this.logger.error(error.getLogMessage());
+        vscode.window.showErrorMessage(error.getUserMessage());
+      } else {
+        this.logger.error('Failed to edit PRD item', error);
+        vscode.window.showErrorMessage(getUserFriendlyMessage(error));
+      }
     }
   }
 
   async deleteItem(item: PrdItem): Promise<void> {
-    if (!this.prdFilePath) {
-      this.logger.error('Cannot delete item: No PRD file found');
-      vscode.window.showErrorMessage("No PRD file found");
-      return;
-    }
-
-    // Show confirmation dialog
-    const confirmed = await vscode.window.showWarningMessage(
-      `Delete item "${item.id}: ${item.description}"?`,
-      { modal: true },
-      "Delete",
-    );
-
-    if (confirmed !== "Delete") {
-      this.logger.debug('Delete cancelled by user', { id: item.id });
-      return; // User cancelled
-    }
-
-    // Find and remove the item
-    const itemIndex = this.prdItems.findIndex((i) => i.id === item.id);
-    if (itemIndex === -1) {
-      this.logger.error('Item not found during delete', { id: item.id });
-      vscode.window.showErrorMessage(`Item ${item.id} not found`);
-      return;
-    }
-
-    this.prdItems.splice(itemIndex, 1);
-
     try {
-      this.logger.info('Deleting PRD item', { id: item.id });
-      fs.writeFileSync(
-        this.prdFilePath,
-        JSON.stringify(this.prdItems, null, "\t"),
-        "utf-8",
+      if (!this.prdFilePath) {
+        throw PrdFileError.notFound('prd.json');
+      }
+
+      // Show confirmation dialog
+      const confirmed = await vscode.window.showWarningMessage(
+        `Delete item "${item.id}: ${item.description}"?`,
+        { modal: true },
+        "Delete",
       );
-      this._onDidChangeTreeData.fire();
-      vscode.window.showInformationMessage(`Deleted item: ${item.id}`);
+
+      if (confirmed !== "Delete") {
+        this.logger.debug('Delete cancelled by user', { id: item.id });
+        return; // User cancelled
+      }
+
+      // Find and remove the item
+      const itemIndex = this.prdItems.findIndex((i) => i.id === item.id);
+      if (itemIndex === -1) {
+        this.logger.error('Item not found during delete', { id: item.id });
+        vscode.window.showErrorMessage(`Item ${item.id} not found`);
+        return;
+      }
+
+      // Store the deleted item for potential rollback
+      const deletedItem = this.prdItems[itemIndex];
+      this.prdItems.splice(itemIndex, 1);
+
+      try {
+        this.logger.info('Deleting PRD item', { id: item.id });
+        fs.writeFileSync(
+          this.prdFilePath,
+          JSON.stringify(this.prdItems, null, "\t"),
+          "utf-8",
+        );
+        this._onDidChangeTreeData.fire();
+        vscode.window.showInformationMessage(`Deleted item: ${item.id}`);
+      } catch (error) {
+        // Rollback the deletion
+        this.prdItems.splice(itemIndex, 0, deletedItem);
+        throw PrdFileError.writeError(this.prdFilePath, error as Error);
+      }
     } catch (error) {
-      this.logger.error('Failed to delete PRD item', error);
-      vscode.window.showErrorMessage(`Failed to delete item: ${error}`);
+      if (isRalphError(error)) {
+        this.logger.error(error.getLogMessage());
+        vscode.window.showErrorMessage(error.getUserMessage());
+      } else {
+        this.logger.error('Failed to delete PRD item', error);
+        vscode.window.showErrorMessage(getUserFriendlyMessage(error));
+      }
     }
   }
 
   async startWork(item: PrdItem): Promise<void> {
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    if (!workspaceFolders) {
-      this.logger.error('Cannot start work: No workspace folder found');
-      vscode.window.showErrorMessage("No workspace folder found");
-      return;
-    }
-
-    const workspaceRoot = workspaceFolders[0].uri.fsPath;
-
     try {
+      const workspaceFolders = vscode.workspace.workspaceFolders;
+      if (!workspaceFolders) {
+        throw EnvironmentError.noWorkspace();
+      }
+
+      const workspaceRoot = workspaceFolders[0].uri.fsPath;
+
       this.logger.info('Starting work on PRD item', { id: item.id });
       // Create and switch to feature branch
       const branchName = `feature/${item.id}`;
@@ -305,7 +365,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
             vscode.window.showInformationMessage(`✓ Switched to existing branch: ${branchName}`);
           } catch (switchError) {
             this.logger.error('Failed to create or switch to branch', { error, switchError });
-            throw new Error(`Failed to create or switch to branch: ${error}`);
+            throw GitOperationError.branchCreationFailed(branchName, error as Error);
           }
         }
 
@@ -317,12 +377,18 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
           this.logger.debug('Updating item status to in-progress', { id: item.id });
           this.prdItems[itemIndex].status = Status.InProgress;
           
-          fs.writeFileSync(
-            this.prdFilePath,
-            JSON.stringify(this.prdItems, null, "\t"),
-            "utf-8",
-          );
-          this._onDidChangeTreeData.fire();
+          try {
+            fs.writeFileSync(
+              this.prdFilePath,
+              JSON.stringify(this.prdItems, null, "\t"),
+              "utf-8",
+            );
+            this._onDidChangeTreeData.fire();
+          } catch (error) {
+            // Rollback status change
+            this.prdItems[itemIndex].status = item.status;
+            throw PrdFileError.writeError(this.prdFilePath, error as Error);
+          }
         }
       });
 
@@ -348,7 +414,13 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
       
       vscode.window.showInformationMessage(`✓ Started work on ${item.id} in new chat session`);
     } catch (error) {
-      vscode.window.showErrorMessage(`Failed to start work: ${error}`);
+      if (isRalphError(error)) {
+        this.logger.error(error.getLogMessage());
+        vscode.window.showErrorMessage(error.getUserMessage());
+      } else {
+        this.logger.error('Failed to start work', error);
+        vscode.window.showErrorMessage(getUserFriendlyMessage(error));
+      }
     }
   }
 
