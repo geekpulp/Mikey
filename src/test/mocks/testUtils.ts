@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 
+import { Status } from '../../constants';
+
 /**
  * Mock WorkspaceConfiguration for testing
  */
@@ -64,7 +66,7 @@ export function createMockPrdItem(overrides?: Partial<any>): any {
 		category: 'test',
 		description: 'Test item',
 		steps: [],
-		status: 'not-started',
+		status: Status.NotStarted,
 		passes: false,
 		...overrides
 	};

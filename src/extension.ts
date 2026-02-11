@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { PrdTreeDataProvider, PrdItem } from './prdTreeDataProvider';
 import { DetailPanel } from './detailPanel';
+import { CATEGORIES } from './constants';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('Ralph extension is now active');
@@ -19,9 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand('ralph.addItem', async () => {
-      const categories = ['setup', 'ui', 'functional', 'git', 'agent', 'polish'];
-      
-      const category = await vscode.window.showQuickPick(categories, {
+      const category = await vscode.window.showQuickPick(CATEGORIES, {
         placeHolder: 'Select category for the new item'
       });
       

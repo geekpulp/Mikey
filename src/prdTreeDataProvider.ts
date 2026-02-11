@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Status, CATEGORIES, STATUS_MARKERS, THEME_COLORS } from './constants';
 
 export interface PrdStep {
 	text: string;
@@ -12,7 +13,7 @@ export interface PrdItem {
 	category: string;
 	description: string;
 	steps: (string | PrdStep)[];
-	status: 'not-started' | 'in-progress' | 'in-review' | 'completed';
+	status: Status;
 	passes: boolean;
 }
 
@@ -95,7 +96,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
       category,
       description,
       steps: [],
-      status: "not-started",
+      status: Status.NotStarted,
       passes: false,
     };
 
@@ -121,8 +122,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     }
 
     // Show category picker pre-selected with current category
-    const categories = ["setup", "ui", "functional", "git", "agent", "polish"];
-    const category = await vscode.window.showQuickPick(categories, {
+    const category = await vscode.window.showQuickPick(CATEGORIES, {
       placeHolder: "Select category",
       title: `Edit Item: ${item.id}`,
     });
@@ -239,10 +239,10 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
 
         progress.report({ message: 'Updating item status...' });
         
-        // Update item status to 'in-progress'
+        // Update item status to in-progress
         const itemIndex = this.prdItems.findIndex(i => i.id === item.id);
         if (itemIndex !== -1 && this.prdFilePath) {
-          this.prdItems[itemIndex].status = 'in-progress';
+          this.prdItems[itemIndex].status = Status.InProgress;
           
           fs.writeFileSync(
             this.prdFilePath,
@@ -318,7 +318,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
 ${item.steps.map((step, idx) => {
   const stepText = typeof step === 'string' ? step : step.text;
   const completed = typeof step === 'string' ? false : step.completed || false;
-  const marker = completed ? '✓' : '○';
+  const marker = completed ? STATUS_MARKERS.completed : STATUS_MARKERS.incomplete;
   const highlight = stepIndex !== undefined && idx === stepIndex ? ' **<-- CURRENT STEP**' : '';
   return `${idx + 1}. [${marker}] ${stepText}${highlight}`;
 }).join('\n')}
@@ -636,17 +636,17 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
     color?: vscode.ThemeColor;
   } {
     switch (status) {
-      case "completed":
+      case Status.Completed:
         return {
           icon: "pass",
-          color: new vscode.ThemeColor("testing.iconPassed"),
+          color: new vscode.ThemeColor(THEME_COLORS.iconPassed),
         };
-      case "in-progress":
+      case Status.InProgress:
         return {
           icon: "sync~spin",
           color: new vscode.ThemeColor("charts.yellow"),
         };
-      case "in-review":
+      case Status.InReview:
         return { icon: "eye", color: new vscode.ThemeColor("charts.blue") };
       default:
         return {

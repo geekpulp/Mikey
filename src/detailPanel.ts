@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { PrdItem, PrdStep } from './prdTreeDataProvider';
+import { Status, MessageCommand, STATUS_MARKERS, THEME_COLORS, GIT, FILE_PATHS } from './constants';
 
 export class DetailPanel {
 	public static currentPanel: DetailPanel | undefined;
@@ -17,24 +18,24 @@ export class DetailPanel {
 		this._panel.webview.onDidReceiveMessage(
 			message => {
 				switch (message.command) {
-					case 'toggleStep':
+					case MessageCommand.ToggleStep:
 						this.toggleStepCompletion(message.stepIndex);
 						break;
-					case 'changeStatus':
+					case MessageCommand.ChangeStatus:
 					this.changeItemStatus(message.status).catch(err => {
 						vscode.window.showErrorMessage(`Failed to change status: ${err}`);
 					});
 						break;
-					case 'togglePasses':
+					case MessageCommand.TogglePasses:
 						this.togglePasses();
 						break;
-					case 'addStep':
+					case MessageCommand.AddStep:
 						this.addStep();
 						break;
-					case 'editStep':
+					case MessageCommand.EditStep:
 						this.editStep(message.stepIndex);
 						break;
-					case 'deleteStep':
+					case MessageCommand.DeleteStep:
 						this.deleteStep(message.stepIndex);
 						break;
 					case 'startWorkOnStep':
@@ -43,7 +44,7 @@ export class DetailPanel {
 					case 'openFileDiff':
 						this.openFileDiff(message.filePath);
 						break;
-					case 'submitForReview':
+					case MessageCommand.SubmitForReview:
 						this.submitForReview();
 						break;
 				}
@@ -444,10 +445,10 @@ export class DetailPanel {
 			<div class="metadata-item">
 				<span class="label">Status:</span>
 				<select class="status-selector" onchange="changeStatus(this.value)">
-					<option value="not-started" ${item.status === 'not-started' ? 'selected' : ''}>Not Started</option>
-					<option value="in-progress" ${item.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
-					<option value="in-review" ${item.status === 'in-review' ? 'selected' : ''}>In Review</option>
-					<option value="completed" ${item.status === 'completed' ? 'selected' : ''}>Completed</option>
+					<option value="${Status.NotStarted}" ${item.status === Status.NotStarted ? 'selected' : ''}>Not Started</option>
+					<option value="${Status.InProgress}" ${item.status === Status.InProgress ? 'selected' : ''}>In Progress</option>
+					<option value="${Status.InReview}" ${item.status === Status.InReview ? 'selected' : ''}>In Review</option>
+					<option value="${Status.Completed}" ${item.status === Status.Completed ? 'selected' : ''}>Completed</option>
 				</select>
 			</div>
 			<div class="metadata-item">
@@ -457,7 +458,7 @@ export class DetailPanel {
 				</div>
 			</div>
 		</div>
-		${item.status === 'in-progress' ? '<button class="submit-review-btn" onclick="submitForReview()">📋 Submit for Review</button>' : ''}
+		${item.status === Status.InProgress ? '<button class="submit-review-btn" onclick="submitForReview()">📋 Submit for Review</button>' : ''}
 	</div>
 
 	<div class="section">
@@ -524,13 +525,13 @@ export class DetailPanel {
 		`;
 	}
 
-	private _getStatusColor(status: string): string {
+	private _getStatusColor(status: Status): string {
 		switch (status) {
-			case 'completed':
-				return 'var(--vscode-testing-iconPassed)';
-			case 'in-progress':
+			case Status.Completed:
+				return `var(--vscode-${THEME_COLORS.iconPassed})`;
+			case Status.InProgress:
 				return 'var(--vscode-charts-yellow)';
-			case 'in-review':
+			case Status.InReview:
 				return 'var(--vscode-charts-blue)';
 			default:
 				return 'var(--vscode-charts-gray)';
@@ -606,8 +607,8 @@ export class DetailPanel {
 		}
 
 		// Validate status value
-		const validStatuses = ['not-started', 'in-progress', 'in-review', 'completed'];
-		if (!validStatuses.includes(newStatus)) {
+		const validStatuses = [Status.NotStarted, Status.InProgress, Status.InReview, Status.Completed];
+		if (!validStatuses.includes(newStatus as Status)) {
 			vscode.window.showErrorMessage(`Invalid status: ${newStatus}`);
 			return;
 		}
@@ -633,7 +634,7 @@ export class DetailPanel {
 			}
 
 			// Update status (type-safe after validation)
-			prdItems[itemIndex].status = newStatus as 'not-started' | 'in-progress' | 'in-review' | 'completed';
+			prdItems[itemIndex].status = newStatus as Status;
 
 			// Write updated PRD file
 			fs.writeFileSync(prdPath, JSON.stringify(prdItems, null, '\t'), 'utf-8');
@@ -644,8 +645,8 @@ export class DetailPanel {
 			
 			vscode.window.showInformationMessage(`Status updated to: ${newStatus}`);
 			
-			// If status is 'completed', trigger auto-merge workflow
-			if (newStatus === 'completed') {
+			// If status is completed, trigger auto-merge workflow
+			if (newStatus === Status.Completed) {
 				await this.handleCompletionMerge(workspaceFolders[0].uri.fsPath);
 			}
 			
@@ -963,7 +964,7 @@ export class DetailPanel {
 ${item.steps.map((step, idx) => {
 	const stepText = typeof step === 'string' ? step : step.text;
 	const completed = typeof step === 'string' ? false : step.completed || false;
-	const marker = completed ? '✓' : '○';
+	const marker = completed ? STATUS_MARKERS.completed : STATUS_MARKERS.incomplete;
 	const highlight = stepIndex !== undefined && idx === stepIndex ? ' **<-- CURRENT STEP**' : '';
 	return `${idx + 1}. [${marker}] ${stepText}${highlight}`;
 }).join('\n')}
@@ -1203,9 +1204,9 @@ private async openFileDiff(filePath: string) {
 		
 		// Create a URI for the file on the main branch for comparison
 		const mainUri = fileUri.with({
-			scheme: 'git',
+			scheme: GIT.scheme,
 			path: fileUri.path,
-			query: JSON.stringify({ ref: 'main', path: filePath })
+			query: JSON.stringify({ ref: GIT.mainBranch, path: filePath })
 		});
 		
 		// Open diff view
@@ -1221,8 +1222,8 @@ private async submitForReview(): Promise<void> {
 		return;
 	}
 
-	// Verify item is in "in-progress" status
-	if (this._currentItem.status !== 'in-progress') {
+	// Verify item is in in-progress status
+	if (this._currentItem.status !== Status.InProgress) {
 		vscode.window.showWarningMessage('Only items in "in-progress" status can be submitted for review.');
 		return;
 	}
@@ -1268,7 +1269,7 @@ private async submitForReview(): Promise<void> {
 		}
 
 		// Update status
-		prdItems[itemIndex].status = 'in-review';
+		prdItems[itemIndex].status = Status.InReview;
 
 		// Write updated PRD file
 		fs.writeFileSync(prdPath, JSON.stringify(prdItems, null, '\t'), 'utf-8');

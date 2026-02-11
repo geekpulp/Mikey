@@ -770,15 +770,33 @@
     "category": "refactor",
     "description": "Add constants and enums",
     "steps": [
-      "Create constants.ts file for all magic strings",
-      "Define enum for status values (not-started, in-progress, completed, etc.)",
-      "Define enum for message commands (toggleStep, changeStatus, etc.)",
-      "Define constants for categories",
-      "Replace all magic strings throughout codebase with constants",
-      "Verify no compilation errors after replacement"
+      {
+        "text": "Create constants.ts file for all magic strings",
+        "completed": true
+      },
+      {
+        "text": "Define enum for status values (not-started, in-progress, completed, etc.)",
+        "completed": true
+      },
+      {
+        "text": "Define enum for message commands (toggleStep, changeStatus, etc.)",
+        "completed": true
+      },
+      {
+        "text": "Define constants for categories",
+        "completed": true
+      },
+      {
+        "text": "Replace all magic strings throughout codebase with constants",
+        "completed": true
+      },
+      {
+        "text": "Verify no compilation errors after replacement",
+        "completed": true
+      }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "test-001",

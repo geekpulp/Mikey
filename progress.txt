@@ -437,3 +437,43 @@
   - All 7 acceptance criteria met and steps marked as completed
   - Test-001 now complete with passes: true
   - Next: test-002 (Add unit tests for PRD operations) or test-003 (Add integration tests) to add actual test coverage
+
+- 2026-02-11: Completed refactor-004: Add constants and enums
+  - Created src/constants.ts with comprehensive enums and constants:
+    * Status enum for all PRD item statuses (NotStarted, InProgress, InReview, Completed)
+    * MessageCommand enum for webview-extension communication commands
+    * Category enum for all PRD item categories (setup, ui, functional, git, agent, polish, test, refactor, quality, security, Bug, Action, Docs, Audit)
+    * CATEGORIES array for use in QuickPick selectors
+    * STATUS_MARKERS constants for completed/incomplete step icons
+    * FILE_PATHS constants for common file paths
+    * GIT constants for git-related strings
+    * THEME_COLORS constants for VS Code theme colors
+  - Updated prdTreeDataProvider.ts to use constants:
+    * Replaced Status type with Status enum
+    * Replaced hardcoded category arrays with CATEGORIES constant
+    * Replaced status string literals with Status enum values
+    * Replaced status markers with STATUS_MARKERS constants
+    * Replaced theme color strings with THEME_COLORS constants
+  - Updated extension.ts to use constants:
+    * Replaced hardcoded category array with CATEGORIES constant
+  - Updated detailPanel.ts to use constants:
+    * Imported Status, MessageCommand, STATUS_MARKERS, THEME_COLORS, GIT, FILE_PATHS constants
+    * Replaced message command case statements with MessageCommand enum
+    * Replaced status string comparisons with Status enum values
+    * Replaced status markers with STATUS_MARKERS constants
+    * Replaced git scheme and branch names with GIT constants
+    * Updated _getStatusColor method to use Status enum and THEME_COLORS
+    * Updated status validation to use Status enum array
+  - Updated test/mocks/testUtils.ts to use constants:
+    * Imported Status enum
+    * Replaced 'not-started' literal with Status.NotStarted in createMockPrdItem
+  - Benefits of this refactor:
+    * Type safety: Enums prevent typos and invalid values at compile time
+    * Autocomplete: IDE can suggest valid enum values
+    * Maintainability: Single source of truth for all magic strings
+    * Refactoring safety: Changing a constant value updates all usages
+    * Code clarity: Enums make code intent more explicit
+  - All TypeScript files compile successfully (pnpm typecheck ✓)
+  - All 6 steps completed successfully
+  - Refactor-004 now complete with passes: true
+  - Next: refactor-001, refactor-002, or refactor-003 would continue improving code quality
