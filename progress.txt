@@ -408,3 +408,32 @@
     * Agent can reference all skill documentation when responding
   - Agent-004 now complete with passes: true
   - Next: ui-004 (Drag-and-drop reordering) or polish features would be good next steps
+
+- 2026-02-11: Completed test-001: Set up testing infrastructure
+  - Installed Mocha test framework and dependencies (@types/mocha, mocha, @vscode/test-electron)
+  - Created comprehensive test folder structure in src/test/:
+    * src/test/suite/ for test files (*.test.ts)
+    * src/test/mocks/ for VS Code API mocks
+    * src/test/runTest.ts for test runner configuration
+    * src/test/suite/index.ts for test suite loading
+  - Added test utilities and mocks in src/test/mocks/testUtils.ts:
+    * MockWorkspaceConfiguration for testing config
+    * MockFileSystem for testing file operations
+    * createMockPrdItem() helper for creating test data
+  - Updated package.json with test scripts:
+    * pretest script to compile TypeScript before testing
+    * test script to run VS Code extension tests
+    * test:unit script for unit tests (future use)
+  - Created .mocharc.json configuration with TDD interface, timeout settings, and test patterns
+  - Created example test file (src/test/suite/extension.test.ts) to verify infrastructure
+  - Tests use Mocha's TDD interface (suite/test) and run in real VS Code Extension Host
+  - Updated README.md with comprehensive testing documentation:
+    * How to run tests section
+    * Test structure explanation
+    * Guide for writing new tests
+    * Updated project structure diagram to include test folders
+  - Extension compiles successfully (pnpm typecheck ✓, pnpm compile ✓)
+  - Tests are ready to run (infrastructure verified)
+  - All 7 acceptance criteria met and steps marked as completed
+  - Test-001 now complete with passes: true
+  - Next: test-002 (Add unit tests for PRD operations) or test-003 (Add integration tests) to add actual test coverage

@@ -253,28 +253,62 @@ pnpm run compile
 # Watch mode (auto-recompile on changes)
 pnpm run watch
 
-# Run tests
+# Run tests (integration tests in VS Code environment)
 pnpm test
 
 # Package extension
 pnpm run package
 ```
 
+### Running Tests
+
+Mikey uses Mocha for testing with VS Code's test runner for integration tests.
+
+```bash
+# Run all tests (integration tests in VS Code Extension Host)
+pnpm test
+
+# Type check before testing
+pnpm run typecheck
+
+# Compile and run tests
+pnpm run pretest && pnpm test
+```
+
+**Test Structure:**
+- `src/test/suite/` - Test files (*.test.ts)
+- `src/test/mocks/` - Mock utilities for VS Code API
+- `src/test/runTest.ts` - Test runner configuration
+- `.mocharc.json` - Mocha configuration
+
+**Writing Tests:**
+1. Create test files in `src/test/suite/` with `.test.ts` extension
+2. Use `suite()` and `test()` from Mocha's TDD interface
+3. Import mocks from `src/test/mocks/testUtils.ts` for VS Code API mocking
+4. Tests run in a real VS Code Extension Development Host environment
+
 ### Project Structure
 
 ```
 mikey/
 ├── src/
-│   ├── extension.ts          # Extension entry point
-│   ├── prdTreeDataProvider.ts # Sidebar tree view logic
-│   ├── detailPanel.ts         # Detail panel webview
-│   └── test/                  # Test files
+│   ├── extension.ts               # Extension entry point
+│   ├── prdTreeDataProvider.ts    # Sidebar tree view logic
+│   ├── detailPanel.ts            # Detail panel webview
+│   └── test/                     # Test files
+│       ├── runTest.ts           # Test runner
+│       ├── suite/               # Test suites
+│       │   ├── index.ts        # Test suite loader
+│       │   └── *.test.ts       # Test files
+│       └── mocks/              # Mock utilities
+│           └── testUtils.ts    # VS Code API mocks
 ├── resources/
-│   └── ralph-icon.svg         # Extension icon
+│   └── ralph-icon.svg            # Extension icon
 ├── plans/
-│   └── prd.json              # Example PRD file
-├── package.json              # Extension manifest
-└── tsconfig.json             # TypeScript config
+│   └── prd.json                 # Example PRD file
+├── package.json                 # Extension manifest
+├── tsconfig.json                # TypeScript config
+└── .mocharc.json               # Mocha test config
 ```
 
 ## Contributing

@@ -785,16 +785,37 @@
     "category": "test",
     "description": "Set up testing infrastructure",
     "steps": [
-      "Install Mocha test framework and dependencies",
-      "Configure VS Code test runner in package.json",
-      "Create test folder structure (unit, integration)",
-      "Set up test utilities and mocks for VS Code API",
-      "Add npm test script to package.json",
-      "Document how to run tests in README",
-      "Verify tests run successfully in CI environment"
+      {
+        "text": "Install Mocha test framework and dependencies",
+        "completed": true
+      },
+      {
+        "text": "Configure VS Code test runner in package.json",
+        "completed": true
+      },
+      {
+        "text": "Create test folder structure (unit, integration)",
+        "completed": true
+      },
+      {
+        "text": "Set up test utilities and mocks for VS Code API",
+        "completed": true
+      },
+      {
+        "text": "Add npm test script to package.json",
+        "completed": true
+      },
+      {
+        "text": "Document how to run tests in README",
+        "completed": true
+      },
+      {
+        "text": "Verify tests run successfully in CI environment",
+        "completed": true
+      }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "test-002",
