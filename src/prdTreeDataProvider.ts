@@ -3,8 +3,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Status, CATEGORIES, STATUS_MARKERS, THEME_COLORS } from './constants';
 import { Logger } from './logger';
-import { validatePrdFile, validateUserInput } from './validation';
+import { validateUserInput } from './validation';
 import { PrdFileError, GitOperationError, EnvironmentError, getUserFriendlyMessage, isRalphError } from './errors';
+import { PrdFileManager } from './prdFileManager';
 
 /**
  * Represents a step within a PRD item
@@ -76,6 +77,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
   private prdItems: PrdItem[] = [];
   private prdFilePath: string | undefined;
   private logger = Logger.getInstance();
+  private fileManager = PrdFileManager.getInstance();
 
   /**
    * Creates a new PRD tree data provider
@@ -97,64 +99,27 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
         return;
       }
 
-      const prdPath = path.join(
-        workspaceFolders[0].uri.fsPath,
-        "plans",
-        "prd.json",
-      );
+      const workspacePath = workspaceFolders[0].uri.fsPath;
+      this.prdFilePath = this.fileManager.initialize(workspacePath);
 
-      if (!fs.existsSync(prdPath)) {
-        const error = PrdFileError.notFound(prdPath);
+      if (!this.prdFilePath) {
+        const error = PrdFileError.notFound(path.join(workspacePath, 'plans', 'prd.json'));
         this.logger.warn(error.getLogMessage());
         return;
       }
 
-      this.prdFilePath = prdPath;
-
       try {
-        this.logger.debug('Loading PRD file', { path: prdPath });
-        const content = fs.readFileSync(prdPath, "utf-8");
-        
-        let parsedData;
-        try {
-          parsedData = JSON.parse(content);
-        } catch (parseError) {
-          throw PrdFileError.parseError(prdPath, parseError as Error);
-        }
-        
-        // Validate PRD file content
-        const validationResult = validatePrdFile(parsedData);
-        if (!validationResult.success) {
-          const error = PrdFileError.validationError(validationResult.error || 'Unknown validation error');
-          this.logger.error(error.getLogMessage(), { errors: validationResult.errors });
-          vscode.window.showErrorMessage(
-            error.getUserMessage(),
-            'View Details'
-          ).then(selection => {
-            if (selection === 'View Details' && validationResult.errors) {
-              const details = validationResult.errors
-                .map(e => `• ${e.path}: ${e.message}`)
-                .join('\n');
-              vscode.window.showErrorMessage(
-                `Validation errors:\n${details}`,
-                { modal: true }
-              );
-            }
-          });
-          // Still load the data but log the issues
-          this.prdItems = parsedData;
-        } else {
-          this.prdItems = validationResult.data!;
-          this.logger.info('PRD file loaded and validated successfully', { itemCount: this.prdItems.length });
-        }
-        
+        this.prdItems = this.fileManager.read();
+        this.logger.info('PRD file loaded successfully via PrdFileManager', { 
+          itemCount: this.prdItems.length 
+        });
         this._onDidChangeTreeData.fire();
       } catch (error) {
         if (isRalphError(error)) {
           this.logger.error(error.getLogMessage());
           vscode.window.showErrorMessage(error.getUserMessage());
         } else if (error instanceof Error) {
-          const prdError = PrdFileError.readError(prdPath, error);
+          const prdError = PrdFileError.readError(this.prdFilePath, error);
           this.logger.error(prdError.getLogMessage());
           vscode.window.showErrorMessage(prdError.getUserMessage());
         } else {
@@ -163,7 +128,6 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
         }
       }
     } catch (error) {
-      // Catch any unexpected errors at the top level
       this.logger.error('Unexpected error in loadPrdFile', error);
       vscode.window.showErrorMessage(getUserFriendlyMessage(error));
     }
@@ -243,21 +207,18 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
         passes: false,
       };
 
-      this.prdItems.push(newItem);
-
       try {
-        this.logger.info('Adding new PRD item', { id: newId, category, description });
-        fs.writeFileSync(
-          this.prdFilePath,
-          JSON.stringify(this.prdItems, null, "\t"),
-          "utf-8",
-        );
+        this.logger.info('Adding new PRD item via PrdFileManager', { 
+          id: newId, 
+          category, 
+          description 
+        });
+        this.fileManager.addItem(newItem);
+        this.prdItems.push(newItem);
         this._onDidChangeTreeData.fire();
         vscode.window.showInformationMessage(`Added item: ${newId}`);
       } catch (error) {
-        // Rollback the in-memory change
-        this.prdItems.pop();
-        throw PrdFileError.writeError(this.prdFilePath, error as Error);
+        throw error;
       }
     } catch (error) {
       if (isRalphError(error)) {
@@ -338,27 +299,26 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
         return;
       }
 
-      // Store original values for rollback
-      const originalCategory = this.prdItems[itemIndex].category;
-      const originalDescription = this.prdItems[itemIndex].description;
-
-      this.prdItems[itemIndex].category = validation.data!.category;
-      this.prdItems[itemIndex].description = validation.data!.description;
-
       try {
-        this.logger.info('Updating PRD item', { id: item.id, category, description });
-        fs.writeFileSync(
-          this.prdFilePath,
-          JSON.stringify(this.prdItems, null, "\t"),
-          "utf-8",
-        );
+        this.logger.info('Updating PRD item via PrdFileManager', { 
+          id: item.id, 
+          category, 
+          description 
+        });
+        this.fileManager.updateItem(item.id, (existingItem) => ({
+          ...existingItem,
+          category: validation.data!.category,
+          description: validation.data!.description
+        }));
+        
+        // Update in-memory copy
+        this.prdItems[itemIndex].category = validation.data!.category;
+        this.prdItems[itemIndex].description = validation.data!.description;
+        
         this._onDidChangeTreeData.fire();
         vscode.window.showInformationMessage(`Updated item: ${item.id}`);
       } catch (error) {
-        // Rollback the in-memory changes
-        this.prdItems[itemIndex].category = originalCategory;
-        this.prdItems[itemIndex].description = originalDescription;
-        throw PrdFileError.writeError(this.prdFilePath, error as Error);
+        throw error;
       }
     } catch (error) {
       if (isRalphError(error)) {
@@ -420,23 +380,17 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
         return;
       }
 
-      // Store the deleted item for potential rollback
-      const deletedItem = this.prdItems[itemIndex];
-      this.prdItems.splice(itemIndex, 1);
-
       try {
-        this.logger.info('Deleting PRD item', { id: item.id });
-        fs.writeFileSync(
-          this.prdFilePath,
-          JSON.stringify(this.prdItems, null, "\t"),
-          "utf-8",
-        );
+        this.logger.info('Deleting PRD item via PrdFileManager', { id: item.id });
+        this.fileManager.removeItem(item.id);
+        
+        // Update in-memory copy
+        this.prdItems.splice(itemIndex, 1);
+        
         this._onDidChangeTreeData.fire();
         vscode.window.showInformationMessage(`Deleted item: ${item.id}`);
       } catch (error) {
-        // Rollback the deletion
-        this.prdItems.splice(itemIndex, 0, deletedItem);
-        throw PrdFileError.writeError(this.prdFilePath, error as Error);
+        throw error;
       }
     } catch (error) {
       if (isRalphError(error)) {
@@ -520,19 +474,18 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
         const itemIndex = this.prdItems.findIndex(i => i.id === item.id);
         if (itemIndex !== -1 && this.prdFilePath) {
           this.logger.debug('Updating item status to in-progress', { id: item.id });
-          this.prdItems[itemIndex].status = Status.InProgress;
           
           try {
-            fs.writeFileSync(
-              this.prdFilePath,
-              JSON.stringify(this.prdItems, null, "\t"),
-              "utf-8",
-            );
+            this.fileManager.updateItem(item.id, (existingItem) => ({
+              ...existingItem,
+              status: Status.InProgress
+            }));
+            
+            // Update in-memory copy
+            this.prdItems[itemIndex].status = Status.InProgress;
             this._onDidChangeTreeData.fire();
           } catch (error) {
-            // Rollback status change
-            this.prdItems[itemIndex].status = item.status;
-            throw PrdFileError.writeError(this.prdFilePath, error as Error);
+            throw error;
           }
         }
       });
@@ -1038,19 +991,22 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
 
       // Convert step to object format if it's a string
       const currentStep = item.steps[stepIndex];
-      if (typeof currentStep === 'string') {
-        item.steps[stepIndex] = { text: currentStep, completed };
-      } else {
-        item.steps[stepIndex] = { ...currentStep, completed };
-      }
+      const updatedStep = typeof currentStep === 'string'
+        ? { text: currentStep, completed }
+        : { ...currentStep, completed };
 
-      // Save to file
-      fs.writeFileSync(
-        this.prdFilePath,
-        JSON.stringify(this.prdItems, null, '\t'),
-        'utf-8'
-      );
+      // Save to file using PrdFileManager
+      this.fileManager.updateItem(itemId, (existingItem) => {
+        const newSteps = [...existingItem.steps];
+        newSteps[stepIndex] = updatedStep;
+        return {
+          ...existingItem,
+          steps: newSteps
+        };
+      });
 
+      // Update in-memory copy
+      item.steps[stepIndex] = updatedStep;
       this._onDidChangeTreeData.fire();
       
       const status = completed ? 'completed' : 'incomplete';

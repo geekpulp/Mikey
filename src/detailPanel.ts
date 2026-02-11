@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
 import * as path from 'path';
 import { PrdItem, PrdStep } from './prdTreeDataProvider';
 import { Status, MessageCommand, FILE_PATHS } from './constants';
@@ -9,6 +8,7 @@ import { PrdFileError, GitOperationError, EnvironmentError, getUserFriendlyMessa
 import { getHtmlForWebview } from './htmlRenderer';
 import { getChangedFiles, openFileDiff, handleCompletionMerge } from './gitOperations';
 import { buildChatContext, startWorkOnStep } from './stepManager';
+import { PrdFileManager } from './prdFileManager';
 
 /**
  * Manages the webview panel for displaying PRD item details
@@ -35,6 +35,7 @@ export class DetailPanel {
 	private _disposables: vscode.Disposable[] = [];
 	private _currentItem: PrdItem | undefined;
 	private logger = Logger.getInstance();
+	private fileManager = PrdFileManager.getInstance();
 
 	/**
 	 * Private constructor - use createOrShow() to instantiate
@@ -236,50 +237,35 @@ export class DetailPanel {
 		if (!this._currentItem) {
 			return;
 		}
-
-		const workspaceFolders = vscode.workspace.workspaceFolders;
-		if (!workspaceFolders) {
-			vscode.window.showErrorMessage('No workspace folder found');
-			return;
-		}
-
-		const prdPath = path.join(workspaceFolders[0].uri.fsPath, 'plans', 'prd.json');
 		
 		try {
-			// Read current PRD file
-			const content = fs.readFileSync(prdPath, 'utf-8');
-			const prdItems: PrdItem[] = JSON.parse(content);
-			
-			// Find the current item in the array
-			const itemIndex = prdItems.findIndex(item => item.id === this._currentItem!.id);
-			if (itemIndex === -1) {
-				vscode.window.showErrorMessage('Item not found in PRD file');
-				return;
-			}
+			// Update using PrdFileManager
+			const updatedItem = this.fileManager.updateItem(this._currentItem.id, (item) => {
+				// Ensure step exists
+				if (stepIndex < 0 || stepIndex >= item.steps.length) {
+					throw new Error('Invalid step index');
+				}
 
-			const item = prdItems[itemIndex];
-			
-			// Ensure step exists
-			if (stepIndex < 0 || stepIndex >= item.steps.length) {
-				vscode.window.showErrorMessage('Invalid step index');
-				return;
-			}
+				// Convert step to object format if it's a string
+				const step = item.steps[stepIndex];
+				const updatedSteps = [...item.steps];
+				
+				if (typeof step === 'string') {
+					updatedSteps[stepIndex] = { text: step, completed: true };
+				} else {
+					// Toggle completion state
+					updatedSteps[stepIndex] = { ...step, completed: !step.completed };
+				}
 
-			// Convert step to object format if it's a string
-			const step = item.steps[stepIndex];
-			if (typeof step === 'string') {
-				item.steps[stepIndex] = { text: step, completed: true };
-			} else {
-				// Toggle completion state
-				step.completed = !step.completed;
-			}
-
-			// Write updated PRD file
-			fs.writeFileSync(prdPath, JSON.stringify(prdItems, null, '\t'), 'utf-8');
+				return {
+					...item,
+					steps: updatedSteps
+				};
+			});
 			
 			// Update current item reference and refresh view
-			this._currentItem = item;
-			this.update(item);
+			this._currentItem = updatedItem;
+			this.update(updatedItem);
 			
 		} catch (error) {
 			vscode.window.showErrorMessage(`Failed to update step: ${error}`);
@@ -303,30 +289,17 @@ export class DetailPanel {
 			vscode.window.showErrorMessage('No workspace folder found');
 			return;
 		}
-
-		const prdPath = path.join(workspaceFolders[0].uri.fsPath, 'plans', 'prd.json');
 		
 		try {
-			// Read current PRD file
-			const content = fs.readFileSync(prdPath, 'utf-8');
-			const prdItems: PrdItem[] = JSON.parse(content);
-			
-			// Find the current item in the array
-			const itemIndex = prdItems.findIndex(item => item.id === this._currentItem!.id);
-			if (itemIndex === -1) {
-				vscode.window.showErrorMessage('Item not found in PRD file');
-				return;
-			}
-
-			// Update status (type-safe after validation)
-			prdItems[itemIndex].status = newStatus as Status;
-
-			// Write updated PRD file
-			fs.writeFileSync(prdPath, JSON.stringify(prdItems, null, '\t'), 'utf-8');
+			// Update using PrdFileManager
+			const updatedItem = this.fileManager.updateItem(this._currentItem.id, (item) => ({
+				...item,
+				status: newStatus as Status
+			}));
 			
 			// Update current item reference and refresh view
-			this._currentItem = prdItems[itemIndex];
-			this.update(prdItems[itemIndex]);
+			this._currentItem = updatedItem;
+			this.update(updatedItem);
 			
 			vscode.window.showInformationMessage(`Status updated to: ${newStatus}`);
 			
@@ -344,38 +317,19 @@ export class DetailPanel {
 		if (!this._currentItem) {
 			return;
 		}
-
-		const workspaceFolders = vscode.workspace.workspaceFolders;
-		if (!workspaceFolders) {
-			vscode.window.showErrorMessage('No workspace folder found');
-			return;
-		}
-
-		const prdPath = path.join(workspaceFolders[0].uri.fsPath, 'plans', 'prd.json');
 		
 		try {
-			// Read current PRD file
-			const content = fs.readFileSync(prdPath, 'utf-8');
-			const prdItems: PrdItem[] = JSON.parse(content);
-			
-			// Find the current item in the array
-			const itemIndex = prdItems.findIndex(item => item.id === this._currentItem!.id);
-			if (itemIndex === -1) {
-				vscode.window.showErrorMessage('Item not found in PRD file');
-				return;
-			}
-
-			// Toggle passes field
-			prdItems[itemIndex].passes = !prdItems[itemIndex].passes;
-
-			// Write updated PRD file
-			fs.writeFileSync(prdPath, JSON.stringify(prdItems, null, '\t'), 'utf-8');
+			// Update using PrdFileManager
+			const updatedItem = this.fileManager.updateItem(this._currentItem.id, (item) => ({
+				...item,
+				passes: !item.passes
+			}));
 			
 			// Update current item reference and refresh view
-			this._currentItem = prdItems[itemIndex];
-			this.update(prdItems[itemIndex]);
+			this._currentItem = updatedItem;
+			this.update(updatedItem);
 			
-			const passesValue = prdItems[itemIndex].passes ? 'true (passes)' : 'false (does not pass)';
+			const passesValue = updatedItem.passes ? 'true (passes)' : 'false (does not pass)';
 			vscode.window.showInformationMessage(`Passes field updated to: ${passesValue}`);
 			
 		} catch (error) {
@@ -408,27 +362,8 @@ export class DetailPanel {
 		if (!stepText) {
 			return; // User cancelled
 		}
-
-		const workspaceFolders = vscode.workspace.workspaceFolders;
-		if (!workspaceFolders) {
-			vscode.window.showErrorMessage('No workspace folder found');
-			return;
-		}
-
-		const prdPath = path.join(workspaceFolders[0].uri.fsPath, 'plans', 'prd.json');
 		
 		try {
-			// Read current PRD file
-			const content = fs.readFileSync(prdPath, 'utf-8');
-			const prdItems: PrdItem[] = JSON.parse(content);
-			
-			// Find the current item in the array
-			const itemIndex = prdItems.findIndex(item => item.id === this._currentItem!.id);
-			if (itemIndex === -1) {
-				vscode.window.showErrorMessage('Item not found in PRD file');
-				return;
-			}
-
 			// Validate and sanitize step text
 			const sanitized = stepText.trim();
 			const validation = validateStep(sanitized);
@@ -437,15 +372,15 @@ export class DetailPanel {
 				return;
 			}
 
-			// Add new step (as string initially)
-			prdItems[itemIndex].steps.push(sanitized);
-
-			// Write updated PRD file
-			fs.writeFileSync(prdPath, JSON.stringify(prdItems, null, '\t'), 'utf-8');
+			// Update using PrdFileManager
+			const updatedItem = this.fileManager.updateItem(this._currentItem.id, (item) => ({
+				...item,
+				steps: [...item.steps, sanitized]
+			}));
 			
 			// Update current item reference and refresh view
-			this._currentItem = prdItems[itemIndex];
-			this.update(prdItems[itemIndex]);
+			this._currentItem = updatedItem;
+			this.update(updatedItem);
 			
 			vscode.window.showInformationMessage('Step added successfully');
 			
@@ -488,27 +423,8 @@ export class DetailPanel {
 		if (!stepText) {
 			return; // User cancelled
 		}
-
-		const workspaceFolders = vscode.workspace.workspaceFolders;
-		if (!workspaceFolders) {
-			vscode.window.showErrorMessage('No workspace folder found');
-			return;
-		}
-
-		const prdPath = path.join(workspaceFolders[0].uri.fsPath, 'plans', 'prd.json');
 		
 		try {
-			// Read current PRD file
-			const content = fs.readFileSync(prdPath, 'utf-8');
-			const prdItems: PrdItem[] = JSON.parse(content);
-			
-			// Find the current item in the array
-			const itemIndex = prdItems.findIndex(item => item.id === this._currentItem!.id);
-			if (itemIndex === -1) {
-				vscode.window.showErrorMessage('Item not found in PRD file');
-				return;
-			}
-
 			// Validate and sanitize step text
 			const sanitized = stepText.trim();
 			const validation = validateStep(sanitized);
@@ -517,20 +433,27 @@ export class DetailPanel {
 				return;
 			}
 
-			// Update step text, preserving completed status if it's an object
-			const existingStep = prdItems[itemIndex].steps[stepIndex];
-			if (typeof existingStep === 'string') {
-				prdItems[itemIndex].steps[stepIndex] = sanitized;
-			} else {
-				existingStep.text = sanitized;
-			}
-
-			// Write updated PRD file
-			fs.writeFileSync(prdPath, JSON.stringify(prdItems, null, '\t'), 'utf-8');
+			// Update using PrdFileManager
+			const updatedItem = this.fileManager.updateItem(this._currentItem.id, (item) => {
+				const updatedSteps = [...item.steps];
+				const existingStep = updatedSteps[stepIndex];
+				
+				// Update step text, preserving completed status if it's an object
+				if (typeof existingStep === 'string') {
+					updatedSteps[stepIndex] = sanitized;
+				} else {
+					updatedSteps[stepIndex] = { ...existingStep, text: sanitized };
+				}
+				
+				return {
+					...item,
+					steps: updatedSteps
+				};
+			});
 			
 			// Update current item reference and refresh view
-			this._currentItem = prdItems[itemIndex];
-			this.update(prdItems[itemIndex]);
+			this._currentItem = updatedItem;
+			this.update(updatedItem);
 			
 			vscode.window.showInformationMessage('Step updated successfully');
 			
@@ -563,36 +486,22 @@ export class DetailPanel {
 		if (confirmation !== 'Delete') {
 			return; // User cancelled
 		}
-
-		const workspaceFolders = vscode.workspace.workspaceFolders;
-		if (!workspaceFolders) {
-			vscode.window.showErrorMessage('No workspace folder found');
-			return;
-		}
-
-		const prdPath = path.join(workspaceFolders[0].uri.fsPath, 'plans', 'prd.json');
 		
 		try {
-			// Read current PRD file
-			const content = fs.readFileSync(prdPath, 'utf-8');
-			const prdItems: PrdItem[] = JSON.parse(content);
-			
-			// Find the current item in the array
-			const itemIndex = prdItems.findIndex(item => item.id === this._currentItem!.id);
-			if (itemIndex === -1) {
-				vscode.window.showErrorMessage('Item not found in PRD file');
-				return;
-			}
-
-			// Remove step from array
-			prdItems[itemIndex].steps.splice(stepIndex, 1);
-
-			// Write updated PRD file
-			fs.writeFileSync(prdPath, JSON.stringify(prdItems, null, '\t'), 'utf-8');
+			// Update using PrdFileManager
+			const updatedItem = this.fileManager.updateItem(this._currentItem.id, (item) => {
+				const updatedSteps = [...item.steps];
+				updatedSteps.splice(stepIndex, 1);
+				
+				return {
+					...item,
+					steps: updatedSteps
+				};
+			});
 			
 			// Update current item reference and refresh view
-			this._currentItem = prdItems[itemIndex];
-			this.update(prdItems[itemIndex]);
+			this._currentItem = updatedItem;
+			this.update(updatedItem);
 			
 			vscode.window.showInformationMessage('Step deleted successfully');
 			
@@ -638,29 +547,16 @@ export class DetailPanel {
 		}
 
 		// Change status to in-review
-		const prdPath = path.join(workspaceFolders[0].uri.fsPath, FILE_PATHS.prdFile);
-		
 		try {
-			// Read current PRD file
-			const content = fs.readFileSync(prdPath, 'utf-8');
-			const prdItems: PrdItem[] = JSON.parse(content);
-			
-			// Find the current item in the array
-			const itemIndex = prdItems.findIndex(item => item.id === this._currentItem!.id);
-			if (itemIndex === -1) {
-				vscode.window.showErrorMessage('Item not found in PRD file');
-				return;
-			}
-
-			// Update status
-			prdItems[itemIndex].status = Status.InReview;
-
-			// Write updated PRD file
-			fs.writeFileSync(prdPath, JSON.stringify(prdItems, null, '\t'), 'utf-8');
+			// Update using PrdFileManager
+			const updatedItem = this.fileManager.updateItem(this._currentItem.id, (item) => ({
+				...item,
+				status: Status.InReview
+			}));
 			
 			// Update current item reference and refresh view
-			this._currentItem = prdItems[itemIndex];
-			await this.update(prdItems[itemIndex]);
+			this._currentItem = updatedItem;
+			await this.update(updatedItem);
 			
 			vscode.window.showInformationMessage(`✓ Item "${this._currentItem.id}" submitted for review`);
 			

@@ -753,16 +753,37 @@
     "category": "refactor",
     "description": "Create PrdFileManager service",
     "steps": [
-      "Create new PrdFileManager class to abstract file operations",
-      "Add methods for read, write, update operations with error handling",
-      "Add transaction-like operations for atomic PRD updates",
-      "Implement file backup/recovery mechanism",
-      "Update prdTreeDataProvider to use PrdFileManager",
-      "Update detailPanel to use PrdFileManager",
-      "Add unit tests for PrdFileManager"
+      {
+        "text": "Create new PrdFileManager class to abstract file operations",
+        "completed": true
+      },
+      {
+        "text": "Add methods for read, write, update operations with error handling",
+        "completed": true
+      },
+      {
+        "text": "Add transaction-like operations for atomic PRD updates",
+        "completed": true
+      },
+      {
+        "text": "Implement file backup/recovery mechanism",
+        "completed": true
+      },
+      {
+        "text": "Update prdTreeDataProvider to use PrdFileManager",
+        "completed": true
+      },
+      {
+        "text": "Update detailPanel to use PrdFileManager",
+        "completed": true
+      },
+      {
+        "text": "Add unit tests for PrdFileManager",
+        "completed": true
+      }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "refactor-003",
