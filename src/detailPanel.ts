@@ -17,17 +17,30 @@ export class DetailPanel {
 		this._panel = panel;
 		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 		
-		// Handle messages from the webview
+		/**
+		 * SECURITY: Message handler with validation
+		 * All messages from webview are validated before processing to prevent malicious payloads
+		 */
 		this._panel.webview.onDidReceiveMessage(
 			message => {
+				// SECURITY: Validate message structure before processing
+				if (!this._isValidMessage(message)) {
+					this.logger.warn('Invalid message received from webview', { message });
+					return;
+				}
+
 				switch (message.command) {
 					case MessageCommand.ToggleStep:
-						this.toggleStepCompletion(message.stepIndex);
+						if (typeof message.stepIndex === 'number') {
+							this.toggleStepCompletion(message.stepIndex);
+						}
 						break;
 					case MessageCommand.ChangeStatus:
-					this.changeItemStatus(message.status).catch(err => {
-						vscode.window.showErrorMessage(`Failed to change status: ${err}`);
-					});
+						if (typeof message.status === 'string') {
+							this.changeItemStatus(message.status).catch(err => {
+								vscode.window.showErrorMessage(`Failed to change status: ${err}`);
+							});
+						}
 						break;
 					case MessageCommand.TogglePasses:
 						this.togglePasses();
@@ -36,20 +49,30 @@ export class DetailPanel {
 						this.addStep();
 						break;
 					case MessageCommand.EditStep:
-						this.editStep(message.stepIndex);
+						if (typeof message.stepIndex === 'number') {
+							this.editStep(message.stepIndex);
+						}
 						break;
 					case MessageCommand.DeleteStep:
-						this.deleteStep(message.stepIndex);
+						if (typeof message.stepIndex === 'number') {
+							this.deleteStep(message.stepIndex);
+						}
 						break;
 					case 'startWorkOnStep':
-						this.startWorkOnStep(message.stepIndex);
+						if (typeof message.stepIndex === 'number') {
+							this.startWorkOnStep(message.stepIndex);
+						}
 						break;
 					case 'openFileDiff':
-						this.openFileDiff(message.filePath);
+						if (typeof message.filePath === 'string') {
+							this.openFileDiff(message.filePath);
+						}
 						break;
 					case MessageCommand.SubmitForReview:
 						this.submitForReview();
 						break;
+					default:
+						this.logger.warn('Unknown message command', { command: message.command });
 				}
 			},
 			null,
@@ -116,13 +139,23 @@ export class DetailPanel {
 		const changedFiles = workspaceRoot ? await this.getChangedFiles(workspaceRoot) : [];
 		const changedFilesHtml = this._renderChangedFiles(changedFiles);
 
+		// SECURITY: Generate nonce for inline scripts and styles
+		const nonce = this._getNonce();
+
 		return `<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Content-Security-Policy" content="
+		default-src 'none';
+		script-src 'nonce-${nonce}';
+		style-src 'nonce-${nonce}';
+		font-src ${this._panel.webview.cspSource};
+		img-src ${this._panel.webview.cspSource} data:;
+	">
 	<title>PRD Item Details</title>
-	<style>
+	<style nonce="${nonce}">
 		body {
 			font-family: var(--vscode-font-family);
 			color: var(--vscode-foreground);
@@ -374,21 +407,64 @@ export class DetailPanel {
 			background-color: var(--vscode-button-hoverBackground);
 		}
 	</style>
-	<script>
+	<script nonce="${nonce}">
 		const vscode = acquireVsCodeApi();
 		
-		function toggleStep(stepIndex) {
-			vscode.postMessage({
-				command: 'toggleStep',
-				stepIndex: stepIndex
+		/**
+		 * SECURITY: Event delegation to avoid inline onclick handlers
+		 * All events are handled through data attributes for better CSP compliance
+		 */
+		document.addEventListener('DOMContentLoaded', () => {
+			// Use event delegation on document for all clicks
+			document.addEventListener('click', (e) => {
+				const target = e.target;
+				if (!target) return;
+
+				// Find the element with data-action (might be parent)
+				const actionElement = target.closest('[data-action]');
+				if (!actionElement) return;
+
+				const action = actionElement.getAttribute('data-action');
+				const index = actionElement.getAttribute('data-index');
+				const filepath = actionElement.getAttribute('data-filepath');
+
+				// SECURITY: Validate and sanitize inputs before sending to extension
+				switch (action) {
+					case 'toggleStep':
+					case 'editStep':
+					case 'deleteStep':
+					case 'startWorkOnStep':
+						if (index !== null) {
+							const stepIndex = parseInt(index, 10);
+							if (!isNaN(stepIndex) && stepIndex >= 0) {
+								vscode.postMessage({
+									command: action,
+									stepIndex: stepIndex
+								});
+							}
+						}
+						break;
+					
+					case 'openFileDiff':
+						if (filepath) {
+							vscode.postMessage({
+								command: action,
+								filePath: filepath
+							});
+						}
+						break;
+				}
 			});
-		}
+		});
 		
+		// Keep these functions for backward compatibility with existing UI elements
 		function changeStatus(newStatus) {
-			vscode.postMessage({
-				command: 'changeStatus',
-				status: newStatus
-			});
+			if (newStatus && typeof newStatus === 'string') {
+				vscode.postMessage({
+					command: 'changeStatus',
+					status: newStatus
+				});
+			}
 		}
 		
 		function togglePasses() {
@@ -400,34 +476,6 @@ export class DetailPanel {
 		function addStep() {
 			vscode.postMessage({
 				command: 'addStep'
-			});
-		}
-		
-		function editStep(stepIndex) {
-			vscode.postMessage({
-				command: 'editStep',
-				stepIndex: stepIndex
-			});
-		}
-		
-		function deleteStep(stepIndex) {
-			vscode.postMessage({
-				command: 'deleteStep',
-				stepIndex: stepIndex
-			});
-		}
-		
-		function startWorkOnStep(stepIndex) {
-			vscode.postMessage({
-				command: 'startWorkOnStep',
-				stepIndex: stepIndex
-			});
-		}
-		
-		function openFileDiff(filePath) {
-			vscode.postMessage({
-				command: 'openFileDiff',
-				filePath: filePath
 			});
 		}
 		
@@ -493,16 +541,17 @@ export class DetailPanel {
 			const checkboxClass = isCompleted ? 'checkbox checked' : 'checkbox';
 			const textClass = isCompleted ? 'step-text step-completed' : 'step-text';
 
+			// SECURITY: Use data attributes instead of inline onclick handlers
 			return `
 				<li class="step-item">
 					<span class="step-checkbox">
-						<span class="${checkboxClass}" onclick="toggleStep(${index})" style="cursor: pointer;"></span>
+						<span class="${checkboxClass}" data-action="toggleStep" data-index="${index}" style="cursor: pointer;"></span>
 					</span>
 					<span class="${textClass}">${this._escapeHtml(stepText)}</span>
 					<div class="step-actions">
-						<button class="step-btn" onclick="startWorkOnStep(${index})">💬 Start Work</button>
-						<button class="step-btn" onclick="editStep(${index})">Edit</button>
-						<button class="step-btn delete" onclick="deleteStep(${index})">Delete</button>
+						<button class="step-btn" data-action="startWorkOnStep" data-index="${index}">💬 Start Work</button>
+						<button class="step-btn" data-action="editStep" data-index="${index}">Edit</button>
+						<button class="step-btn delete" data-action="deleteStep" data-index="${index}">Delete</button>
 					</div>
 				</li>
 			`;
@@ -516,9 +565,10 @@ export class DetailPanel {
 			return '';
 		}
 
-		const fileItems = files.map(file => {
+		// SECURITY: Use data attributes instead of inline onclick handlers
+		const fileItems = files.map((file) => {
 			return `
-				<li class="file-item" onclick="openFileDiff('${this._escapeHtml(file)}')">
+				<li class="file-item" data-action="openFileDiff" data-filepath="${this._escapeHtml(file)}">
 					<span class="file-icon">📝</span>
 					<span class="file-path">${this._escapeHtml(file)}</span>
 				</li>
@@ -553,6 +603,61 @@ export class DetailPanel {
 			.replace(/>/g, '&gt;')
 			.replace(/"/g, '&quot;')
 			.replace(/'/g, '&#039;');
+	}
+
+	/**
+	 * SECURITY: Generate cryptographically secure nonce for CSP
+	 * Used to allow only specific inline scripts and styles
+	 */
+	private _getNonce(): string {
+		let text = '';
+		const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		for (let i = 0; i < 32; i++) {
+			text += possible.charAt(Math.floor(Math.random() * possible.length));
+		}
+		return text;
+	}
+
+	/**
+	 * SECURITY: Validate message structure from webview
+	 * Prevents malicious or malformed messages from being processed
+	 */
+	private _isValidMessage(message: any): boolean {
+		if (!message || typeof message !== 'object') {
+			return false;
+		}
+
+		// All messages must have a command field
+		if (typeof message.command !== 'string') {
+			return false;
+		}
+
+		// Validate specific message types
+		switch (message.command) {
+			case MessageCommand.ToggleStep:
+			case MessageCommand.EditStep:
+			case MessageCommand.DeleteStep:
+			case 'startWorkOnStep':
+				return typeof message.stepIndex === 'number' && 
+					   message.stepIndex >= 0 && 
+					   Number.isInteger(message.stepIndex);
+			
+			case MessageCommand.ChangeStatus:
+				return typeof message.status === 'string' && 
+					   [Status.NotStarted, Status.InProgress, Status.InReview, Status.Completed].includes(message.status as Status);
+			
+			case 'openFileDiff':
+				return typeof message.filePath === 'string' && 
+					   message.filePath.length > 0;
+			
+			case MessageCommand.TogglePasses:
+			case MessageCommand.AddStep:
+			case MessageCommand.SubmitForReview:
+				return true;
+			
+			default:
+				return false;
+		}
 	}
 
 	private toggleStepCompletion(stepIndex: number): void {

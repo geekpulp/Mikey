@@ -1020,15 +1020,36 @@
 		"category": "security",
 		"description": "Enhance webview security",
 		"steps": [
-			"Review and strengthen Content Security Policy",
-			"Sanitize all user inputs before rendering in webview",
-			"Use nonce for inline scripts and styles",
-			"Validate all messages from webview before processing",
-			"Audit for potential XSS vulnerabilities",
-			"Test with malicious inputs to verify security",
-			"Document security measures in code comments"
+			{
+				"text": "Review and strengthen Content Security Policy",
+				"completed": true
+			},
+			{
+				"text": "Sanitize all user inputs before rendering in webview",
+				"completed": true
+			},
+			{
+				"text": "Use nonce for inline scripts and styles",
+				"completed": true
+			},
+			{
+				"text": "Validate all messages from webview before processing",
+				"completed": true
+			},
+			{
+				"text": "Audit for potential XSS vulnerabilities",
+				"completed": true
+			},
+			{
+				"text": "Test with malicious inputs to verify security",
+				"completed": true
+			},
+			{
+				"text": "Document security measures in code comments",
+				"completed": true
+			}
 		],
-		"status": "not-started",
-		"passes": false
+		"status": "completed",
+		"passes": true
 	}
 ]
