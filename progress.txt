@@ -1288,3 +1288,47 @@ Implemented a comprehensive run-loop manager that enables automated sequential p
 - Remaining items: feature-007, feature-008, feature-009, test-002, feature-011, feature-012, test-004
 - feature-011 is already partially addressed by this implementation (run queue command)
 - feature-012 (auto-completion detection) would enhance this further
+
+## Completed feature-007: Implement PRD item archiving system
+
+**Date:** 2026-02-11
+
+**Summary:**
+Implemented a comprehensive archiving system to keep prd.json lean by moving completed items to dated archive files.
+
+**Changes made:**
+- Created src/archiveManager.ts with ArchiveManager class
+- Implemented archivable item detection (status: completed AND passes: true)
+- Implemented extraction of archivable items from PRD list
+- Implemented archive file saving with merge/deduplication support
+- Archive files follow naming convention: prd-archive-YYYY-MM-DD.json
+- Archive files stored in plans/ directory alongside prd.json
+- Added utility methods for listing and loading archive files
+
+**Implementation details:**
+- Singleton pattern for consistent access across extension
+- Archive files use ISO date format (YYYY-MM-DD) for easy sorting
+- When archiving to existing file, items are merged and deduplicated by ID
+- Comprehensive logging for all operations
+- Error handling with informative messages
+- Public API: archiveCompleted() method returns archived count, archive file path, and remaining items
+
+**Verification:**
+- ✓ pnpm typecheck: TypeScript compilation successful
+- ✓ pnpm test: All tests pass (exit code 0)
+- ✓ ArchiveManager module created with all required methods
+- ✓ Proper error handling and logging implemented
+
+**Steps completed:**
+1. ✓ Design archiving system: completed items → prd-archive-<YYYY-MM-DD>.json files
+2. ✓ Create archiveManager module to handle archive file operations
+3. ✓ Implement function to identify completable items (status: completed AND passes: true)
+4. ✓ Implement function to extract completable items from prd.json
+5. ✓ Implement function to save extracted items to prd-archive-<date>.json
+
+**Item status:** completed, passes: true
+
+**Next steps:**
+- feature-008: Add UI command to archive completed PRD items (can now be implemented)
+- feature-009: Add archiving options and configuration settings
+- test-002: Add tests for PRD item archiving functionality

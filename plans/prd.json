@@ -1322,27 +1322,27 @@
     "steps": [
       {
         "text": "Design archiving system: completed items → prd-archive-<YYYY-MM-DD>.json files",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Create archiveManager module to handle archive file operations",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Implement function to identify completable items (status: completed AND passes: true)",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Implement function to extract completable items from prd.json",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Implement function to save extracted items to prd-archive-<date>.json",
-        "completed": false
+        "completed": true
       }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "feature-008",
