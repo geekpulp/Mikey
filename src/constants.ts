@@ -1,5 +1,5 @@
 /**
- * Constants and enums for the Ralph extension
+ * Constants and enums for the Mikey extension
  */
 
 /**

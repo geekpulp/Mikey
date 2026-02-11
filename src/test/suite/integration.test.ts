@@ -26,15 +26,15 @@ suite('Integration Test Suite', () => {
 		const commands = await vscode.commands.getCommands(true);
 		
 		const requiredCommands = [
-			'ralph.refresh',
-			'ralph.addItem',
-			'ralph.editItem',
-			'ralph.deleteItem',
-			'ralph.runItem',
-			'ralph.startWork',
-			'ralph.openItem',
-			'ralph.markStepComplete'
-		];
+      "mikey.refresh",
+      "mikey.addItem",
+      "mikey.editItem",
+      "mikey.deleteItem",
+      "mikey.runItem",
+      "mikey.startWork",
+      "mikey.openItem",
+      "mikey.markStepComplete",
+    ];
 
 		for (const cmd of requiredCommands) {
 			assert.ok(
@@ -51,10 +51,10 @@ suite('Integration Test Suite', () => {
 		const packageJson = ext.packageJSON;
 		assert.ok(packageJson.activationEvents, 'Should have activation events');
 		assert.ok(
-			packageJson.activationEvents.includes('onView:ralph.prdExplorer') ||
-			packageJson.activationEvents.includes('*'),
-			'Should activate on tree view'
-		);
+      packageJson.activationEvents.includes("onView:mikey.prdExplorer") ||
+        packageJson.activationEvents.includes("*"),
+      "Should activate on tree view",
+    );
 	});
 
 	test('Extension should provide tree view', () => {
@@ -64,9 +64,10 @@ suite('Integration Test Suite', () => {
 		const packageJson = ext.packageJSON;
 		assert.ok(packageJson.contributes?.views, 'Should contribute views');
 		
-		const ralphViews = packageJson.contributes.views['ralph-explorer'] || 
-						   packageJson.contributes.views['explorer'];
-		assert.ok(ralphViews, 'Should have Ralph views');
+		const mikeyViews =
+      packageJson.contributes.views["mikey"] ||
+      packageJson.contributes.views["mikey-explorer"];
+    assert.ok(mikeyViews, "Should have Mikey views");
 	});
 
 	test('Extension should provide commands', () => {
@@ -82,8 +83,14 @@ suite('Integration Test Suite', () => {
 		
 		// Verify key commands exist
 		const commandIds = commands.map((cmd: any) => cmd.command);
-		assert.ok(commandIds.includes('ralph.addItem'), 'Should have addItem command');
-		assert.ok(commandIds.includes('ralph.refresh'), 'Should have refresh command');
+		assert.ok(
+      commandIds.includes("mikey.addItem"),
+      "Should have addItem command",
+    );
+    assert.ok(
+      commandIds.includes("mikey.refresh"),
+      "Should have refresh command",
+    );
 	});
 
 	test('PRD file operations - read and parse', () => {

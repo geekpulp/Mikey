@@ -6,9 +6,10 @@ import { Logger } from './logger';
 import { RunLoopManager } from './runLoopManager';
 import { ArchiveManager } from './archiveManager';
 import { PrdFileManager } from './prdFileManager';
+import { AddItemPanel } from "./addItemPanel";
 
 /**
- * Activates the Ralph extension
+ * Activates the Mikey extension
  * 
  * This is the main entry point for the extension. It:
  * - Initializes the logger
@@ -22,7 +23,7 @@ import { PrdFileManager } from './prdFileManager';
  * ```typescript
  * // Called automatically by VS Code when extension activates
  * // Activation events defined in package.json:
- * // - onView:ralph.prdExplorer
+ * // - onView:mikey.prdExplorer
  * // - workspaceContains:plans/prd.json
  * ```
  */
@@ -30,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
   const logger = Logger.getInstance();
   logger.info("Extension activation starting...");
   const config = ConfigManager.getInstance();
-  logger.info("Ralph extension activated");
+  logger.info("Mikey extension activated");
   logger.debug("Logger initialized, creating PrdTreeDataProvider...");
 
   let prdProvider: PrdTreeDataProvider | null = null;
@@ -49,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
   if (prdProvider) {
     try {
       logger.debug("Creating tree view...");
-      treeView = vscode.window.createTreeView("ralph.prdExplorer", {
+      treeView = vscode.window.createTreeView("mikey.prdExplorer", {
         treeDataProvider: prdProvider,
         dragAndDropController: prdProvider,
       });
@@ -72,7 +73,7 @@ export function activate(context: vscode.ExtensionContext) {
   // Register all commands - these are always available even if provider fails
   try {
     context.subscriptions.push(
-      vscode.commands.registerCommand("ralph.refresh", () => {
+      vscode.commands.registerCommand("mikey.refresh", () => {
         logger.debug("Refreshing PRD tree view");
         if (prdProvider) {
           prdProvider.refresh();
@@ -85,7 +86,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
-      vscode.commands.registerCommand("ralph.filterByStatus", async () => {
+      vscode.commands.registerCommand("mikey.filterByStatus", async () => {
         if (!prdProvider) {
           vscode.window.showErrorMessage("PRD viewer not initialized");
           return;
@@ -138,7 +139,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
-      vscode.commands.registerCommand("ralph.filterByCategory", async () => {
+      vscode.commands.registerCommand("mikey.filterByCategory", async () => {
         if (!prdProvider) {
           vscode.window.showErrorMessage("PRD viewer not initialized");
           return;
@@ -178,42 +179,27 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
-      vscode.commands.registerCommand("ralph.addItem", async () => {
+      vscode.commands.registerCommand("mikey.addItem", async () => {
         if (!prdProvider) {
           vscode.window.showErrorMessage("PRD viewer not initialized");
           return;
         }
-        logger.debug("Add item command invoked");
-        const category = await vscode.window.showQuickPick(
-          config.getCategories(),
-          {
-            placeHolder: "Select category for the new item",
-          },
-        );
+        logger.debug("Add item command invoked - opening webview panel");
 
-        if (!category) {
-          logger.debug("Add item cancelled: no category selected");
-          return;
-        }
-
-        const description = await vscode.window.showInputBox({
-          prompt: "Enter description for the new item",
-          placeHolder: "e.g., Implement export functionality",
+        // Show the webview panel for adding items
+        AddItemPanel.show((category: string, description: string) => {
+          logger.info("Adding new PRD item from webview", {
+            category,
+            description,
+          });
+          prdProvider.addItem(category, description);
         });
-
-        if (!description) {
-          logger.debug("Add item cancelled: no description provided");
-          return;
-        }
-
-        logger.info("Adding new PRD item", { category, description });
-        await prdProvider.addItem(category, description);
       }),
     );
 
     context.subscriptions.push(
       vscode.commands.registerCommand(
-        "ralph.editItem",
+        "mikey.editItem",
         async (item: PrdItem) => {
           if (!prdProvider) {
             vscode.window.showErrorMessage("PRD viewer not initialized");
@@ -227,7 +213,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
       vscode.commands.registerCommand(
-        "ralph.deleteItem",
+        "mikey.deleteItem",
         async (item: PrdItem) => {
           if (!prdProvider) {
             vscode.window.showErrorMessage("PRD viewer not initialized");
@@ -241,7 +227,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
       vscode.commands.registerCommand(
-        "ralph.runItem",
+        "mikey.runItem",
         async (item?: PrdItem) => {
           if (!prdProvider) {
             vscode.window.showErrorMessage("PRD viewer not initialized");
@@ -255,7 +241,23 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
       vscode.commands.registerCommand(
-        "ralph.startWork",
+        "mikey.runItemDirect",
+        async (item: PrdItem) => {
+          if (!prdProvider) {
+            vscode.window.showErrorMessage("PRD viewer not initialized");
+            return;
+          }
+          logger.info("Running PRD item directly with defaults", {
+            id: item.id,
+          });
+          await prdProvider.runItemDirect(item);
+        },
+      ),
+    );
+
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        "mikey.startWork",
         async (item?: PrdItem) => {
           if (!prdProvider) {
             vscode.window.showErrorMessage("PRD viewer not initialized");
@@ -273,7 +275,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
-      vscode.commands.registerCommand("ralph.openItem", (item: PrdItem) => {
+      vscode.commands.registerCommand("mikey.openItem", (item: PrdItem) => {
         logger.debug("Opening detail panel for item", { id: item.id });
         DetailPanel.createOrShow(context.extensionUri, item);
       }),
@@ -281,7 +283,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(
       vscode.commands.registerCommand(
-        "ralph.markStepComplete",
+        "mikey.markStepComplete",
         async (
           itemId: string,
           stepIndex: number,
@@ -302,25 +304,28 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
-      vscode.commands.registerCommand("ralph.runQueue", async () => {
+      vscode.commands.registerCommand("mikey.runQueue", async () => {
         logger.debug("Run queue command invoked");
-        
+
         // Prompt user for queue options
         const statusOptions = [
           { label: "Not Started", value: "not-started" },
           { label: "In Progress", value: "in-progress" },
           { label: "All Items", value: "all" },
         ];
-        
-        const selectedStatus = await vscode.window.showQuickPick(statusOptions, {
-          placeHolder: "Select which items to process",
-        });
-        
+
+        const selectedStatus = await vscode.window.showQuickPick(
+          statusOptions,
+          {
+            placeHolder: "Select which items to process",
+          },
+        );
+
         if (!selectedStatus) {
           logger.debug("Run queue cancelled: no status selected");
           return;
         }
-        
+
         const categoryOptions = [
           { label: "All Categories", value: "all" },
           { label: "Setup", value: "setup" },
@@ -330,30 +335,36 @@ export function activate(context: vscode.ExtensionContext) {
           { label: "Agent", value: "agent" },
           { label: "Test", value: "test" },
         ];
-        
-        const selectedCategory = await vscode.window.showQuickPick(categoryOptions, {
-          placeHolder: "Select category to process",
-        });
-        
+
+        const selectedCategory = await vscode.window.showQuickPick(
+          categoryOptions,
+          {
+            placeHolder: "Select category to process",
+          },
+        );
+
         if (!selectedCategory) {
           logger.debug("Run queue cancelled: no category selected");
           return;
         }
-        
+
         const stopOnFailureOptions = [
           { label: "Continue on failure", value: false },
           { label: "Stop on first failure", value: true },
         ];
-        
-        const selectedStopOption = await vscode.window.showQuickPick(stopOnFailureOptions, {
-          placeHolder: "How should failures be handled?",
-        });
-        
+
+        const selectedStopOption = await vscode.window.showQuickPick(
+          stopOnFailureOptions,
+          {
+            placeHolder: "How should failures be handled?",
+          },
+        );
+
         if (!selectedStopOption) {
           logger.debug("Run queue cancelled: no failure option selected");
           return;
         }
-        
+
         // Prompt for iterations per item
         const iterationInput = await vscode.window.showInputBox({
           prompt: "Number of iterations per item",
@@ -366,23 +377,23 @@ export function activate(context: vscode.ExtensionContext) {
             return null;
           },
         });
-        
+
         if (!iterationInput) {
           logger.debug("Run queue cancelled: no iterations specified");
           return;
         }
-        
+
         const iterationsPerItem = parseInt(iterationInput, 10);
-        
+
         logger.info("Starting run queue", {
           status: selectedStatus.value,
           category: selectedCategory.value,
           stopOnFailure: selectedStopOption.value,
           iterationsPerItem,
         });
-        
+
         const runLoopManager = new RunLoopManager();
-        
+
         // Get workspace path
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (!workspaceFolders) {
@@ -390,10 +401,10 @@ export function activate(context: vscode.ExtensionContext) {
           return;
         }
         const workspacePath = workspaceFolders[0].uri.fsPath;
-        
+
         // Initialize with workspace context
         runLoopManager.initialize(workspacePath);
-        
+
         try {
           await runLoopManager.startLoop({
             statusFilter: selectedStatus.value as any,
@@ -407,7 +418,11 @@ export function activate(context: vscode.ExtensionContext) {
               }
             },
             onItemComplete: (item, success, iteration) => {
-              logger.info("Item completed", { id: item.id, success, iteration });
+              logger.info("Item completed", {
+                id: item.id,
+                success,
+                iteration,
+              });
               if (prdProvider) {
                 prdProvider.refresh();
               }
@@ -422,14 +437,14 @@ export function activate(context: vscode.ExtensionContext) {
         } catch (error) {
           logger.error("Run queue failed", error);
           vscode.window.showErrorMessage(
-            `Failed to run queue: ${error instanceof Error ? error.message : String(error)}`
+            `Failed to run queue: ${error instanceof Error ? error.message : String(error)}`,
           );
         }
       }),
     );
 
     context.subscriptions.push(
-      vscode.commands.registerCommand("ralph.archiveCompleted", async () => {
+      vscode.commands.registerCommand("mikey.archiveCompleted", async () => {
         if (!prdProvider) {
           vscode.window.showErrorMessage("PRD viewer not initialized");
           return;
@@ -446,7 +461,7 @@ export function activate(context: vscode.ExtensionContext) {
           }
 
           const workspacePath = workspaceFolders[0].uri.fsPath;
-          
+
           // Initialize archive manager
           const archiveManager = ArchiveManager.getInstance();
           archiveManager.initialize(workspacePath);
@@ -459,7 +474,9 @@ export function activate(context: vscode.ExtensionContext) {
           const result = archiveManager.archiveCompleted(currentItems);
 
           if (result.archivedCount === 0) {
-            vscode.window.showInformationMessage("No completed items to archive");
+            vscode.window.showInformationMessage(
+              "No completed items to archive",
+            );
             logger.info("No items to archive");
             return;
           }
@@ -468,40 +485,44 @@ export function activate(context: vscode.ExtensionContext) {
           fileManager.write(result.remainingItems);
 
           // Cleanup old archives based on retention policy
-          const config = vscode.workspace.getConfiguration('ralph');
-          const retentionDays = config.get<number>('archiving.retentionDays', 90);
+          const config = vscode.workspace.getConfiguration("mikey");
+          const retentionDays = config.get<number>(
+            "archiving.retentionDays",
+            90,
+          );
           if (retentionDays > 0) {
-            const deletedCount = archiveManager.cleanupOldArchives(retentionDays);
+            const deletedCount =
+              archiveManager.cleanupOldArchives(retentionDays);
             if (deletedCount > 0) {
-              logger.info('Cleaned up old archives', { deletedCount });
+              logger.info("Cleaned up old archives", { deletedCount });
             }
           }
 
           // Show success message
-          const archiveFileName = result.archiveFile.split('/').pop() || result.archiveFile;
+          const archiveFileName =
+            result.archiveFile.split("/").pop() || result.archiveFile;
           vscode.window.showInformationMessage(
-            `Archived ${result.archivedCount} completed item${result.archivedCount > 1 ? 's' : ''} to ${archiveFileName}`
+            `Archived ${result.archivedCount} completed item${result.archivedCount > 1 ? "s" : ""} to ${archiveFileName}`,
           );
 
           logger.info("Archive completed successfully", {
             archivedCount: result.archivedCount,
             archiveFile: result.archiveFile,
-            remainingCount: result.remainingItems.length
+            remainingCount: result.remainingItems.length,
           });
 
           // Refresh tree view
           prdProvider.refresh();
-
         } catch (error) {
           logger.error("Archive failed", error);
           vscode.window.showErrorMessage(
-            `Failed to archive items: ${error instanceof Error ? error.message : String(error)}`
+            `Failed to archive items: ${error instanceof Error ? error.message : String(error)}`,
           );
         }
       }),
     );
 
-    logger.info("All Ralph extension commands registered");
+    logger.info("All Mikey extension commands registered");
   } catch (error) {
     const logger = Logger.getInstance();
     logger.error("Error registering commands", error);
@@ -511,7 +532,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 /**
- * Deactivates the Ralph extension
+ * Deactivates the Mikey extension
  * 
  * This function is called when the extension is deactivated. It:
  * - Logs the deactivation event
@@ -525,10 +546,10 @@ export function activate(context: vscode.ExtensionContext) {
  */
 export function deactivate() {
   const logger = Logger.getInstance();
-  logger.info('Ralph extension deactivated');
+  logger.info("Mikey extension deactivated");
 
   try {
-    const config = vscode.workspace.getConfiguration('ralph');
+    const config = vscode.workspace.getConfiguration("mikey");
     const autoArchiveOnExit = config.get<boolean>('archiving.autoArchiveOnExit', false);
     const retentionDays = config.get<number>('archiving.retentionDays', 90);
 

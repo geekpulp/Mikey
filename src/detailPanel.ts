@@ -4,7 +4,13 @@ import { PrdItem, PrdStep } from './prdTreeDataProvider';
 import { Status, MessageCommand } from './constants';
 import { Logger } from './logger';
 import { validateStep, sanitizeInput } from './validation';
-import { PrdFileError, GitOperationError, EnvironmentError, getUserFriendlyMessage, isRalphError } from './errors';
+import {
+  PrdFileError,
+  GitOperationError,
+  EnvironmentError,
+  getUserFriendlyMessage,
+  isMikeyError,
+} from "./errors";
 import { getHtmlForWebview } from './htmlRenderer';
 import { getChangedFiles, openFileDiff, handleCompletionMerge } from './gitOperations';
 import { buildChatContext, startWorkOnStep } from './stepManager';
@@ -153,14 +159,14 @@ export class DetailPanel {
 
 		logger.debug('Creating new detail panel');
 		const panel = vscode.window.createWebviewPanel(
-			'ralphDetailPanel',
-			'PRD Item Details',
-			column || vscode.ViewColumn.One,
-			{
-				enableScripts: true,
-				retainContextWhenHidden: true,
-			}
-		);
+      "mikeyDetailPanel",
+      "PRD Item Details",
+      column || vscode.ViewColumn.One,
+      {
+        enableScripts: true,
+        retainContextWhenHidden: true,
+      },
+    );
 
 		DetailPanel.currentPanel = new DetailPanel(panel, extensionUri);
 		DetailPanel.currentPanel.update(item);

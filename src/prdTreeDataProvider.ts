@@ -5,8 +5,16 @@ import { Status, STATUS_MARKERS, THEME_COLORS } from './constants';
 import { ConfigManager } from './config';
 import { Logger } from './logger';
 import { validateUserInput } from './validation';
-import { PrdFileError, GitOperationError, EnvironmentError, getUserFriendlyMessage, isRalphError } from './errors';
+import {
+  PrdFileError,
+  GitOperationError,
+  EnvironmentError,
+  getUserFriendlyMessage,
+  isMikeyError,
+} from "./errors";
 import { PrdFileManager } from './prdFileManager';
+import { PromptExecutor } from "./promptExecutor";
+import { getCurrentBranch, isFeatureBranch } from "./gitOperations";
 
 /**
  * Represents a step within a PRD item
@@ -67,7 +75,11 @@ export type TreeNode = CategoryNode | PrdItem;
  * 
  * @implements vscode.TreeDataProvider<TreeNode>
  */
-export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, vscode.TreeDragAndDropController<TreeNode> {
+export class PrdTreeDataProvider
+  implements
+    vscode.TreeDataProvider<TreeNode>,
+    vscode.TreeDragAndDropController<TreeNode>
+{
   private _onDidChangeTreeData: vscode.EventEmitter<
     TreeNode | undefined | null | void
   > = new vscode.EventEmitter<TreeNode | undefined | null | void>();
@@ -75,23 +87,25 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
     TreeNode | undefined | null | void
   > = this._onDidChangeTreeData.event;
 
-  private _onProgressUpdate: vscode.EventEmitter<string> = new vscode.EventEmitter<string>();
-  readonly onProgressUpdate: vscode.Event<string> = this._onProgressUpdate.event;
+  private _onProgressUpdate: vscode.EventEmitter<string> =
+    new vscode.EventEmitter<string>();
+  readonly onProgressUpdate: vscode.Event<string> =
+    this._onProgressUpdate.event;
 
   private prdItems: PrdItem[] = [];
   private prdFilePath: string | undefined;
   private logger = Logger.getInstance();
   private fileManager = PrdFileManager.getInstance();
-  private statusFilter: Status | 'all' = 'all';
-  private categoryFilter: string | 'all' = 'all';
+  private statusFilter: Status | "all" = "all";
+  private categoryFilter: string | "all" = "all";
 
   // Drag and drop support
-  readonly dropMimeTypes = ['application/vnd.code.tree.ralph.prdExplorer'];
-  readonly dragMimeTypes = ['application/vnd.code.tree.ralph.prdExplorer'];
+  readonly dropMimeTypes = ["application/vnd.code.tree.mikey.prdExplorer"];
+  readonly dragMimeTypes = ["application/vnd.code.tree.mikey.prdExplorer"];
 
   /**
    * Creates a new PRD tree data provider
-   * 
+   *
    * @param context - The extension context for managing subscriptions and state
    */
   constructor(private context: vscode.ExtensionContext) {
@@ -124,20 +138,22 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
       this.prdFilePath = this.fileManager.initialize(workspacePath);
 
       if (!this.prdFilePath) {
-        const error = PrdFileError.notFound(path.join(workspacePath, 'plans', 'prd.json'));
+        const error = PrdFileError.notFound(
+          path.join(workspacePath, "plans", "prd.json"),
+        );
         this.logger.warn(error.getLogMessage());
         return;
       }
 
       try {
         this.prdItems = this.fileManager.read();
-        this.logger.info('PRD file loaded successfully via PrdFileManager', { 
-          itemCount: this.prdItems.length 
+        this.logger.info("PRD file loaded successfully via PrdFileManager", {
+          itemCount: this.prdItems.length,
         });
         this._onDidChangeTreeData.fire();
         this.updateProgress();
       } catch (error) {
-        if (isRalphError(error)) {
+        if (isMikeyError(error)) {
           this.logger.error(error.getLogMessage());
           vscode.window.showErrorMessage(error.getUserMessage());
         } else if (error instanceof Error) {
@@ -145,27 +161,29 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
           this.logger.error(prdError.getLogMessage());
           vscode.window.showErrorMessage(prdError.getUserMessage());
         } else {
-          this.logger.error('Unexpected error loading PRD file', error);
-          vscode.window.showErrorMessage(`Failed to load PRD file: ${String(error)}`);
+          this.logger.error("Unexpected error loading PRD file", error);
+          vscode.window.showErrorMessage(
+            `Failed to load PRD file: ${String(error)}`,
+          );
         }
       }
     } catch (error) {
-      this.logger.error('Unexpected error in loadPrdFile', error);
+      this.logger.error("Unexpected error in loadPrdFile", error);
       vscode.window.showErrorMessage(getUserFriendlyMessage(error));
     }
   }
 
   private watchPrdFile(): void {
     if (!this.prdFilePath) {
-      this.logger.debug('PRD file path not set, skipping file watcher setup');
+      this.logger.debug("PRD file path not set, skipping file watcher setup");
       return;
     }
 
-    this.logger.debug('Setting up file watcher for PRD file');
+    this.logger.debug("Setting up file watcher for PRD file");
     const watcher = vscode.workspace.createFileSystemWatcher(this.prdFilePath);
 
     watcher.onDidChange(() => {
-      this.logger.debug('PRD file changed, reloading');
+      this.logger.debug("PRD file changed, reloading");
       this.loadPrdFile();
     });
 
@@ -174,7 +192,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
 
   /**
    * Calculates and updates the progress summary
-   * 
+   *
    * This method:
    * - Counts completed vs total items
    * - Calculates completion percentage
@@ -183,17 +201,24 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
    */
   private updateProgress(): void {
     const totalItems = this.prdItems.length;
-    const completedItems = this.prdItems.filter(item => item.status === 'completed').length;
-    const percentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
-    
+    const completedItems = this.prdItems.filter(
+      (item) => item.status === "completed",
+    ).length;
+    const percentage =
+      totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+
     const progressText = `${completedItems}/${totalItems} completed (${percentage}%)`;
     this._onProgressUpdate.fire(progressText);
-    this.logger.debug('Progress updated', { completedItems, totalItems, percentage });
+    this.logger.debug("Progress updated", {
+      completedItems,
+      totalItems,
+      percentage,
+    });
   }
 
   /**
    * Refreshes the tree view by reloading the PRD file
-   * 
+   *
    * This method is typically called when:
    * - User triggers manual refresh via command
    * - External changes to prd.json are detected
@@ -205,81 +230,81 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
 
   /**
    * Sets the status filter for the tree view
-   * 
+   *
    * This method:
    * - Updates the internal filter state
    * - Triggers a tree refresh to show only items matching the filter
    * - Supports filtering by specific status or showing all items
-   * 
+   *
    * @param filter - The status to filter by, or 'all' to show all items
-   * 
+   *
    * @example
    * ```typescript
    * prdProvider.setStatusFilter('in-progress'); // Show only in-progress items
    * prdProvider.setStatusFilter('all'); // Show all items
    * ```
    */
-  setStatusFilter(filter: Status | 'all'): void {
-    this.logger.debug('Setting status filter', { filter });
+  setStatusFilter(filter: Status | "all"): void {
+    this.logger.debug("Setting status filter", { filter });
     this.statusFilter = filter;
     this._onDidChangeTreeData.fire();
   }
 
   /**
    * Gets the current status filter
-   * 
+   *
    * @returns The current filter value ('all' or a specific Status)
    */
-  getStatusFilter(): Status | 'all' {
+  getStatusFilter(): Status | "all" {
     return this.statusFilter;
   }
 
   /**
    * Sets the category filter for the tree view
-   * 
+   *
    * This method:
    * - Updates the internal category filter state
    * - Triggers a tree refresh to show only items matching the filter
    * - Supports filtering by specific category or showing all items
-   * 
+   *
    * @param filter - The category to filter by, or 'all' to show all items
-   * 
+   *
    * @example
    * ```typescript
    * prdProvider.setCategoryFilter('ui'); // Show only UI items
    * prdProvider.setCategoryFilter('all'); // Show all items
    * ```
    */
-  setCategoryFilter(filter: string | 'all'): void {
-    this.logger.debug('Setting category filter', { filter });
+  setCategoryFilter(filter: string | "all"): void {
+    this.logger.debug("Setting category filter", { filter });
     this.categoryFilter = filter;
     this._onDidChangeTreeData.fire();
   }
 
   /**
    * Gets the current category filter
-   * 
+   *
    * @returns The current filter value ('all' or a specific category)
    */
-  getCategoryFilter(): string | 'all' {
+  getCategoryFilter(): string | "all" {
     return this.categoryFilter;
   }
 
   /**
    * Adds a new PRD item to the prd.json file
-   * 
+   *
    * This method:
    * - Validates the user input (category and description)
    * - Generates a unique ID in format 'category-XXX'
    * - Creates a new PRD item with default values (not-started status, no steps)
    * - Saves to prd.json file
    * - Refreshes the tree view
-   * 
+   *
    * @param category - The category for the new item (must be from available categories)
    * @param description - Human-readable description of the requirement (min 10 chars)
    * @throws {PrdFileError} If prd.json file not found or cannot be written
    * @throws {Error} If validation fails or JSON serialization fails
-   * 
+   *
    * @example
    * ```typescript
    * await prdProvider.addItem('ui', 'Add dark mode theme selector');
@@ -289,13 +314,15 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
   async addItem(category: string, description: string): Promise<void> {
     try {
       if (!this.prdFilePath) {
-        throw PrdFileError.notFound('prd.json');
+        throw PrdFileError.notFound("prd.json");
       }
 
       // Validate user input
       const validation = validateUserInput({ category, description });
       if (!validation.success) {
-        this.logger.warn('Invalid input for new PRD item', { error: validation.error });
+        this.logger.warn("Invalid input for new PRD item", {
+          error: validation.error,
+        });
         vscode.window.showErrorMessage(`Invalid input: ${validation.error}`);
         return;
       }
@@ -311,10 +338,10 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
       };
 
       try {
-        this.logger.info('Adding new PRD item via PrdFileManager', { 
-          id: newId, 
-          category, 
-          description 
+        this.logger.info("Adding new PRD item via PrdFileManager", {
+          id: newId,
+          category,
+          description,
         });
         this.fileManager.addItem(newItem);
         this.prdItems.push(newItem);
@@ -324,11 +351,11 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
         throw error;
       }
     } catch (error) {
-      if (isRalphError(error)) {
+      if (isMikeyError(error)) {
         this.logger.error(error.getLogMessage());
         vscode.window.showErrorMessage(error.getUserMessage());
       } else {
-        this.logger.error('Failed to add PRD item', error);
+        this.logger.error("Failed to add PRD item", error);
         vscode.window.showErrorMessage(getUserFriendlyMessage(error));
       }
     }
@@ -336,23 +363,23 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
 
   /**
    * Edits an existing PRD item
-   * 
+   *
    * This method:
    * - Prompts user to edit category and description
    * - Validates the new input
    * - Updates the item in memory
    * - Saves changes to prd.json file
    * - Refreshes the tree view
-   * 
+   *
    * @param item - The PRD item to edit
    * @throws {PrdFileError} If prd.json file not found or cannot be written
    * @throws {Error} If validation fails or item not found
-   * 
+   *
    * @remarks
    * The item ID is NOT changed during edit - only category and description can be modified.
    * If the user cancels any input dialog, no changes are made.
    * Changes are rolled back if file write fails.
-   * 
+   *
    * @example
    * ```typescript
    * const item = prdItems.find(i => i.id === 'ui-003');
@@ -362,16 +389,19 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
   async editItem(item: PrdItem): Promise<void> {
     try {
       if (!this.prdFilePath) {
-        throw PrdFileError.notFound('prd.json');
+        throw PrdFileError.notFound("prd.json");
       }
 
       const config = ConfigManager.getInstance();
-      
+
       // Show category picker pre-selected with current category
-      const category = await vscode.window.showQuickPick(config.getCategories(), {
-        placeHolder: "Select category",
-        title: `Edit Item: ${item.id}`,
-      });
+      const category = await vscode.window.showQuickPick(
+        config.getCategories(),
+        {
+          placeHolder: "Select category",
+          title: `Edit Item: ${item.id}`,
+        },
+      );
 
       if (!category) {
         return; // User cancelled
@@ -391,7 +421,9 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
       // Validate user input
       const validation = validateUserInput({ category, description });
       if (!validation.success) {
-        this.logger.warn('Invalid input for editing PRD item', { error: validation.error });
+        this.logger.warn("Invalid input for editing PRD item", {
+          error: validation.error,
+        });
         vscode.window.showErrorMessage(`Invalid input: ${validation.error}`);
         return;
       }
@@ -399,38 +431,38 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
       // Find and update the item
       const itemIndex = this.prdItems.findIndex((i) => i.id === item.id);
       if (itemIndex === -1) {
-        this.logger.error('Item not found during edit', { id: item.id });
+        this.logger.error("Item not found during edit", { id: item.id });
         vscode.window.showErrorMessage(`Item ${item.id} not found`);
         return;
       }
 
       try {
-        this.logger.info('Updating PRD item via PrdFileManager', { 
-          id: item.id, 
-          category, 
-          description 
+        this.logger.info("Updating PRD item via PrdFileManager", {
+          id: item.id,
+          category,
+          description,
         });
         this.fileManager.updateItem(item.id, (existingItem) => ({
           ...existingItem,
           category: validation.data!.category,
-          description: validation.data!.description
+          description: validation.data!.description,
         }));
-        
+
         // Update in-memory copy
         this.prdItems[itemIndex].category = validation.data!.category;
         this.prdItems[itemIndex].description = validation.data!.description;
-        
+
         this._onDidChangeTreeData.fire();
         vscode.window.showInformationMessage(`Updated item: ${item.id}`);
       } catch (error) {
         throw error;
       }
     } catch (error) {
-      if (isRalphError(error)) {
+      if (isMikeyError(error)) {
         this.logger.error(error.getLogMessage());
         vscode.window.showErrorMessage(error.getUserMessage());
       } else {
-        this.logger.error('Failed to edit PRD item', error);
+        this.logger.error("Failed to edit PRD item", error);
         vscode.window.showErrorMessage(getUserFriendlyMessage(error));
       }
     }
@@ -438,21 +470,21 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
 
   /**
    * Deletes a PRD item from the prd.json file
-   * 
+   *
    * This method:
    * - Shows a confirmation dialog to prevent accidental deletion
    * - Removes the item from the in-memory array
    * - Saves changes to prd.json file
    * - Refreshes the tree view
-   * 
+   *
    * @param item - The PRD item to delete
    * @throws {PrdFileError} If prd.json file not found or cannot be written
-   * 
+   *
    * @remarks
    * If the user cancels the confirmation dialog, no changes are made.
    * Changes are rolled back if file write fails.
    * This operation cannot be undone (except via git if committed).
-   * 
+   *
    * @example
    * ```typescript
    * const item = prdItems.find(i => i.id === 'ui-003');
@@ -462,7 +494,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
   async deleteItem(item: PrdItem): Promise<void> {
     try {
       if (!this.prdFilePath) {
-        throw PrdFileError.notFound('prd.json');
+        throw PrdFileError.notFound("prd.json");
       }
 
       // Show confirmation dialog
@@ -473,36 +505,38 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
       );
 
       if (confirmed !== "Delete") {
-        this.logger.debug('Delete cancelled by user', { id: item.id });
+        this.logger.debug("Delete cancelled by user", { id: item.id });
         return; // User cancelled
       }
 
       // Find and remove the item
       const itemIndex = this.prdItems.findIndex((i) => i.id === item.id);
       if (itemIndex === -1) {
-        this.logger.error('Item not found during delete', { id: item.id });
+        this.logger.error("Item not found during delete", { id: item.id });
         vscode.window.showErrorMessage(`Item ${item.id} not found`);
         return;
       }
 
       try {
-        this.logger.info('Deleting PRD item via PrdFileManager', { id: item.id });
+        this.logger.info("Deleting PRD item via PrdFileManager", {
+          id: item.id,
+        });
         this.fileManager.removeItem(item.id);
-        
+
         // Update in-memory copy
         this.prdItems.splice(itemIndex, 1);
-        
+
         this._onDidChangeTreeData.fire();
         vscode.window.showInformationMessage(`Deleted item: ${item.id}`);
       } catch (error) {
         throw error;
       }
     } catch (error) {
-      if (isRalphError(error)) {
+      if (isMikeyError(error)) {
         this.logger.error(error.getLogMessage());
         vscode.window.showErrorMessage(error.getUserMessage());
       } else {
-        this.logger.error('Failed to delete PRD item', error);
+        this.logger.error("Failed to delete PRD item", error);
         vscode.window.showErrorMessage(getUserFriendlyMessage(error));
       }
     }
@@ -510,24 +544,24 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
 
   /**
    * Starts work on a PRD item
-   * 
+   *
    * This method orchestrates the workflow for beginning work on a PRD item:
    * 1. Creates a new git feature branch (format: feature/item-id)
    * 2. Updates item status to 'in-progress'
    * 3. Opens GitHub Copilot Chat with contextual information
    * 4. Provides the AI with item details, steps, and skill references
-   * 
+   *
    * @param item - The PRD item to start working on
    * @throws {EnvironmentError} If no workspace folder is open
    * @throws {GitOperationError} If git operations fail (branch creation, status update)
    * @throws {PrdFileError} If prd.json cannot be updated
-   * 
+   *
    * @remarks
    * - If the feature branch already exists, it will switch to it instead of creating
    * - The status update is saved to prd.json before opening Copilot Chat
    * - Copilot Chat receives full context including steps, skill references, and prompts
    * - A fresh chat session is created for each item to avoid context pollution
-   * 
+   *
    * @example
    * ```typescript
    * const item = prdItems.find(i => i.id === 'ui-003');
@@ -544,84 +578,134 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
 
       const workspaceRoot = workspaceFolders[0].uri.fsPath;
 
-      this.logger.info('Starting work on PRD item', { id: item.id });
+      this.logger.info("Starting work on PRD item", { id: item.id });
       // Create and switch to feature branch
       const branchName = `feature/${item.id}`;
-      
-      await vscode.window.withProgress({
-        location: vscode.ProgressLocation.Notification,
-        title: `Starting work on ${item.id}`,
-        cancellable: false
-      }, async (progress) => {
-        progress.report({ message: 'Creating feature branch...' });
-        
-        try {
-          this.logger.debug('Creating git branch', { branchName });
-          await this.execGitCommand(workspaceRoot, ['checkout', '-b', branchName]);
-          this.logger.info('Git branch created successfully', { branchName });
-          vscode.window.showInformationMessage(`✓ Created and switched to branch: ${branchName}`);
-        } catch (error) {
-          // Branch might already exist, try to switch to it
-          try {
-            this.logger.debug('Branch exists, switching to it', { branchName });
-            await this.execGitCommand(workspaceRoot, ['checkout', branchName]);
-            this.logger.info('Switched to existing branch', { branchName });
-            vscode.window.showInformationMessage(`✓ Switched to existing branch: ${branchName}`);
-          } catch (switchError) {
-            this.logger.error('Failed to create or switch to branch', { error, switchError });
-            throw GitOperationError.branchCreationFailed(branchName, error as Error);
-          }
-        }
 
-        progress.report({ message: 'Updating item status...' });
-        
-        // Update item status to in-progress
-        const itemIndex = this.prdItems.findIndex(i => i.id === item.id);
-        if (itemIndex !== -1 && this.prdFilePath) {
-          this.logger.debug('Updating item status to in-progress', { id: item.id });
-          
+      await vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: `Starting work on ${item.id}`,
+          cancellable: false,
+        },
+        async (progress) => {
+          progress.report({ message: "Preparing git branch..." });
+
           try {
-            this.fileManager.updateItem(item.id, (existingItem) => ({
-              ...existingItem,
-              status: Status.InProgress
-            }));
-            
-            // Update in-memory copy
-            this.prdItems[itemIndex].status = Status.InProgress;
-            this._onDidChangeTreeData.fire();
+            // Check current branch - if we're on a different feature branch,
+            // switch to main first to ensure clean branch creation
+            const currentBranch = await getCurrentBranch(workspaceRoot);
+            this.logger.debug("Current git branch", { currentBranch });
+
+            if (
+              isFeatureBranch(currentBranch) &&
+              currentBranch !== branchName
+            ) {
+              this.logger.debug("Switching to main branch first", {
+                from: currentBranch,
+              });
+              const config = ConfigManager.getInstance();
+              await this.execGitCommand(workspaceRoot, [
+                "checkout",
+                config.getMainBranch(),
+              ]);
+            }
+
+            progress.report({ message: "Creating feature branch..." });
+
+            // Now try to create the new branch
+            this.logger.debug("Creating git branch", { branchName });
+            await this.execGitCommand(workspaceRoot, [
+              "checkout",
+              "-b",
+              branchName,
+            ]);
+            this.logger.info("Git branch created successfully", { branchName });
+            vscode.window.showInformationMessage(
+              `✓ Created and switched to branch: ${branchName}`,
+            );
           } catch (error) {
-            throw error;
+            // Branch might already exist, try to switch to it
+            try {
+              this.logger.debug("Branch exists, switching to it", {
+                branchName,
+              });
+              await this.execGitCommand(workspaceRoot, [
+                "checkout",
+                branchName,
+              ]);
+              this.logger.info("Switched to existing branch", { branchName });
+              vscode.window.showInformationMessage(
+                `✓ Switched to existing branch: ${branchName}`,
+              );
+            } catch (switchError) {
+              this.logger.error("Failed to create or switch to branch", {
+                error,
+                switchError,
+              });
+              throw GitOperationError.branchCreationFailed(
+                branchName,
+                error as Error,
+              );
+            }
           }
-        }
-      });
+
+          progress.report({ message: "Updating item status..." });
+
+          // Update item status to in-progress
+          const itemIndex = this.prdItems.findIndex((i) => i.id === item.id);
+          if (itemIndex !== -1 && this.prdFilePath) {
+            this.logger.debug("Updating item status to in-progress", {
+              id: item.id,
+            });
+
+            try {
+              this.fileManager.updateItem(item.id, (existingItem) => ({
+                ...existingItem,
+                status: Status.InProgress,
+              }));
+
+              // Update in-memory copy
+              this.prdItems[itemIndex].status = Status.InProgress;
+              this._onDidChangeTreeData.fire();
+            } catch (error) {
+              throw error;
+            }
+          }
+        },
+      );
 
       // Build context for the chat session
       const context = this.buildChatContext(item);
 
       // Clear any existing chat session and start fresh
-      await vscode.commands.executeCommand('workbench.action.chat.clear');
-      
+      await vscode.commands.executeCommand("workbench.action.chat.clear");
+
       // Wait a moment for the clear to complete
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
       // Open Copilot Chat panel
-      await vscode.commands.executeCommand('workbench.panel.chat.view.copilot.focus');
-      
+      await vscode.commands.executeCommand(
+        "workbench.panel.chat.view.copilot.focus",
+      );
+
       // Wait a moment for the panel to open
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
       // Send the context as a new message in the fresh chat session
-      await vscode.commands.executeCommand('workbench.action.chat.open', {
-        query: context
+      await vscode.commands.executeCommand("workbench.action.chat.open", {
+        query: context,
       });
-      
-      vscode.window.showInformationMessage(`✓ Started work on ${item.id} in new chat session`);
+
+      vscode.window.showInformationMessage(
+        `✓ Started work on ${item.id} in new chat session`,
+      );
     } catch (error) {
-      if (isRalphError(error)) {
+      if (isMikeyError(error)) {
         this.logger.error(error.getLogMessage());
         vscode.window.showErrorMessage(error.getUserMessage());
       } else {
-        this.logger.error('Failed to start work', error);
+        this.logger.error("Failed to start work", error);
         vscode.window.showErrorMessage(getUserFriendlyMessage(error));
       }
     }
@@ -630,25 +714,28 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
   private buildChatContext(item: PrdItem, stepIndex?: number): string {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders) {
-      return '';
+      return "";
     }
 
     const workspaceRoot = workspaceFolders[0].uri.fsPath;
-    const progressFile = path.join(workspaceRoot, 'progress.txt');
-    
-    let progressContent = '';
+    const progressFile = path.join(workspaceRoot, "progress.txt");
+
+    let progressContent = "";
     if (fs.existsSync(progressFile)) {
-      progressContent = fs.readFileSync(progressFile, 'utf-8');
+      progressContent = fs.readFileSync(progressFile, "utf-8");
     }
 
     // Load prompt template
-    let promptTemplate = '';
-    const config = vscode.workspace.getConfiguration('mikey');
-    const templatePath = config.get<string>('promptTemplate', 'prompts/default.txt');
+    let promptTemplate = "";
+    const config = vscode.workspace.getConfiguration("mikey");
+    const templatePath = config.get<string>(
+      "promptTemplate",
+      "prompts/default.txt",
+    );
     const fullTemplatePath = path.join(workspaceRoot, templatePath);
-    
+
     if (fs.existsSync(fullTemplatePath)) {
-      promptTemplate = fs.readFileSync(fullTemplatePath, 'utf-8');
+      promptTemplate = fs.readFileSync(fullTemplatePath, "utf-8");
     }
 
     // Load relevant skill references
@@ -663,52 +750,62 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode>, v
 **Passes:** ${item.passes}
 
 ## Steps
-${item.steps.map((step, idx) => {
-  const stepText = typeof step === 'string' ? step : step.text;
-  const completed = typeof step === 'string' ? false : step.completed || false;
-  const marker = completed ? STATUS_MARKERS.completed : STATUS_MARKERS.incomplete;
-  const highlight = stepIndex !== undefined && idx === stepIndex ? ' **<-- CURRENT STEP**' : '';
-  return `${idx + 1}. [${marker}] ${stepText}${highlight}`;
-}).join('\n')}
+${item.steps
+  .map((step, idx) => {
+    const stepText = typeof step === "string" ? step : step.text;
+    const completed =
+      typeof step === "string" ? false : step.completed || false;
+    const marker = completed
+      ? STATUS_MARKERS.completed
+      : STATUS_MARKERS.incomplete;
+    const highlight =
+      stepIndex !== undefined && idx === stepIndex
+        ? " **<-- CURRENT STEP**"
+        : "";
+    return `${idx + 1}. [${marker}] ${stepText}${highlight}`;
+  })
+  .join("\n")}
 
 ## Progress History
-${progressContent || '(No progress yet)'}
+${progressContent || "(No progress yet)"}
 
 ## Available Commands
 You can mark steps as complete by using the VS Code command:
 \`\`\`
-await vscode.commands.executeCommand('ralph.markStepComplete', '${item.id}', stepIndex, true);
+await vscode.commands.executeCommand('mikey.markStepComplete', '${item.id}', stepIndex, true);
 \`\`\`
 Where stepIndex is 0-based (0 for first step, 1 for second, etc.)
 
 ## Task
-${stepIndex !== undefined 
-  ? `Work on step ${stepIndex + 1} of ${item.id}. Complete this specific step and mark it as done when finished.`
-  : `Work on ${item.id}. Follow the steps listed above. Update progress.txt when you make changes.`}
+${
+  stepIndex !== undefined
+    ? `Work on step ${stepIndex + 1} of ${item.id}. Complete this specific step and mark it as done when finished.`
+    : `Work on ${item.id}. Follow the steps listed above. Update progress.txt when you make changes.`
+}
 
 ${skillContext}
 
-${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
+${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ""}
 `;
 
     return prdContext;
   }
 
   private loadSkillReferences(workspaceRoot: string, item: PrdItem): string {
-    const skillsDir = path.join(workspaceRoot, 'skills');
+    const skillsDir = path.join(workspaceRoot, "skills");
     if (!fs.existsSync(skillsDir)) {
-      const testSkillsDir = path.join(workspaceRoot, 'test', 'skills');
+      const testSkillsDir = path.join(workspaceRoot, "test", "skills");
       if (fs.existsSync(testSkillsDir)) {
         return this.loadSkillsFromDirectory(testSkillsDir, item);
       }
-      return '';
+      return "";
     }
     return this.loadSkillsFromDirectory(skillsDir, item);
   }
 
   private loadSkillsFromDirectory(skillsDir: string, item: PrdItem): string {
     try {
-      const skillFolders = fs.readdirSync(skillsDir).filter(name => {
+      const skillFolders = fs.readdirSync(skillsDir).filter((name) => {
         const fullPath = path.join(skillsDir, name);
         return fs.statSync(fullPath).isDirectory();
       });
@@ -718,14 +815,21 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
       const relevantSkills: string[] = [];
 
       for (const skillFolder of skillFolders) {
-        const skillMdPath = path.join(skillsDir, skillFolder, 'SKILL.md');
+        const skillMdPath = path.join(skillsDir, skillFolder, "SKILL.md");
         if (!fs.existsSync(skillMdPath)) {
           continue;
         }
 
         // Check if skill is relevant
-        if (searchText.includes('wordpress') || searchText.includes('wp') || searchText.includes('plugin')) {
-          if (skillFolder.includes('wp-plugin') || skillFolder.includes('wordpress')) {
+        if (
+          searchText.includes("wordpress") ||
+          searchText.includes("wp") ||
+          searchText.includes("plugin")
+        ) {
+          if (
+            skillFolder.includes("wp-plugin") ||
+            skillFolder.includes("wordpress")
+          ) {
             relevantSkills.push(skillFolder);
           }
         }
@@ -735,29 +839,31 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
       }
 
       if (relevantSkills.length === 0) {
-        return '';
+        return "";
       }
 
       // Build context from relevant skills
-      let skillContext = '\n---\n\n# Available Skills\n\n';
-      
+      let skillContext = "\n---\n\n# Available Skills\n\n";
+
       for (const skillFolder of relevantSkills) {
-        const skillMdPath = path.join(skillsDir, skillFolder, 'SKILL.md');
-        const skillContent = fs.readFileSync(skillMdPath, 'utf-8');
-        
+        const skillMdPath = path.join(skillsDir, skillFolder, "SKILL.md");
+        const skillContent = fs.readFileSync(skillMdPath, "utf-8");
+
         skillContext += `## Skill: ${skillFolder}\n\n${skillContent}\n\n`;
 
         // Load reference documents
-        const referencesDir = path.join(skillsDir, skillFolder, 'references');
+        const referencesDir = path.join(skillsDir, skillFolder, "references");
         if (fs.existsSync(referencesDir)) {
-          const referenceFiles = fs.readdirSync(referencesDir).filter(f => f.endsWith('.md'));
-          
+          const referenceFiles = fs
+            .readdirSync(referencesDir)
+            .filter((f) => f.endsWith(".md"));
+
           if (referenceFiles.length > 0) {
             skillContext += `### References for ${skillFolder}\n\n`;
-            
+
             for (const refFile of referenceFiles) {
               const refPath = path.join(referencesDir, refFile);
-              const refContent = fs.readFileSync(refPath, 'utf-8');
+              const refContent = fs.readFileSync(refPath, "utf-8");
               skillContext += `#### ${refFile}\n\n${refContent}\n\n`;
             }
           }
@@ -766,11 +872,106 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
 
       return skillContext;
     } catch (error) {
-      this.logger.error('Error loading skill references', error);
-      return '';
+      this.logger.error("Error loading skill references", error);
+      return "";
     }
   }
 
+  /**
+   * Run a PRD item directly with default settings (no user prompts)
+   *
+   * Uses:
+   * - 1 iteration
+   * - prompts/default.txt
+   * - dev permission profile
+   *
+   * @param item - The PRD item to execute
+   */
+  async runItemDirect(item: PrdItem): Promise<void> {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders) {
+      vscode.window.showErrorMessage("No workspace folder found");
+      return;
+    }
+
+    // Execute with the PromptExecutor using default settings
+    const executor = new PromptExecutor();
+    const workspaceRoot = workspaceFolders[0].uri.fsPath;
+    const prdPath = path.join(workspaceRoot, "plans", "prd.json");
+    const promptPath = path.join(workspaceRoot, "prompts", "default.txt");
+
+    // Check if Copilot CLI is available
+    const copilotAvailable = await executor.isCopilotAvailable();
+    if (!copilotAvailable) {
+      vscode.window.showErrorMessage(
+        "Copilot CLI not found. Please install it with: npm install -g @githubnext/copilot-cli",
+      );
+      return;
+    }
+
+    // Show progress while executing
+    const result = await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: `Running ${item.id}`,
+        cancellable: false,
+      },
+      async (progress) => {
+        progress.report({
+          message: "Executing with Copilot (dev permissions)...",
+        });
+
+        return await executor.execute({
+          prompt: promptPath,
+          prdFile: prdPath,
+          allowProfile: "dev",
+          workspaceRoot,
+          iterations: 1,
+        });
+      },
+    );
+
+    // Handle result
+    if (result.success) {
+      // Create terminal to show output
+      const terminal = vscode.window.createTerminal({
+        name: `Mikey: ${item.id}`,
+        cwd: workspaceRoot,
+      });
+      terminal.show();
+
+      // Write the output to the terminal
+      terminal.sendText(
+        `# Execution completed successfully\n${result.output}`,
+        false,
+      );
+
+      vscode.window.showInformationMessage(`✓ Completed running ${item.id}`);
+    } else {
+      vscode.window.showErrorMessage(
+        `Failed to execute prompt: ${result.error || "Unknown error"}`,
+      );
+
+      // Show error in output channel
+      this.logger.error("Prompt execution failed", {
+        item: item.id,
+        error: result.error,
+        exitCode: result.exitCode,
+      });
+    }
+  }
+
+  /**
+   * Run a PRD item with user-selected settings (LEGACY)
+   *
+   * This method prompts the user for:
+   * - Number of iterations
+   * - Prompt file to use
+   * - Permission profile
+   *
+   * @deprecated Use runItemDirect() instead for simplified execution
+   * @param item - Optional PRD item to execute (will prompt if not provided)
+   */
   async runItem(item?: PrdItem): Promise<void> {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders) {
@@ -797,49 +998,23 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
       selectedItem = choice.item;
     }
 
-    // Ask which script to use
-    const scriptChoice = await vscode.window.showQuickPick(
-      [
-        {
-          label: "ralph-once.sh",
-          description: "Run one iteration",
-          value: "ralph-once.sh",
-        },
-        {
-          label: "ralph.sh",
-          description: "Run multiple iterations",
-          value: "ralph.sh",
-        },
-      ],
-      {
-        placeHolder: "Select script to run",
+    // Ask for number of iterations
+    const iterInput = await vscode.window.showInputBox({
+      prompt: "Number of iterations",
+      value: "1",
+      validateInput: (value) => {
+        const num = parseInt(value);
+        if (isNaN(num) || num < 1) {
+          return "Please enter a valid positive number";
+        }
+        return null;
       },
-    );
+    });
 
-    if (!scriptChoice) {
+    if (!iterInput) {
       return;
     }
-
-    // Ask for iterations count if using ralph.sh
-    let iterations = "";
-    if (scriptChoice.value === "ralph.sh") {
-      const iterInput = await vscode.window.showInputBox({
-        prompt: "Number of iterations",
-        value: "5",
-        validateInput: (value) => {
-          const num = parseInt(value);
-          if (isNaN(num) || num < 1) {
-            return "Please enter a valid positive number";
-          }
-          return null;
-        },
-      });
-
-      if (!iterInput) {
-        return;
-      }
-      iterations = iterInput;
-    }
+    const iterations = parseInt(iterInput, 10);
 
     // Ask for prompt file
     const promptChoice = await vscode.window.showQuickPick(
@@ -877,29 +1052,71 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
       return;
     }
 
-    // Build command
+    // Execute with the new PromptExecutor
+    const executor = new PromptExecutor();
     const workspaceRoot = workspaceFolders[0].uri.fsPath;
-    const scriptPath = path.join(workspaceRoot, scriptChoice.value);
     const prdPath = path.join(workspaceRoot, "plans", "prd.json");
+    const promptPath = path.join(workspaceRoot, promptChoice.value);
 
-    let command = `./${scriptChoice.value} --prompt ${promptChoice.value} --prd ${prdPath} --allow-profile ${profileChoice.label}`;
-
-    if (iterations) {
-      command += ` ${iterations}`;
+    // Check if Copilot CLI is available
+    const copilotAvailable = await executor.isCopilotAvailable();
+    if (!copilotAvailable) {
+      vscode.window.showErrorMessage(
+        "Copilot CLI not found. Please install it with: npm install -g @githubnext/copilot-cli",
+      );
+      return;
     }
 
-    // Create terminal and run command
-    const terminal = vscode.window.createTerminal({
-      name: `Ralph: ${selectedItem.id}`,
-      cwd: workspaceRoot,
-    });
+    // Show progress while executing
+    const result = await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: `Running ${selectedItem.id}`,
+        cancellable: false,
+      },
+      async (progress) => {
+        progress.report({ message: "Executing prompt with Copilot..." });
 
-    terminal.show();
-    terminal.sendText(command);
-
-    vscode.window.showInformationMessage(
-      `Running ${selectedItem.id} with ${scriptChoice.label}`,
+        return await executor.execute({
+          prompt: promptPath,
+          prdFile: prdPath,
+          allowProfile: profileChoice.label as "safe" | "dev" | "locked",
+          workspaceRoot,
+          iterations,
+        });
+      },
     );
+
+    // Handle result
+    if (result.success) {
+      // Create terminal to show output
+      const terminal = vscode.window.createTerminal({
+        name: `Mikey: ${selectedItem.id}`,
+        cwd: workspaceRoot,
+      });
+      terminal.show();
+
+      // Write the output to the terminal
+      terminal.sendText(
+        `# Execution completed successfully\n${result.output}`,
+        false,
+      );
+
+      vscode.window.showInformationMessage(
+        `✓ Completed running ${selectedItem.id} (${iterations} iteration${iterations !== 1 ? "s" : ""})`,
+      );
+    } else {
+      vscode.window.showErrorMessage(
+        `Failed to execute prompt: ${result.error || "Unknown error"}`,
+      );
+
+      // Show error in output channel
+      this.logger.error("Prompt execution failed", {
+        item: selectedItem.id,
+        error: result.error,
+        exitCode: result.exitCode,
+      });
+    }
   }
 
   private generateUniqueId(category: string): string {
@@ -917,13 +1134,13 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
 
   /**
    * Gets the tree item representation for a node
-   * 
+   *
    * Required by VS Code TreeDataProvider interface. Converts either a CategoryNode
    * or PrdItem into a TreeItem for display in the sidebar.
-   * 
+   *
    * @param element - The node to convert (CategoryNode or PrdItem)
    * @returns A VS Code TreeItem configured with icon, label, tooltip, and command
-   * 
+   *
    * @remarks
    * - Category nodes are collapsible folders shown in uppercase
    * - PRD items show status icon with color (green=completed, blue=in-progress, etc.)
@@ -957,7 +1174,7 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
 
       // Make item clickable - opens detail panel
       treeItem.command = {
-        command: "ralph.openItem",
+        command: "mikey.openItem",
         title: "Open Item Details",
         arguments: [item],
       };
@@ -973,13 +1190,13 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
 
   /**
    * Gets the children of a tree node
-   * 
+   *
    * Required by VS Code TreeDataProvider interface. Returns the hierarchical structure
    * of the tree view.
-   * 
+   *
    * @param element - The parent node (undefined for root, CategoryNode for category items)
    * @returns Promise resolving to array of child nodes
-   * 
+   *
    * @remarks
    * - Root level returns CategoryNode objects (one per category)
    * - Category level returns PrdItem objects in that category
@@ -1059,56 +1276,64 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
   }
 
   private async execGitCommand(cwd: string, args: string[]): Promise<string> {
-    const { promisify } = require('util');
-    const { exec } = require('child_process');
+    const { promisify } = require("util");
+    const { exec } = require("child_process");
     const execAsync = promisify(exec);
-    
-    const command = `git ${args.join(' ')}`;
+
+    const command = `git ${args.join(" ")}`;
     const { stdout, stderr } = await execAsync(command, { cwd });
-    
-    if (stderr && !stderr.includes('Switched to branch') && !stderr.includes('Already up to date')) {
+
+    if (
+      stderr &&
+      !stderr.includes("Switched to branch") &&
+      !stderr.includes("Already up to date")
+    ) {
       throw new Error(stderr);
     }
-    
+
     return stdout;
   }
 
   /**
    * Marks a step as complete or incomplete
-   * 
+   *
    * This method:
    * - Finds the item and step by index
    * - Converts string steps to object format if needed
    * - Updates the completion status
    * - Saves changes to prd.json
    * - Refreshes the tree view
-   * 
+   *
    * @param itemId - The ID of the PRD item containing the step
    * @param stepIndex - The zero-based index of the step to update
    * @param completed - Whether the step should be marked as complete (default: true)
    * @throws {Error} If item not found or step index out of range
-   * 
+   *
    * @remarks
    * Steps can be either strings or objects with {text, completed} format.
    * This method automatically converts string steps to object format.
-   * 
+   *
    * @example
    * ```typescript
    * // Mark the first step of ui-003 as complete
    * await prdProvider.markStepComplete('ui-003', 0, true);
-   * 
+   *
    * // Unmark the second step
    * await prdProvider.markStepComplete('ui-003', 1, false);
    * ```
    */
-  async markStepComplete(itemId: string, stepIndex: number, completed: boolean = true): Promise<void> {
+  async markStepComplete(
+    itemId: string,
+    stepIndex: number,
+    completed: boolean = true,
+  ): Promise<void> {
     if (!this.prdFilePath) {
-      vscode.window.showErrorMessage('No PRD file found');
+      vscode.window.showErrorMessage("No PRD file found");
       return;
     }
 
     try {
-      const itemIndex = this.prdItems.findIndex(i => i.id === itemId);
+      const itemIndex = this.prdItems.findIndex((i) => i.id === itemId);
       if (itemIndex === -1) {
         vscode.window.showErrorMessage(`Item ${itemId} not found`);
         return;
@@ -1116,15 +1341,18 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
 
       const item = this.prdItems[itemIndex];
       if (stepIndex < 0 || stepIndex >= item.steps.length) {
-        vscode.window.showErrorMessage(`Step index ${stepIndex} is out of range for item ${itemId}`);
+        vscode.window.showErrorMessage(
+          `Step index ${stepIndex} is out of range for item ${itemId}`,
+        );
         return;
       }
 
       // Convert step to object format if it's a string
       const currentStep = item.steps[stepIndex];
-      const updatedStep = typeof currentStep === 'string'
-        ? { text: currentStep, completed }
-        : { ...currentStep, completed };
+      const updatedStep =
+        typeof currentStep === "string"
+          ? { text: currentStep, completed }
+          : { ...currentStep, completed };
 
       // Save to file using PrdFileManager
       this.fileManager.updateItem(itemId, (existingItem) => {
@@ -1132,16 +1360,18 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
         newSteps[stepIndex] = updatedStep;
         return {
           ...existingItem,
-          steps: newSteps
+          steps: newSteps,
         };
       });
 
       // Update in-memory copy
       item.steps[stepIndex] = updatedStep;
       this._onDidChangeTreeData.fire();
-      
-      const status = completed ? 'completed' : 'incomplete';
-      vscode.window.showInformationMessage(`✓ Marked step ${stepIndex + 1} of ${itemId} as ${status}`);
+
+      const status = completed ? "completed" : "incomplete";
+      vscode.window.showInformationMessage(
+        `✓ Marked step ${stepIndex + 1} of ${itemId} as ${status}`,
+      );
     } catch (error) {
       vscode.window.showErrorMessage(`Failed to mark step complete: ${error}`);
     }
@@ -1149,65 +1379,82 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
 
   /**
    * Handles drag operation - puts dragged items into data transfer
-   * 
+   *
    * This method is called when user starts dragging an item.
    * Only PrdItem nodes can be dragged (not category nodes).
-   * 
+   *
    * @param source - Array of tree nodes being dragged
    * @param dataTransfer - Data transfer object to populate with drag data
    */
-  async handleDrag(source: TreeNode[], dataTransfer: vscode.DataTransfer): Promise<void> {
+  async handleDrag(
+    source: TreeNode[],
+    dataTransfer: vscode.DataTransfer,
+  ): Promise<void> {
     // Only allow dragging PrdItem nodes (not categories)
-    const prdItems = source.filter((item): item is PrdItem => !(item instanceof CategoryNode));
-    
+    const prdItems = source.filter(
+      (item): item is PrdItem => !(item instanceof CategoryNode),
+    );
+
     if (prdItems.length === 0) {
-      this.logger.debug('Drag started but no valid items to drag');
+      this.logger.debug("Drag started but no valid items to drag");
       return;
     }
 
-    this.logger.debug('Drag started', { itemIds: prdItems.map(i => i.id) });
-    
+    this.logger.debug("Drag started", { itemIds: prdItems.map((i) => i.id) });
+
     // Store the dragged items in the data transfer
     dataTransfer.set(
-      'application/vnd.code.tree.ralph.prdExplorer',
-      new vscode.DataTransferItem(prdItems)
+      "application/vnd.code.tree.mikey.prdExplorer",
+      new vscode.DataTransferItem(prdItems),
     );
   }
 
   /**
    * Handles drop operation - reorders items in the tree
-   * 
+   *
    * This method is called when user drops an item.
    * It reorders the items in prdItems array and saves to file.
-   * 
+   *
    * @param target - The tree node where items are being dropped (can be undefined for root)
    * @param dataTransfer - Data transfer object containing the dragged items
    */
-  async handleDrop(target: TreeNode | undefined, dataTransfer: vscode.DataTransfer): Promise<void> {
+  async handleDrop(
+    target: TreeNode | undefined,
+    dataTransfer: vscode.DataTransfer,
+  ): Promise<void> {
     try {
-      const transferItem = dataTransfer.get('application/vnd.code.tree.ralph.prdExplorer');
+      const transferItem = dataTransfer.get(
+        "application/vnd.code.tree.mikey.prdExplorer",
+      );
       if (!transferItem) {
-        this.logger.debug('Drop failed: no transfer data');
+        this.logger.debug("Drop failed: no transfer data");
         return;
       }
 
       const draggedItems = transferItem.value as PrdItem[];
       if (!draggedItems || draggedItems.length === 0) {
-        this.logger.debug('Drop failed: no dragged items');
+        this.logger.debug("Drop failed: no dragged items");
         return;
       }
 
       // We only support dropping a single item
       const draggedItem = draggedItems[0];
-      this.logger.debug('Drop operation', { 
+      this.logger.debug("Drop operation", {
         draggedItemId: draggedItem.id,
-        targetId: target instanceof CategoryNode ? `category:${target.category}` : (target as PrdItem)?.id 
+        targetId:
+          target instanceof CategoryNode
+            ? `category:${target.category}`
+            : (target as PrdItem)?.id,
       });
 
       // Find the index of the dragged item
-      const draggedIndex = this.prdItems.findIndex(item => item.id === draggedItem.id);
+      const draggedIndex = this.prdItems.findIndex(
+        (item) => item.id === draggedItem.id,
+      );
       if (draggedIndex === -1) {
-        this.logger.warn('Dragged item not found in items array', { itemId: draggedItem.id });
+        this.logger.warn("Dragged item not found in items array", {
+          itemId: draggedItem.id,
+        });
         return;
       }
 
@@ -1218,41 +1465,48 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
         targetIndex = this.prdItems.length - 1;
       } else if (target instanceof CategoryNode) {
         // Dropped on a category - move to end of that category
-        const categoryItems = this.prdItems.filter(item => item.category === target.category);
+        const categoryItems = this.prdItems.filter(
+          (item) => item.category === target.category,
+        );
         if (categoryItems.length === 0) {
           targetIndex = this.prdItems.length - 1;
         } else {
           const lastItemInCategory = categoryItems[categoryItems.length - 1];
-          targetIndex = this.prdItems.findIndex(item => item.id === lastItemInCategory.id);
+          targetIndex = this.prdItems.findIndex(
+            (item) => item.id === lastItemInCategory.id,
+          );
         }
       } else {
         // Dropped on another item - insert after that item
-        targetIndex = this.prdItems.findIndex(item => item.id === (target as PrdItem).id);
+        targetIndex = this.prdItems.findIndex(
+          (item) => item.id === (target as PrdItem).id,
+        );
       }
 
       if (targetIndex === -1) {
-        this.logger.warn('Target position not found');
+        this.logger.warn("Target position not found");
         return;
       }
 
       // Don't reorder if dropped on itself
       if (draggedIndex === targetIndex) {
-        this.logger.debug('Item dropped on itself, no reordering needed');
+        this.logger.debug("Item dropped on itself, no reordering needed");
         return;
       }
 
       // Perform the reordering
       const reorderedItems = [...this.prdItems];
       const [movedItem] = reorderedItems.splice(draggedIndex, 1);
-      
+
       // Adjust target index if we removed an item before it
-      const adjustedTargetIndex = draggedIndex < targetIndex ? targetIndex : targetIndex + 1;
+      const adjustedTargetIndex =
+        draggedIndex < targetIndex ? targetIndex : targetIndex + 1;
       reorderedItems.splice(adjustedTargetIndex, 0, movedItem);
 
-      this.logger.info('Reordering items', {
+      this.logger.info("Reordering items", {
         itemId: draggedItem.id,
         from: draggedIndex,
-        to: adjustedTargetIndex
+        to: adjustedTargetIndex,
       });
 
       // Update in-memory array
@@ -1261,16 +1515,20 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
       // Save to file
       if (this.prdFilePath) {
         this.fileManager.write(this.prdItems);
-        this.logger.info('PRD file updated with new order');
+        this.logger.info("PRD file updated with new order");
       }
 
       // Refresh the tree view
       this._onDidChangeTreeData.fire();
-      
-      vscode.window.showInformationMessage(`Moved ${draggedItem.id} to new position`);
+
+      vscode.window.showInformationMessage(
+        `Moved ${draggedItem.id} to new position`,
+      );
     } catch (error) {
-      this.logger.error('Failed to handle drop', error);
-      vscode.window.showErrorMessage(`Failed to reorder items: ${getUserFriendlyMessage(error)}`);
+      this.logger.error("Failed to handle drop", error);
+      vscode.window.showErrorMessage(
+        `Failed to reorder items: ${getUserFriendlyMessage(error)}`,
+      );
     }
   }
 }
