@@ -601,8 +601,8 @@
     "category": "Audit",
     "description": "I'd like to audit the project to determine where the codebase could be polished to improve its maintainablity. please perform an audit and create an audit report in a .reports folder for me to review. This report will likely inform additional items being added to the prd.json so consider that when creating the report.",
     "steps": [],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "Bug-003",
