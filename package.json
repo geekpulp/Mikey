@@ -134,6 +134,24 @@
         }
       ]
     },
+    "keybindings": [
+      {
+        "command": "ralph.addItem",
+        "key": "n",
+        "when": "focusedView == ralph.prdExplorer"
+      },
+      {
+        "command": "ralph.openItem",
+        "key": "enter",
+        "when": "focusedView == ralph.prdExplorer && viewItem == prdItem"
+      },
+      {
+        "command": "ralph.deleteItem",
+        "key": "delete",
+        "mac": "cmd+backspace",
+        "when": "focusedView == ralph.prdExplorer && viewItem == prdItem"
+      }
+    ],
     "configuration": {
       "title": "Mikey",
       "properties": {

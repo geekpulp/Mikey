@@ -1013,3 +1013,34 @@
   - Extension compiles successfully (pnpm typecheck ✓)
   - Polish-002 now complete with passes: true
   - Next: Remaining items are ui-004 (drag-and-drop) and polish-003 (keyboard shortcuts)
+
+- 2026-02-11: Completed polish-003: Keyboard shortcuts for common actions
+  - Added keybindings section to package.json with three keyboard shortcuts:
+    * 'n' key - Opens "Add PRD Item" dialog when sidebar is focused
+    * 'Enter' key - Opens detail panel for selected item
+    * 'Delete' key (Windows/Linux) / 'Cmd+Backspace' (Mac) - Shows delete confirmation for selected item
+  - All shortcuts are scoped to only work when ralph.prdExplorer view is focused
+  - Enter and Delete shortcuts additionally require viewItem == prdItem context
+  - Shortcuts integrate with existing commands:
+    * ralph.addItem - Shows category picker then description input
+    * ralph.openItem - Opens detail panel with item details and steps
+    * ralph.deleteItem - Shows confirmation dialog before deleting
+  - Implementation details:
+    * Uses VS Code's standard keybindings contribution
+    * Platform-specific keybinding for delete action (Mac uses cmd+backspace)
+    * Proper when clauses ensure shortcuts only work in appropriate contexts
+    * Shortcuts automatically receive selected tree item as parameter
+  - User experience:
+    * Fast keyboard-driven workflow for common tasks
+    * No need to use mouse for basic operations
+    * Consistent with VS Code's keyboard-first design
+    * Intuitive key choices (n=new, enter=open, delete=delete)
+  - All 5 acceptance criteria verified:
+    1. ✓ Pressing 'n' with sidebar focused opens Add Item dialog
+    2. ✓ Add Item dialog shows category picker and description input
+    3. ✓ Pressing 'Enter' on selected item opens detail panel
+    4. ✓ Detail panel displays item information and steps
+    5. ✓ Pressing 'Delete' key shows delete confirmation dialog
+  - Extension compiles successfully (pnpm typecheck ✓)
+  - Polish-003 now complete with passes: true
+  - Next: Only ui-004 (drag-and-drop reordering) remains incomplete

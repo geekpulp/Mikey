@@ -647,14 +647,29 @@
     "category": "polish",
     "description": "Keyboard shortcuts for common actions",
     "steps": [
-      "With sidebar focused, press 'n' or configured shortcut",
-      "Verify 'Add Item' dialog opens",
-      "With item selected, press 'Enter'",
-      "Verify detail panel opens",
-      "Press 'Delete' key and verify delete confirmation appears"
+      {
+        "text": "With sidebar focused, press 'n' or configured shortcut",
+        "completed": true
+      },
+      {
+        "text": "Verify 'Add Item' dialog opens",
+        "completed": true
+      },
+      {
+        "text": "With item selected, press 'Enter'",
+        "completed": true
+      },
+      {
+        "text": "Verify detail panel opens",
+        "completed": true
+      },
+      {
+        "text": "Press 'Delete' key and verify delete confirmation appears",
+        "completed": true
+      }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "polish-004",
