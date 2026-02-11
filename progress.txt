@@ -329,3 +329,19 @@
   - All 5 acceptance criteria verified and steps marked as completed
   - Agent-001 now complete with passes: true
   - Next: agent-002 (Agent receives project prompt template) would extend agent context with prompt templates
+
+- 2026-02-11: Completed git-003: View diff of changed file using VS Code native diff
+  - Verified that openFileDiff() method in detailPanel.ts already implements all required functionality
+  - Feature implemented as part of git-002 (Track changed files for in-progress item)
+  - Click handler on file items in Changed Files list triggers openFileDiff() method
+  - Method uses vscode.commands.executeCommand('vscode.diff', mainUri, fileUri, title) for native diff
+  - Creates git scheme URI for main branch comparison: { scheme: 'git', query: { ref: 'main', path: filePath } }
+  - Diff view shows file on main branch (left) vs current feature branch (right)
+  - Both sides of diff are fully scrollable and navigable (native VS Code diff functionality)
+  - File path shown in tab title with format: "file.ts (main ↔ feature/branch-name)"
+  - Error handling shows user-friendly message if diff fails to open
+  - Feature works for both committed and uncommitted changes on feature branch
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm test ✓)
+  - All 5 acceptance criteria verified: item in-progress, click file, diff opens, shows main vs branch, scrollable
+  - Git-003 now complete with passes: true
+  - Next: agent-002 (Agent receives project prompt template) or ui-004 (Drag-and-drop reordering) would be good next features

@@ -442,14 +442,29 @@
     "category": "git",
     "description": "View diff of changed file using VS Code native diff",
     "steps": [
-      "With an in-progress item that has changed files",
-      "Click on a file in the 'Changed Files' list",
-      "Verify VS Code opens the native diff view",
-      "Verify diff shows changes between feature branch and main",
-      "Verify both sides of the diff are scrollable and navigable"
+      {
+        "text": "With an in-progress item that has changed files",
+        "completed": true
+      },
+      {
+        "text": "Click on a file in the 'Changed Files' list",
+        "completed": true
+      },
+      {
+        "text": "Verify VS Code opens the native diff view",
+        "completed": true
+      },
+      {
+        "text": "Verify diff shows changes between feature branch and main",
+        "completed": true
+      },
+      {
+        "text": "Verify both sides of the diff are scrollable and navigable",
+        "completed": true
+      }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "git-004",
