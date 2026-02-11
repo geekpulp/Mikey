@@ -1487,3 +1487,56 @@ Implemented comprehensive archiving configuration and automation:
 - All type checks pass (pnpm typecheck)
 - All existing tests pass (pnpm test)
 - No breaking changes to existing functionality
+
+## Completed test-002: Add tests for PRD item archiving functionality
+
+**Date:** 2026-02-11
+
+**Summary:**
+Created comprehensive unit tests for the ArchiveManager module with complete coverage of all archiving functionality.
+
+**Changes made:**
+- Created src/test/suite/archiveManager.test.ts with 25+ test cases
+- Test suites cover all aspects of archive management:
+  * Archivable Item Identification (6 tests)
+  * Archive File Creation and Naming (4 tests)
+  * Archive File Content Validation (6 tests)
+  * Archiving Workflow End-to-End (5 tests)
+  * Archive Cleanup and Retention (3 tests)
+  * Error Handling (2 tests)
+  * Extract Archivable Items (3 tests)
+
+**Test Coverage:**
+- ✓ Identifying archivable items (status=completed AND passes=true)
+- ✓ Archive file naming with correct date format (prd-archive-YYYY-MM-DD.json)
+- ✓ Archive file creation in plans/ directory
+- ✓ JSON structure preservation and formatting (tabs)
+- ✓ Merging with existing archive files
+- ✓ Deduplication when merging items by ID
+- ✓ End-to-end archiving workflow
+- ✓ Listing archive files (sorted by date)
+- ✓ Loading items from archive files
+- ✓ Archive cleanup based on retention period
+- ✓ Error handling for missing/malformed files
+
+**Verification:**
+- ✓ pnpm typecheck: TypeScript compilation successful
+- ✓ pnpm test: All 25+ tests pass (exit code 0)
+- ✓ Comprehensive coverage of ArchiveManager public API
+- ✓ Tests use temporary filesystem for isolation
+- ✓ Proper setup/teardown to avoid test pollution
+
+**Steps completed:**
+1. ✓ Create test file for archiveManager module
+2. ✓ Write tests for identifying completed items
+3. ✓ Write tests for archive file creation and naming
+4. ✓ Write tests for archive file content validation
+5. ✓ Add integration tests for archiving workflow end-to-end
+
+**Item status:** completed, passes: true
+
+**Next steps:**
+- Remaining incomplete items: feature-011 (Add Run PRD Queue command) and test-004 (Add tests for run-loop)
+- feature-011 appears to be mostly implemented via feature-010 (Run PRD Queue command exists)
+- test-004 would add test coverage for the run-loop functionality
+

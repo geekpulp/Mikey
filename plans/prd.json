@@ -1409,27 +1409,27 @@
     "steps": [
       {
         "text": "Create test file for archiveManager module",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Write tests for identifying completed items",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Write tests for archive file creation and naming",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Write tests for archive file content validation",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Add integration tests for archiving workflow end-to-end",
-        "completed": false
+        "completed": true
       }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "feature-010",
