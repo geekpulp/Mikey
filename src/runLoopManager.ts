@@ -21,11 +21,14 @@ export interface RunLoopOptions {
 	/** Maximum number of items to process (0 = unlimited) */
 	maxItems?: number;
 	
+	/** Number of iterations to run per item (default: 1) */
+	iterationsPerItem?: number;
+	
 	/** Callback when item processing starts */
-	onItemStart?: (item: PrdItem) => void;
+	onItemStart?: (item: PrdItem, iteration?: number) => void;
 	
 	/** Callback when item processing completes */
-	onItemComplete?: (item: PrdItem, success: boolean) => void;
+	onItemComplete?: (item: PrdItem, success: boolean, iteration?: number) => void;
 	
 	/** Callback when loop completes */
 	onLoopComplete?: (processedCount: number, successCount: number, failureCount: number) => void;
@@ -151,6 +154,8 @@ export class RunLoopManager {
 					this.cancellationToken?.cancel();
 				});
 
+				const iterations = options.iterationsPerItem || 1;
+				
 				for (let i = 0; i < queue.length; i++) {
 					if (this.cancellationToken?.token.isCancellationRequested) {
 						this.logger.info('Run loop cancelled', { 
@@ -162,34 +167,53 @@ export class RunLoopManager {
 					}
 
 					const item = queue[i];
-					const progressPercent = ((i + 1) / queue.length) * 100;
 					
-					progress.report({
-						increment: 100 / queue.length,
-						message: `${i + 1}/${queue.length}: ${item.description}`
-					});
-
-					this.logger.info('Processing item', { 
-						id: item.id, 
-						index: i + 1, 
-						total: queue.length 
-					});
-
-					const result = await this.processItem(item, options);
-					processedCount++;
-
-					if (result.success) {
-						successCount++;
-					} else {
-						failureCount++;
-						
-						if (options.stopOnFailure) {
-							this.logger.warn('Stopping on failure', { 
-								itemId: item.id,
-								error: result.error?.message 
-							});
+					// Process item for specified number of iterations
+					for (let iteration = 1; iteration <= iterations; iteration++) {
+						if (this.cancellationToken?.token.isCancellationRequested) {
 							break;
 						}
+						
+						const iterationMsg = iterations > 1 ? ` (iteration ${iteration}/${iterations})` : '';
+						
+						progress.report({
+							increment: 100 / (queue.length * iterations),
+							message: `${i + 1}/${queue.length}: ${item.description}${iterationMsg}`
+						});
+
+						this.logger.info('Processing item', { 
+							id: item.id, 
+							index: i + 1, 
+							total: queue.length,
+							iteration,
+							totalIterations: iterations
+						});
+
+						const result = await this.processItem(item, options, iteration);
+						processedCount++;
+
+						if (result.success) {
+							successCount++;
+						} else {
+							failureCount++;
+							
+							if (options.stopOnFailure) {
+								this.logger.warn('Stopping on failure', { 
+									itemId: item.id,
+									iteration,
+									error: result.error?.message 
+								});
+								break;
+							}
+						}
+					}
+					
+					// Break outer loop if cancelled or stopped on failure
+					if (this.cancellationToken?.token.isCancellationRequested) {
+						break;
+					}
+					if (options.stopOnFailure && failureCount > 0) {
+						break;
 					}
 				}
 
@@ -234,9 +258,10 @@ export class RunLoopManager {
 	 * 
 	 * @param item - The PRD item to process
 	 * @param options - Options containing callbacks
+	 * @param iteration - Current iteration number (1-based)
 	 * @returns Processing result
 	 */
-	private async processItem(item: PrdItem, options: RunLoopOptions): Promise<ProcessingResult> {
+	private async processItem(item: PrdItem, options: RunLoopOptions, iteration: number = 1): Promise<ProcessingResult> {
 		try {
 			// Skip if already completed
 			if (item.status === 'completed' && item.passes) {
@@ -246,16 +271,18 @@ export class RunLoopManager {
 
 			// Call start callback
 			if (options.onItemStart) {
-				options.onItemStart(item);
+				options.onItemStart(item, iteration);
 			}
 
-			// Update status to in-progress
-			this.fileManager.updateItem(item.id, (currentItem) => ({
-				...currentItem,
-				status: 'in-progress' as Status
-			}));
+			// Update status to in-progress (only on first iteration)
+			if (iteration === 1) {
+				this.fileManager.updateItem(item.id, (currentItem) => ({
+					...currentItem,
+					status: 'in-progress' as Status
+				}));
 
-			this.logger.info('Item status updated to in-progress', { id: item.id });
+				this.logger.info('Item status updated to in-progress', { id: item.id });
+			}
 
 			// Execute the "Start Work" command which opens Copilot Chat
 			await vscode.commands.executeCommand('ralph.startWork', item);
@@ -273,7 +300,7 @@ export class RunLoopManager {
 			
 			// Call completion callback
 			if (options.onItemComplete) {
-				options.onItemComplete(item, success);
+				options.onItemComplete(item, success, iteration);
 			}
 
 			return { item, success, skipped: false };
@@ -283,7 +310,7 @@ export class RunLoopManager {
 			
 			// Call completion callback with failure
 			if (options.onItemComplete) {
-				options.onItemComplete(item, false);
+				options.onItemComplete(item, false, iteration);
 			}
 
 			return { 

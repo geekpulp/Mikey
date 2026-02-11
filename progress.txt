@@ -1540,3 +1540,44 @@ Created comprehensive unit tests for the ArchiveManager module with complete cov
 - feature-011 appears to be mostly implemented via feature-010 (Run PRD Queue command exists)
 - test-004 would add test coverage for the run-loop functionality
 
+
+## Completed feature-011: Add Run PRD Queue command with loop options
+
+**Date:** 2026-02-11
+
+**Summary:**
+Enhanced the Run PRD Queue command with support for iterations per item, allowing the queue to process each item multiple times.
+
+**Changes made:**
+1. **RunLoopManager.ts**:
+   - Added `iterationsPerItem` parameter to `RunLoopOptions` interface
+   - Updated `onItemStart` and `onItemComplete` callbacks to accept `iteration` parameter
+   - Modified `startLoop()` to loop through each item for the specified number of iterations
+   - Updated progress UI to show iteration count (e.g., "item 1/3: Description (iteration 2/5)")
+   - Updated `processItem()` to accept iteration parameter and only update status to in-progress on first iteration
+   - Enhanced logging to include iteration information
+
+2. **extension.ts**:
+   - Added input prompt for iterations per item with validation (must be >= 1)
+   - Passed `iterationsPerItem` to RunLoopManager.startLoop()
+   - Updated callbacks to handle iteration parameter
+   - Enhanced logging to include iteration information
+
+**Implementation details:**
+- The command already existed from feature-010, but lacked iteration support
+- Iterations are performed sequentially for each item before moving to the next
+- Progress bar correctly accounts for total iterations (item count × iterations per item)
+- Status is only updated to "in-progress" on the first iteration to avoid redundant updates
+- Cancellation gracefully stops at any point during iterations
+- Stop-on-failure option works across iterations (stops immediately on first failure)
+
+**Verification:**
+- ✓ pnpm typecheck: TypeScript compilation successful
+- ✓ pnpm test: All tests pass (exit code 0)
+- ✓ All 5 steps of feature-011 marked as completed
+- ✓ Command contribution already existed in package.json
+- ✓ RunLoopManager already wired from feature-010
+- ✓ Progress UI shows current item and iteration count
+- ✓ User cancellation handled via existing cancellation token
+
+**Item status:** completed, passes: true

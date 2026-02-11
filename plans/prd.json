@@ -1467,27 +1467,27 @@
     "steps": [
       {
         "text": "Add command contribution and command registration",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Prompt for iterations per item, status filter, and category filter",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Wire command to run-loop manager",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Show progress UI with current item and iteration count",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Handle user cancelation gracefully",
-        "completed": false
+        "completed": true
       }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "feature-012",

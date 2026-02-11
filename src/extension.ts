@@ -354,10 +354,31 @@ export function activate(context: vscode.ExtensionContext) {
           return;
         }
         
+        // Prompt for iterations per item
+        const iterationInput = await vscode.window.showInputBox({
+          prompt: "Number of iterations per item",
+          value: "1",
+          validateInput: (value) => {
+            const num = parseInt(value, 10);
+            if (isNaN(num) || num < 1) {
+              return "Please enter a number greater than or equal to 1";
+            }
+            return null;
+          },
+        });
+        
+        if (!iterationInput) {
+          logger.debug("Run queue cancelled: no iterations specified");
+          return;
+        }
+        
+        const iterationsPerItem = parseInt(iterationInput, 10);
+        
         logger.info("Starting run queue", {
           status: selectedStatus.value,
           category: selectedCategory.value,
           stopOnFailure: selectedStopOption.value,
+          iterationsPerItem,
         });
         
         const runLoopManager = new RunLoopManager();
@@ -378,14 +399,15 @@ export function activate(context: vscode.ExtensionContext) {
             statusFilter: selectedStatus.value as any,
             categoryFilter: selectedCategory.value,
             stopOnFailure: selectedStopOption.value,
-            onItemStart: (item) => {
-              logger.info("Starting item", { id: item.id });
+            iterationsPerItem,
+            onItemStart: (item, iteration) => {
+              logger.info("Starting item", { id: item.id, iteration });
               if (prdProvider) {
                 prdProvider.refresh();
               }
             },
-            onItemComplete: (item, success) => {
-              logger.info("Item completed", { id: item.id, success });
+            onItemComplete: (item, success, iteration) => {
+              logger.info("Item completed", { id: item.id, success, iteration });
               if (prdProvider) {
                 prdProvider.refresh();
               }
