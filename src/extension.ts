@@ -49,6 +49,35 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
+    vscode.commands.registerCommand('ralph.filterByStatus', async () => {
+      logger.debug('Filter by status command invoked');
+      
+      const currentFilter = prdProvider.getStatusFilter();
+      const filterOptions = [
+        { label: 'All Items', value: 'all', description: currentFilter === 'all' ? '(current)' : '' },
+        { label: 'Not Started', value: 'not-started', description: currentFilter === 'not-started' ? '(current)' : '' },
+        { label: 'In Progress', value: 'in-progress', description: currentFilter === 'in-progress' ? '(current)' : '' },
+        { label: 'In Review', value: 'in-review', description: currentFilter === 'in-review' ? '(current)' : '' },
+        { label: 'Completed', value: 'completed', description: currentFilter === 'completed' ? '(current)' : '' }
+      ];
+      
+      const selected = await vscode.window.showQuickPick(filterOptions, {
+        placeHolder: 'Filter PRD items by status'
+      });
+      
+      if (selected) {
+        logger.info('Setting status filter', { filter: selected.value });
+        prdProvider.setStatusFilter(selected.value as any);
+        vscode.window.showInformationMessage(
+          selected.value === 'all' 
+            ? 'Showing all PRD items' 
+            : `Showing only ${selected.label.toLowerCase()} items`
+        );
+      }
+    })
+  );
+
+  context.subscriptions.push(
     vscode.commands.registerCommand('ralph.addItem', async () => {
       logger.debug('Add item command invoked');
       const category = await vscode.window.showQuickPick(config.getCategories(), {

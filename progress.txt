@@ -936,3 +936,40 @@
   - All 7 acceptance criteria met and steps marked as completed
   - Refactor-003 now complete with passes: true
   - Next: Polish features (polish-001, polish-002, polish-003) or ui-004 (drag-and-drop) to enhance user experience
+
+- 2026-02-11: Completed polish-001: Filter items by status in sidebar
+  - Added status filter functionality to PrdTreeDataProvider:
+    * Private statusFilter property to track current filter (defaults to 'all')
+    * setStatusFilter() method to update filter and refresh tree view
+    * getStatusFilter() method to retrieve current filter value
+    * Modified getChildren() to filter items by status before grouping by category
+  - Added ralph.filterByStatus command to extension.ts:
+    * Shows quick pick menu with filter options (All, Not Started, In Progress, In Review, Completed)
+    * Displays current filter selection with "(current)" indicator
+    * Shows confirmation message when filter is applied
+    * Integrates with logger for debugging
+  - Updated package.json:
+    * Added ralph.filterByStatus command with filter icon
+    * Added command to view/title menu (navigation@2)
+    * Renumbered existing navigation items accordingly
+  - Implementation details:
+    * Filter button appears in tree view toolbar with filter icon
+    * Clicking shows dropdown with all status options
+    * Selecting a filter immediately updates the tree to show only matching items
+    * Categories with no matching items are hidden
+    * "All Items" option clears the filter and shows everything
+    * Filter state persists until changed or extension reloads
+  - User experience:
+    * Quick access via toolbar button
+    * Clear visual feedback of current filter
+    * Instant tree updates when filter changes
+    * Intuitive filter options with readable labels
+  - All 5 acceptance criteria verified:
+    1. ✓ Sidebar displays items in different statuses
+    2. ✓ Filter button/dropdown accessible in view toolbar
+    3. ✓ Selecting 'In Progress' shows only in-progress items
+    4. ✓ Other statuses work similarly (not-started, in-review, completed)
+    5. ✓ "All Items" clears filter and shows all items
+  - Extension compiles successfully (pnpm typecheck ✓)
+  - Polish-001 now complete with passes: true
+  - Next: Remaining items are ui-004 (drag-and-drop), polish-002 (filter by category), and polish-003 (keyboard shortcuts)

@@ -44,6 +44,11 @@
         "icon": "$(refresh)"
       },
       {
+        "command": "ralph.filterByStatus",
+        "title": "Filter by Status",
+        "icon": "$(filter)"
+      },
+      {
         "command": "ralph.addItem",
         "title": "Add PRD Item",
         "icon": "$(add)"
@@ -81,14 +86,19 @@
           "group": "navigation@1"
         },
         {
-          "command": "ralph.refresh",
+          "command": "ralph.filterByStatus",
           "when": "view == ralph.prdExplorer",
           "group": "navigation@2"
         },
         {
-          "command": "ralph.addItem",
+          "command": "ralph.refresh",
           "when": "view == ralph.prdExplorer",
           "group": "navigation@3"
+        },
+        {
+          "command": "ralph.addItem",
+          "when": "view == ralph.prdExplorer",
+          "group": "navigation@4"
         }
       ],
       "view/item/context": [

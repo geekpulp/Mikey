@@ -82,6 +82,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
   private prdFilePath: string | undefined;
   private logger = Logger.getInstance();
   private fileManager = PrdFileManager.getInstance();
+  private statusFilter: Status | 'all' = 'all';
 
   /**
    * Creates a new PRD tree data provider
@@ -184,6 +185,37 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
    */
   refresh(): void {
     this.loadPrdFile();
+  }
+
+  /**
+   * Sets the status filter for the tree view
+   * 
+   * This method:
+   * - Updates the internal filter state
+   * - Triggers a tree refresh to show only items matching the filter
+   * - Supports filtering by specific status or showing all items
+   * 
+   * @param filter - The status to filter by, or 'all' to show all items
+   * 
+   * @example
+   * ```typescript
+   * prdProvider.setStatusFilter('in-progress'); // Show only in-progress items
+   * prdProvider.setStatusFilter('all'); // Show all items
+   * ```
+   */
+  setStatusFilter(filter: Status | 'all'): void {
+    this.logger.debug('Setting status filter', { filter });
+    this.statusFilter = filter;
+    this._onDidChangeTreeData.fire();
+  }
+
+  /**
+   * Gets the current status filter
+   * 
+   * @returns The current filter value ('all' or a specific Status)
+   */
+  getStatusFilter(): Status | 'all' {
+    return this.statusFilter;
   }
 
   /**
@@ -903,7 +935,13 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
     if (!element) {
       // Root level: return category nodes
       const categories = new Map<string, PrdItem[]>();
-      this.prdItems.forEach((item) => {
+      
+      // Filter items by status if filter is active
+      const filteredItems = this.statusFilter === 'all' 
+        ? this.prdItems 
+        : this.prdItems.filter(item => item.status === this.statusFilter);
+      
+      filteredItems.forEach((item) => {
         if (!categories.has(item.category)) {
           categories.set(item.category, []);
         }
@@ -921,7 +959,7 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
     }
 
     if (element instanceof CategoryNode) {
-      // Return items in this category
+      // Return items in this category (already filtered at root level)
       return Promise.resolve(element.items);
     }
 

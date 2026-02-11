@@ -625,8 +625,8 @@
       "Verify only in-progress items are shown",
       "Clear filter and verify all items return"
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "polish-002",
