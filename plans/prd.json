@@ -1,1199 +1,1207 @@
 [
-  {
-    "id": "setup-001",
-    "category": "setup",
-    "description": "Extension scaffolding and activation",
-    "steps": [
-      {
-        "text": "Run 'yo code' or manually create extension structure with package.json, tsconfig.json, and src folder",
-        "completed": true
-      },
-      {
-        "text": "Define extension activation events in package.json (onView, workspaceContains:prd.json)",
-        "completed": true
-      },
-      {
-        "text": "Create extension entry point that registers all commands and views",
-        "completed": true
-      },
-      {
-        "text": "Run extension in Extension Development Host",
-        "completed": true
-      },
-      {
-        "text": "Verify extension activates without errors in Output panel",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "setup-002",
-    "category": "setup",
-    "description": "PRD file detection and loading",
-    "steps": [
-      {
-        "text": "Open a workspace containing a prd.json file in the plans/ folder",
-        "completed": true
-      },
-      {
-        "text": "Verify extension detects and loads the prd.json file automatically",
-        "completed": true
-      },
-      {
-        "text": "Verify items are parsed correctly with all fields (id, category, description, steps, status, passes)",
-        "completed": true
-      },
-      {
-        "text": "Modify prd.json externally and verify extension reloads changes",
-        "completed": true
-      },
-      {
-        "text": "Verify error handling when prd.json is malformed",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "ui-001",
-    "category": "ui",
-    "description": "Sidebar tree view displays PRD items",
-    "steps": [
-      {
-        "text": "Open a workspace with a valid prd.json",
-        "completed": true
-      },
-      {
-        "text": "Verify a 'Ralph' or 'PRD' view appears in the Activity Bar",
-        "completed": true
-      },
-      {
-        "text": "Click the Activity Bar icon to open the sidebar",
-        "completed": true
-      },
-      {
-        "text": "Verify all PRD items are listed with their descriptions",
-        "completed": true
-      },
-      {
-        "text": "Verify items are grouped or labeled by category (setup, ui, functional, git, agent)",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "ui-002",
-    "category": "ui",
-    "description": "Sidebar shows status indicators for each item",
-    "steps": [
-      {
-        "text": "Open the sidebar with PRD items loaded",
-        "completed": true
-      },
-      {
-        "text": "Verify each item displays a status icon (not-started, in-progress, in-review, completed)",
-        "completed": true
-      },
-      {
-        "text": "Verify different statuses have visually distinct icons or colors",
-        "completed": true
-      },
-      {
-        "text": "Change an item's status in prd.json manually",
-        "completed": true
-      },
-      {
-        "text": "Verify the sidebar updates to reflect the new status",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "ui-003",
-    "category": "ui",
-    "description": "Detail panel opens when selecting a sidebar item",
-    "steps": [
-      {
-        "text": "Click on a PRD item in the sidebar",
-        "completed": true
-      },
-      {
-        "text": "Verify a webview panel opens showing item details",
-        "completed": true
-      },
-      {
-        "text": "Verify the panel displays: id, category, description, status, passes, and all steps",
-        "completed": true
-      },
-      {
-        "text": "Verify each step has a checkbox showing its completion state",
-        "completed": true
-      },
-      {
-        "text": "Click a different item in sidebar and verify panel updates",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "ui-004",
-    "category": "ui",
-    "description": "Drag-and-drop reordering in sidebar",
-    "steps": [
-      {
-        "text": "Open the sidebar with multiple PRD items",
-        "completed": true
-      },
-      {
-        "text": "Drag an item from one position to another",
-        "completed": true
-      },
-      {
-        "text": "Verify the item moves to the new position visually",
-        "completed": true
-      },
-      {
-        "text": "Verify prd.json is updated with the new order",
-        "completed": true
-      },
-      {
-        "text": "Reload the extension and verify order persists",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "functional-001",
-    "category": "functional",
-    "description": "Add new PRD item",
-    "steps": [
-      {
-        "text": "Click the 'Add Item' button in the sidebar toolbar",
-        "completed": true
-      },
-      {
-        "text": "Verify a form/dialog appears with fields: category, description",
-        "completed": true
-      },
-      {
-        "text": "Fill in the form and submit",
-        "completed": true
-      },
-      {
-        "text": "Verify the new item appears in the sidebar with auto-generated ID",
-        "completed": true
-      },
-      {
-        "text": "Verify prd.json is updated with the new item (status: not-started, passes: false, empty steps)",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "functional-002",
-    "category": "functional",
-    "description": "Edit existing PRD item",
-    "steps": [
-      {
-        "text": "Select an item in the sidebar",
-        "completed": true
-      },
-      {
-        "text": "Click 'Edit' button or use context menu",
-        "completed": true
-      },
-      {
-        "text": "Verify form/dialog opens pre-filled with current values",
-        "completed": true
-      },
-      {
-        "text": "Modify description and category",
-        "completed": true
-      },
-      {
-        "text": "Submit and verify changes appear in sidebar and prd.json",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "functional-003",
-    "category": "functional",
-    "description": "Delete PRD item",
-    "steps": [
-      {
-        "text": "Select an item in the sidebar",
-        "completed": true
-      },
-      {
-        "text": "Click 'Delete' button or use context menu",
-        "completed": true
-      },
-      {
-        "text": "Verify confirmation dialog appears",
-        "completed": true
-      },
-      {
-        "text": "Confirm deletion",
-        "completed": true
-      },
-      {
-        "text": "Verify item is removed from sidebar and prd.json",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "functional-004",
-    "category": "functional",
-    "description": "Add, edit, and remove steps within an item",
-    "steps": [
-      {
-        "text": "Open the detail panel for an item",
-        "completed": true
-      },
-      {
-        "text": "Click 'Add Step' and enter step text",
-        "completed": true
-      },
-      {
-        "text": "Verify step appears in the list",
-        "completed": true
-      },
-      {
-        "text": "Click 'Edit' button on a step to edit its text",
-        "completed": true
-      },
-      {
-        "text": "Click delete icon on a step to remove it",
-        "completed": true
-      },
-      {
-        "text": "Verify all changes persist to prd.json",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "functional-005",
-    "category": "functional",
-    "description": "Toggle step completion checkboxes",
-    "steps": [
-      {
-        "text": "Open the detail panel for an item with steps",
-        "completed": true
-      },
-      {
-        "text": "Click a step's checkbox to mark it complete",
-        "completed": true
-      },
-      {
-        "text": "Verify checkbox shows checked state",
-        "completed": true
-      },
-      {
-        "text": "Verify step completion state persists to prd.json (steps become objects with text and completed fields)",
-        "completed": true
-      },
-      {
-        "text": "Uncheck the step and verify state updates",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "functional-006",
-    "category": "functional",
-    "description": "Change item status from detail panel",
-    "steps": [
-      {
-        "text": "Open the detail panel for an item",
-        "completed": true
-      },
-      {
-        "text": "Locate the status dropdown/selector",
-        "completed": true
-      },
-      {
-        "text": "Change status from 'not-started' to 'in-progress'",
-        "completed": true
-      },
-      {
-        "text": "Verify sidebar icon updates immediately",
-        "completed": true
-      },
-      {
-        "text": "Verify prd.json status field is updated",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "functional-007",
-    "category": "functional",
-    "description": "Toggle passes field from detail panel",
-    "steps": [
-      {
-        "text": "Open the detail panel for an item",
-        "completed": true
-      },
-      {
-        "text": "Locate the 'passes' toggle/checkbox",
-        "completed": true
-      },
-      {
-        "text": "Toggle from false to true",
-        "completed": true
-      },
-      {
-        "text": "Verify visual indicator updates (e.g., green checkmark)",
-        "completed": true
-      },
-      {
-        "text": "Verify prd.json passes field is updated",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "functional-008",
-    "category": "functional",
-    "description": "Auto-generate unique IDs for new items",
-    "steps": [
-      {
-        "text": "Create a new PRD item",
-        "completed": true
-      },
-      {
-        "text": "Verify an ID is auto-generated in format 'category-XXX' (e.g., 'ui-005')",
-        "completed": true
-      },
-      {
-        "text": "Create another item in the same category",
-        "completed": true
-      },
-      {
-        "text": "Verify the new ID increments correctly",
-        "completed": true
-      },
-      {
-        "text": "Verify no duplicate IDs exist in prd.json",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "git-001",
-    "category": "git",
-    "description": "Create feature branch when starting work on an item",
-    "steps": [
-      "Select an item with status 'not-started'",
-      "Click 'Start Work' button",
-      "Verify a new git branch is created (e.g., 'feature/setup-001')",
-      "Verify the workspace switches to the new branch",
-      "Verify item status changes to 'in-progress'"
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "git-002",
-    "category": "git",
-    "description": "Track changed files for in-progress item",
-    "steps": [
-      {
-        "text": "Start work on an item (creates feature branch)",
-        "completed": true
-      },
-      {
-        "text": "Make changes to files in the workspace",
-        "completed": true
-      },
-      {
-        "text": "Open the detail panel for the in-progress item",
-        "completed": true
-      },
-      {
-        "text": "Verify a 'Changed Files' section shows modified files",
-        "completed": true
-      },
-      {
-        "text": "Verify the list updates as more files are changed",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "git-003",
-    "category": "git",
-    "description": "View diff of changed file using VS Code native diff",
-    "steps": [
-      {
-        "text": "With an in-progress item that has changed files",
-        "completed": true
-      },
-      {
-        "text": "Click on a file in the 'Changed Files' list",
-        "completed": true
-      },
-      {
-        "text": "Verify VS Code opens the native diff view",
-        "completed": true
-      },
-      {
-        "text": "Verify diff shows changes between feature branch and main",
-        "completed": true
-      },
-      {
-        "text": "Verify both sides of the diff are scrollable and navigable",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "git-004",
-    "category": "git",
-    "description": "Mark item for review and show all diffs",
-    "steps": [
-      {
-        "text": "With an in-progress item that has changed files",
-        "completed": true
-      },
-      {
-        "text": "Click 'Submit for Review' button",
-        "completed": true
-      },
-      {
-        "text": "Verify item status changes to 'in-review'",
-        "completed": true
-      },
-      {
-        "text": "Verify all changed files are listed in the detail panel",
-        "completed": true
-      },
-      {
-        "text": "Verify user can click through each file to review diffs",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "git-005",
-    "category": "git",
-    "description": "Auto-merge feature branch when item status changes to completed",
-    "steps": [
-      "With an item in 'in-review' status on a feature branch",
-      "Change status to 'completed' in the detail panel",
-      "Verify confirmation dialog appears explaining the merge operation",
-      "Confirm the merge",
-      "Verify feature branch is merged into main",
-      "Verify changes are pushed to remote",
-      "Verify feature branch is deleted locally",
-      "Verify workspace switches back to main branch",
-      "Verify success message shows merge details"
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "agent-001",
-    "category": "agent",
-    "description": "Start Work triggers Copilot chat with item context",
-    "steps": [
-      {
-        "text": "Select a PRD item and click 'Start Work'",
-        "completed": true
-      },
-      {
-        "text": "Verify GitHub Copilot Chat opens (or extension chat panel)",
-        "completed": true
-      },
-      {
-        "text": "Verify the chat is pre-populated with context about the item",
-        "completed": true
-      },
-      {
-        "text": "Verify context includes: description, steps, category, and relevant workspace info",
-        "completed": true
-      },
-      {
-        "text": "Verify agent can reference the PRD item in responses",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "agent-002",
-    "category": "agent",
-    "description": "Agent receives project prompt template",
-    "steps": [
-      "Start work on an item",
-      "Verify the agent context includes the appropriate prompt from prompts/ folder",
-      "Verify prompt is selected based on item category or project configuration",
-      "Verify agent responses align with the prompt's instructions",
-      "Test with different prompt templates (default.txt, safe-write-only.txt)"
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "agent-003",
-    "category": "agent",
-    "description": "Agent can update step completion status",
-    "steps": [
-      {
-        "text": "Start work on an item with the agent",
-        "completed": true
-      },
-      {
-        "text": "As agent completes implementation steps, verify it can mark steps complete",
-        "completed": true
-      },
-      {
-        "text": "Verify step checkboxes update in the detail panel",
-        "completed": true
-      },
-      {
-        "text": "Verify prd.json is updated with step completion",
-        "completed": true
-      },
-      {
-        "text": "Verify user can also manually override step status",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "agent-004",
-    "category": "agent",
-    "description": "Agent uses skill references for context",
-    "steps": [
-      {
-        "text": "Start work on an item related to WordPress plugin development",
-        "completed": true
-      },
-      {
-        "text": "Verify agent has access to skills/wp-plugin-development/SKILL.md",
-        "completed": true
-      },
-      {
-        "text": "Verify agent references the skill's references/ documents when relevant",
-        "completed": true
-      },
-      {
-        "text": "Ask agent about WordPress security best practices",
-        "completed": true
-      },
-      {
-        "text": "Verify response incorporates content from security.md reference",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "polish-001",
-    "category": "polish",
-    "description": "Filter items by status in sidebar",
-    "steps": [
-      "Open the sidebar with multiple items in different statuses",
-      "Click filter dropdown or toggle buttons",
-      "Select 'In Progress' filter",
-      "Verify only in-progress items are shown",
-      "Clear filter and verify all items return"
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "polish-002",
-    "category": "polish",
-    "description": "Filter items by category in sidebar",
-    "steps": [
-      "Open the sidebar with items in multiple categories",
-      "Click category filter dropdown",
-      "Select 'ui' category",
-      "Verify only UI category items are shown",
-      "Select multiple categories and verify combined results"
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "polish-003",
-    "category": "polish",
-    "description": "Keyboard shortcuts for common actions",
-    "steps": [
-      {
-        "text": "With sidebar focused, press 'n' or configured shortcut",
-        "completed": true
-      },
-      {
-        "text": "Verify 'Add Item' dialog opens",
-        "completed": true
-      },
-      {
-        "text": "With item selected, press 'Enter'",
-        "completed": true
-      },
-      {
-        "text": "Verify detail panel opens",
-        "completed": true
-      },
-      {
-        "text": "Press 'Delete' key and verify delete confirmation appears",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "polish-004",
-    "category": "polish",
-    "description": "Progress summary in sidebar header",
-    "steps": [
-      {
-        "text": "Open sidebar with items in various statuses",
-        "completed": true
-      },
-      {
-        "text": "Verify header shows progress summary (e.g., '3/10 completed')",
-        "completed": true
-      },
-      {
-        "text": "Complete an item",
-        "completed": true
-      },
-      {
-        "text": "Verify progress summary updates immediately",
-        "completed": true
-      },
-      {
-        "text": "Verify progress bar or percentage indicator reflects completion",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "Bug-001",
-    "category": "Bug",
-    "description": "The user cannot add steps to a new PRD item via the UI. The add steps button is present, as in the steps area in the UI, but they dont seem to work. Clicking the + Add Step button appears to do nothing. Please address this issue",
-    "steps": [],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "Bug-002",
-    "category": "Bug",
-    "description": "There appears to be two buttons that add a new PRD item. the first is \"Add PRD Item (N)\" and the second \"Create PRD Item\". Both appear to do the same thing, but only one is required. Please fix this issue.",
-    "steps": [],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "Audit-001",
-    "category": "Audit",
-    "description": "I'd like to audit the project to determine where the codebase could be polished to improve its maintainablity. please perform an audit and create an audit report in a .reports folder for me to review. This report will likely inform additional items being added to the prd.json so consider that when creating the report.",
-    "steps": [],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "Bug-003",
-    "category": "Bug",
-    "description": "I notice when a new work item in the PRD is started it is appended to the current copilot chat session rather than starting a fresh session. Its important it is started as a new chat session as we want to ensure we are avoiding blowing the context window of a given chat. This shoud also be the case when exicuting any particular step in the PRD item too. Each PRD item and each step within it shold be a new chat session which is started with suffcient context that it can continue the work from the previous step.",
-    "steps": [],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "Action-001",
-    "category": "Action",
-    "description": "Build a new version of the extension so I can share it with others",
-    "steps": [],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "Docs-001",
-    "category": "Docs",
-    "description": "Update docs so anyone installing and using the extension has a clear overview of what the extensions does, how to use it, what's required to use it, and how to set things up.",
-    "steps": [],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "refactor-001",
-    "category": "refactor",
-    "description": "Split detailPanel.ts into modules",
-    "steps": [
-      {
-        "text": "Extract HTML generation to separate htmlRenderer.ts module",
-        "completed": true
-      },
-      {
-        "text": "Extract message handlers to messageHandlers.ts module",
-        "completed": true
-      },
-      {
-        "text": "Extract git operations to gitOperations.ts module",
-        "completed": true
-      },
-      {
-        "text": "Extract step management to stepManager.ts module",
-        "completed": true
-      },
-      {
-        "text": "Update detailPanel.ts to import and use new modules",
-        "completed": true
-      },
-      "Test all functionality to ensure refactoring didn't break anything"
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "refactor-002",
-    "category": "refactor",
-    "description": "Create PrdFileManager service",
-    "steps": [
-      {
-        "text": "Create new PrdFileManager class to abstract file operations",
-        "completed": true
-      },
-      {
-        "text": "Add methods for read, write, update operations with error handling",
-        "completed": true
-      },
-      {
-        "text": "Add transaction-like operations for atomic PRD updates",
-        "completed": true
-      },
-      {
-        "text": "Implement file backup/recovery mechanism",
-        "completed": true
-      },
-      {
-        "text": "Update prdTreeDataProvider to use PrdFileManager",
-        "completed": true
-      },
-      {
-        "text": "Update detailPanel to use PrdFileManager",
-        "completed": true
-      },
-      {
-        "text": "Add unit tests for PrdFileManager",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "refactor-003",
-    "category": "refactor",
-    "description": "Extract configuration management",
-    "steps": [
-      {
-        "text": "Define VS Code workspace configuration schema for categories",
-        "completed": true
-      },
-      {
-        "text": "Define configuration for PRD file path",
-        "completed": true
-      },
-      {
-        "text": "Define configuration for permission profiles",
-        "completed": true
-      },
-      {
-        "text": "Move hardcoded values from extension.ts to configuration",
-        "completed": true
-      },
-      {
-        "text": "Move hardcoded values from prdTreeDataProvider.ts to configuration",
-        "completed": true
-      },
-      {
-        "text": "Add migration logic for existing users",
-        "completed": true
-      },
-      {
-        "text": "Document configuration options in README",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "refactor-004",
-    "category": "refactor",
-    "description": "Add constants and enums",
-    "steps": [
-      {
-        "text": "Create constants.ts file for all magic strings",
-        "completed": true
-      },
-      {
-        "text": "Define enum for status values (not-started, in-progress, completed, etc.)",
-        "completed": true
-      },
-      {
-        "text": "Define enum for message commands (toggleStep, changeStatus, etc.)",
-        "completed": true
-      },
-      {
-        "text": "Define constants for categories",
-        "completed": true
-      },
-      {
-        "text": "Replace all magic strings throughout codebase with constants",
-        "completed": true
-      },
-      {
-        "text": "Verify no compilation errors after replacement",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "test-001",
-    "category": "test",
-    "description": "Set up testing infrastructure",
-    "steps": [
-      {
-        "text": "Install Mocha test framework and dependencies",
-        "completed": true
-      },
-      {
-        "text": "Configure VS Code test runner in package.json",
-        "completed": true
-      },
-      {
-        "text": "Create test folder structure (unit, integration)",
-        "completed": true
-      },
-      {
-        "text": "Set up test utilities and mocks for VS Code API",
-        "completed": true
-      },
-      {
-        "text": "Add npm test script to package.json",
-        "completed": true
-      },
-      {
-        "text": "Document how to run tests in README",
-        "completed": true
-      },
-      {
-        "text": "Verify tests run successfully in CI environment",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "test-002",
-    "category": "test",
-    "description": "Add unit tests for PRD operations",
-    "steps": [
-      {
-        "text": "Write tests for PRD item CRUD operations",
-        "completed": true
-      },
-      {
-        "text": "Write tests for ID generation logic",
-        "completed": true
-      },
-      {
-        "text": "Write tests for step management",
-        "completed": true
-      },
-      {
-        "text": "Write tests for status transitions",
-        "completed": true
-      },
-      {
-        "text": "Mock file system operations for isolated testing",
-        "completed": true
-      },
-      {
-        "text": "Achieve at least 70% code coverage for core logic",
-        "completed": true
-      },
-      {
-        "text": "Run tests and verify all pass",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "test-003",
-    "category": "test",
-    "description": "Add integration tests",
-    "steps": [
-      {
-        "text": "Write test for extension activation",
-        "completed": true
-      },
-      {
-        "text": "Write test for command registration and execution",
-        "completed": true
-      },
-      {
-        "text": "Write test for tree view rendering",
-        "completed": true
-      },
-      {
-        "text": "Write test for detail panel interactions",
-        "completed": true
-      },
-      {
-        "text": "Write test for file watcher behavior",
-        "completed": true
-      },
-      {
-        "text": "Run integration tests in Extension Development Host",
-        "completed": true
-      },
-      {
-        "text": "Verify all tests pass consistently",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "quality-001",
-    "category": "quality",
-    "description": "Add logging infrastructure",
-    "steps": [
-      {
-        "text": "Create Logger class using VS Code OutputChannel",
-        "completed": true
-      },
-      {
-        "text": "Add log levels (debug, info, warn, error)",
-        "completed": true
-      },
-      {
-        "text": "Add timestamps to log entries",
-        "completed": true
-      },
-      {
-        "text": "Log key operations (file changes, git operations, command execution)",
-        "completed": true
-      },
-      {
-        "text": "Add debug mode configuration option",
-        "completed": true
-      },
-      {
-        "text": "Replace console.log statements with logger calls",
-        "completed": true
-      },
-      {
-        "text": "Document logging in README for troubleshooting",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "quality-002",
-    "category": "quality",
-    "description": "Improve error handling",
-    "steps": [
-      {
-        "text": "Create custom error types for domain-specific errors",
-        "completed": true
-      },
-      {
-        "text": "Standardize error handling pattern across all modules",
-        "completed": true
-      },
-      {
-        "text": "Add try-catch blocks to all file operations",
-        "completed": true
-      },
-      {
-        "text": "Add try-catch blocks to all git operations",
-        "completed": true
-      },
-      {
-        "text": "Provide user-friendly error messages with actionable suggestions",
-        "completed": true
-      },
-      {
-        "text": "Log all errors to OutputChannel for debugging",
-        "completed": true
-      },
-      {
-        "text": "Test error scenarios to ensure graceful degradation",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "quality-003",
-    "category": "quality",
-    "description": "Add JSDoc documentation",
-    "steps": [
-      {
-        "text": "Document all public APIs in extension.ts",
-        "completed": true
-      },
-      {
-        "text": "Document all public methods in prdTreeDataProvider.ts",
-        "completed": true
-      },
-      {
-        "text": "Document all public methods in detailPanel.ts",
-        "completed": true
-      },
-      {
-        "text": "Add parameter descriptions and return types",
-        "completed": true
-      },
-      {
-        "text": "Add examples for complex functions",
-        "completed": true
-      },
-      {
-        "text": "Document expected behavior and edge cases",
-        "completed": true
-      },
-      {
-        "text": "Generate documentation with TypeDoc (optional)",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "security-001",
-    "category": "security",
-    "description": "Add input validation",
-    "steps": [
-      {
-        "text": "Install Zod or similar validation library",
-        "completed": true
-      },
-      {
-        "text": "Define schema for PRD item structure",
-        "completed": true
-      },
-      {
-        "text": "Define schema for step structure",
-        "completed": true
-      },
-      {
-        "text": "Validate PRD file content on load",
-        "completed": true
-      },
-      {
-        "text": "Validate user inputs for ID, description, category",
-        "completed": true
-      },
-      {
-        "text": "Add validation error messages for users",
-        "completed": true
-      },
-      {
-        "text": "Test with malformed PRD files and invalid inputs",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  },
-  {
-    "id": "security-002",
-    "category": "security",
-    "description": "Enhance webview security",
-    "steps": [
-      {
-        "text": "Review and strengthen Content Security Policy",
-        "completed": true
-      },
-      {
-        "text": "Sanitize all user inputs before rendering in webview",
-        "completed": true
-      },
-      {
-        "text": "Use nonce for inline scripts and styles",
-        "completed": true
-      },
-      {
-        "text": "Validate all messages from webview before processing",
-        "completed": true
-      },
-      {
-        "text": "Audit for potential XSS vulnerabilities",
-        "completed": true
-      },
-      {
-        "text": "Test with malicious inputs to verify security",
-        "completed": true
-      },
-      {
-        "text": "Document security measures in code comments",
-        "completed": true
-      }
-    ],
-    "status": "completed",
-    "passes": true
-  }
+	{
+		"id": "setup-001",
+		"category": "setup",
+		"description": "Extension scaffolding and activation",
+		"steps": [
+			{
+				"text": "Run 'yo code' or manually create extension structure with package.json, tsconfig.json, and src folder",
+				"completed": true
+			},
+			{
+				"text": "Define extension activation events in package.json (onView, workspaceContains:prd.json)",
+				"completed": true
+			},
+			{
+				"text": "Create extension entry point that registers all commands and views",
+				"completed": true
+			},
+			{
+				"text": "Run extension in Extension Development Host",
+				"completed": true
+			},
+			{
+				"text": "Verify extension activates without errors in Output panel",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "setup-002",
+		"category": "setup",
+		"description": "PRD file detection and loading",
+		"steps": [
+			{
+				"text": "Open a workspace containing a prd.json file in the plans/ folder",
+				"completed": true
+			},
+			{
+				"text": "Verify extension detects and loads the prd.json file automatically",
+				"completed": true
+			},
+			{
+				"text": "Verify items are parsed correctly with all fields (id, category, description, steps, status, passes)",
+				"completed": true
+			},
+			{
+				"text": "Modify prd.json externally and verify extension reloads changes",
+				"completed": true
+			},
+			{
+				"text": "Verify error handling when prd.json is malformed",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "ui-001",
+		"category": "ui",
+		"description": "Sidebar tree view displays PRD items",
+		"steps": [
+			{
+				"text": "Open a workspace with a valid prd.json",
+				"completed": true
+			},
+			{
+				"text": "Verify a 'Ralph' or 'PRD' view appears in the Activity Bar",
+				"completed": true
+			},
+			{
+				"text": "Click the Activity Bar icon to open the sidebar",
+				"completed": true
+			},
+			{
+				"text": "Verify all PRD items are listed with their descriptions",
+				"completed": true
+			},
+			{
+				"text": "Verify items are grouped or labeled by category (setup, ui, functional, git, agent)",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "ui-002",
+		"category": "ui",
+		"description": "Sidebar shows status indicators for each item",
+		"steps": [
+			{
+				"text": "Open the sidebar with PRD items loaded",
+				"completed": true
+			},
+			{
+				"text": "Verify each item displays a status icon (not-started, in-progress, in-review, completed)",
+				"completed": true
+			},
+			{
+				"text": "Verify different statuses have visually distinct icons or colors",
+				"completed": true
+			},
+			{
+				"text": "Change an item's status in prd.json manually",
+				"completed": true
+			},
+			{
+				"text": "Verify the sidebar updates to reflect the new status",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "ui-003",
+		"category": "ui",
+		"description": "Detail panel opens when selecting a sidebar item",
+		"steps": [
+			{
+				"text": "Click on a PRD item in the sidebar",
+				"completed": true
+			},
+			{
+				"text": "Verify a webview panel opens showing item details",
+				"completed": true
+			},
+			{
+				"text": "Verify the panel displays: id, category, description, status, passes, and all steps",
+				"completed": true
+			},
+			{
+				"text": "Verify each step has a checkbox showing its completion state",
+				"completed": true
+			},
+			{
+				"text": "Click a different item in sidebar and verify panel updates",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "ui-004",
+		"category": "ui",
+		"description": "Drag-and-drop reordering in sidebar",
+		"steps": [
+			{
+				"text": "Open the sidebar with multiple PRD items",
+				"completed": true
+			},
+			{
+				"text": "Drag an item from one position to another",
+				"completed": true
+			},
+			{
+				"text": "Verify the item moves to the new position visually",
+				"completed": true
+			},
+			{
+				"text": "Verify prd.json is updated with the new order",
+				"completed": true
+			},
+			{
+				"text": "Reload the extension and verify order persists",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "functional-001",
+		"category": "functional",
+		"description": "Add new PRD item",
+		"steps": [
+			{
+				"text": "Click the 'Add Item' button in the sidebar toolbar",
+				"completed": true
+			},
+			{
+				"text": "Verify a form/dialog appears with fields: category, description",
+				"completed": true
+			},
+			{
+				"text": "Fill in the form and submit",
+				"completed": true
+			},
+			{
+				"text": "Verify the new item appears in the sidebar with auto-generated ID",
+				"completed": true
+			},
+			{
+				"text": "Verify prd.json is updated with the new item (status: not-started, passes: false, empty steps)",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "functional-002",
+		"category": "functional",
+		"description": "Edit existing PRD item",
+		"steps": [
+			{
+				"text": "Select an item in the sidebar",
+				"completed": true
+			},
+			{
+				"text": "Click 'Edit' button or use context menu",
+				"completed": true
+			},
+			{
+				"text": "Verify form/dialog opens pre-filled with current values",
+				"completed": true
+			},
+			{
+				"text": "Modify description and category",
+				"completed": true
+			},
+			{
+				"text": "Submit and verify changes appear in sidebar and prd.json",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "functional-003",
+		"category": "functional",
+		"description": "Delete PRD item",
+		"steps": [
+			{
+				"text": "Select an item in the sidebar",
+				"completed": true
+			},
+			{
+				"text": "Click 'Delete' button or use context menu",
+				"completed": true
+			},
+			{
+				"text": "Verify confirmation dialog appears",
+				"completed": true
+			},
+			{
+				"text": "Confirm deletion",
+				"completed": true
+			},
+			{
+				"text": "Verify item is removed from sidebar and prd.json",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "functional-004",
+		"category": "functional",
+		"description": "Add, edit, and remove steps within an item",
+		"steps": [
+			{
+				"text": "Open the detail panel for an item",
+				"completed": true
+			},
+			{
+				"text": "Click 'Add Step' and enter step text",
+				"completed": true
+			},
+			{
+				"text": "Verify step appears in the list",
+				"completed": true
+			},
+			{
+				"text": "Click 'Edit' button on a step to edit its text",
+				"completed": true
+			},
+			{
+				"text": "Click delete icon on a step to remove it",
+				"completed": true
+			},
+			{
+				"text": "Verify all changes persist to prd.json",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "functional-005",
+		"category": "functional",
+		"description": "Toggle step completion checkboxes",
+		"steps": [
+			{
+				"text": "Open the detail panel for an item with steps",
+				"completed": true
+			},
+			{
+				"text": "Click a step's checkbox to mark it complete",
+				"completed": true
+			},
+			{
+				"text": "Verify checkbox shows checked state",
+				"completed": true
+			},
+			{
+				"text": "Verify step completion state persists to prd.json (steps become objects with text and completed fields)",
+				"completed": true
+			},
+			{
+				"text": "Uncheck the step and verify state updates",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "functional-006",
+		"category": "functional",
+		"description": "Change item status from detail panel",
+		"steps": [
+			{
+				"text": "Open the detail panel for an item",
+				"completed": true
+			},
+			{
+				"text": "Locate the status dropdown/selector",
+				"completed": true
+			},
+			{
+				"text": "Change status from 'not-started' to 'in-progress'",
+				"completed": true
+			},
+			{
+				"text": "Verify sidebar icon updates immediately",
+				"completed": true
+			},
+			{
+				"text": "Verify prd.json status field is updated",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "functional-007",
+		"category": "functional",
+		"description": "Toggle passes field from detail panel",
+		"steps": [
+			{
+				"text": "Open the detail panel for an item",
+				"completed": true
+			},
+			{
+				"text": "Locate the 'passes' toggle/checkbox",
+				"completed": true
+			},
+			{
+				"text": "Toggle from false to true",
+				"completed": true
+			},
+			{
+				"text": "Verify visual indicator updates (e.g., green checkmark)",
+				"completed": true
+			},
+			{
+				"text": "Verify prd.json passes field is updated",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "functional-008",
+		"category": "functional",
+		"description": "Auto-generate unique IDs for new items",
+		"steps": [
+			{
+				"text": "Create a new PRD item",
+				"completed": true
+			},
+			{
+				"text": "Verify an ID is auto-generated in format 'category-XXX' (e.g., 'ui-005')",
+				"completed": true
+			},
+			{
+				"text": "Create another item in the same category",
+				"completed": true
+			},
+			{
+				"text": "Verify the new ID increments correctly",
+				"completed": true
+			},
+			{
+				"text": "Verify no duplicate IDs exist in prd.json",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "git-001",
+		"category": "git",
+		"description": "Create feature branch when starting work on an item",
+		"steps": [
+			"Select an item with status 'not-started'",
+			"Click 'Start Work' button",
+			"Verify a new git branch is created (e.g., 'feature/setup-001')",
+			"Verify the workspace switches to the new branch",
+			"Verify item status changes to 'in-progress'"
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "git-002",
+		"category": "git",
+		"description": "Track changed files for in-progress item",
+		"steps": [
+			{
+				"text": "Start work on an item (creates feature branch)",
+				"completed": true
+			},
+			{
+				"text": "Make changes to files in the workspace",
+				"completed": true
+			},
+			{
+				"text": "Open the detail panel for the in-progress item",
+				"completed": true
+			},
+			{
+				"text": "Verify a 'Changed Files' section shows modified files",
+				"completed": true
+			},
+			{
+				"text": "Verify the list updates as more files are changed",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "git-003",
+		"category": "git",
+		"description": "View diff of changed file using VS Code native diff",
+		"steps": [
+			{
+				"text": "With an in-progress item that has changed files",
+				"completed": true
+			},
+			{
+				"text": "Click on a file in the 'Changed Files' list",
+				"completed": true
+			},
+			{
+				"text": "Verify VS Code opens the native diff view",
+				"completed": true
+			},
+			{
+				"text": "Verify diff shows changes between feature branch and main",
+				"completed": true
+			},
+			{
+				"text": "Verify both sides of the diff are scrollable and navigable",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "git-004",
+		"category": "git",
+		"description": "Mark item for review and show all diffs",
+		"steps": [
+			{
+				"text": "With an in-progress item that has changed files",
+				"completed": true
+			},
+			{
+				"text": "Click 'Submit for Review' button",
+				"completed": true
+			},
+			{
+				"text": "Verify item status changes to 'in-review'",
+				"completed": true
+			},
+			{
+				"text": "Verify all changed files are listed in the detail panel",
+				"completed": true
+			},
+			{
+				"text": "Verify user can click through each file to review diffs",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "git-005",
+		"category": "git",
+		"description": "Auto-merge feature branch when item status changes to completed",
+		"steps": [
+			"With an item in 'in-review' status on a feature branch",
+			"Change status to 'completed' in the detail panel",
+			"Verify confirmation dialog appears explaining the merge operation",
+			"Confirm the merge",
+			"Verify feature branch is merged into main",
+			"Verify changes are pushed to remote",
+			"Verify feature branch is deleted locally",
+			"Verify workspace switches back to main branch",
+			"Verify success message shows merge details"
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "agent-001",
+		"category": "agent",
+		"description": "Start Work triggers Copilot chat with item context",
+		"steps": [
+			{
+				"text": "Select a PRD item and click 'Start Work'",
+				"completed": true
+			},
+			{
+				"text": "Verify GitHub Copilot Chat opens (or extension chat panel)",
+				"completed": true
+			},
+			{
+				"text": "Verify the chat is pre-populated with context about the item",
+				"completed": true
+			},
+			{
+				"text": "Verify context includes: description, steps, category, and relevant workspace info",
+				"completed": true
+			},
+			{
+				"text": "Verify agent can reference the PRD item in responses",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "agent-002",
+		"category": "agent",
+		"description": "Agent receives project prompt template",
+		"steps": [
+			"Start work on an item",
+			"Verify the agent context includes the appropriate prompt from prompts/ folder",
+			"Verify prompt is selected based on item category or project configuration",
+			"Verify agent responses align with the prompt's instructions",
+			"Test with different prompt templates (default.txt, safe-write-only.txt)"
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "agent-003",
+		"category": "agent",
+		"description": "Agent can update step completion status",
+		"steps": [
+			{
+				"text": "Start work on an item with the agent",
+				"completed": true
+			},
+			{
+				"text": "As agent completes implementation steps, verify it can mark steps complete",
+				"completed": true
+			},
+			{
+				"text": "Verify step checkboxes update in the detail panel",
+				"completed": true
+			},
+			{
+				"text": "Verify prd.json is updated with step completion",
+				"completed": true
+			},
+			{
+				"text": "Verify user can also manually override step status",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "agent-004",
+		"category": "agent",
+		"description": "Agent uses skill references for context",
+		"steps": [
+			{
+				"text": "Start work on an item related to WordPress plugin development",
+				"completed": true
+			},
+			{
+				"text": "Verify agent has access to skills/wp-plugin-development/SKILL.md",
+				"completed": true
+			},
+			{
+				"text": "Verify agent references the skill's references/ documents when relevant",
+				"completed": true
+			},
+			{
+				"text": "Ask agent about WordPress security best practices",
+				"completed": true
+			},
+			{
+				"text": "Verify response incorporates content from security.md reference",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "polish-001",
+		"category": "polish",
+		"description": "Filter items by status in sidebar",
+		"steps": [
+			"Open the sidebar with multiple items in different statuses",
+			"Click filter dropdown or toggle buttons",
+			"Select 'In Progress' filter",
+			"Verify only in-progress items are shown",
+			"Clear filter and verify all items return"
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "polish-002",
+		"category": "polish",
+		"description": "Filter items by category in sidebar",
+		"steps": [
+			"Open the sidebar with items in multiple categories",
+			"Click category filter dropdown",
+			"Select 'ui' category",
+			"Verify only UI category items are shown",
+			"Select multiple categories and verify combined results"
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "polish-003",
+		"category": "polish",
+		"description": "Keyboard shortcuts for common actions",
+		"steps": [
+			{
+				"text": "With sidebar focused, press 'n' or configured shortcut",
+				"completed": true
+			},
+			{
+				"text": "Verify 'Add Item' dialog opens",
+				"completed": true
+			},
+			{
+				"text": "With item selected, press 'Enter'",
+				"completed": true
+			},
+			{
+				"text": "Verify detail panel opens",
+				"completed": true
+			},
+			{
+				"text": "Press 'Delete' key and verify delete confirmation appears",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "polish-004",
+		"category": "polish",
+		"description": "Progress summary in sidebar header",
+		"steps": [
+			{
+				"text": "Open sidebar with items in various statuses",
+				"completed": true
+			},
+			{
+				"text": "Verify header shows progress summary (e.g., '3/10 completed')",
+				"completed": true
+			},
+			{
+				"text": "Complete an item",
+				"completed": true
+			},
+			{
+				"text": "Verify progress summary updates immediately",
+				"completed": true
+			},
+			{
+				"text": "Verify progress bar or percentage indicator reflects completion",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "Bug-001",
+		"category": "Bug",
+		"description": "The user cannot add steps to a new PRD item via the UI. The add steps button is present, as in the steps area in the UI, but they dont seem to work. Clicking the + Add Step button appears to do nothing. Please address this issue",
+		"steps": [],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "Bug-002",
+		"category": "Bug",
+		"description": "There appears to be two buttons that add a new PRD item. the first is \"Add PRD Item (N)\" and the second \"Create PRD Item\". Both appear to do the same thing, but only one is required. Please fix this issue.",
+		"steps": [],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "Audit-001",
+		"category": "Audit",
+		"description": "I'd like to audit the project to determine where the codebase could be polished to improve its maintainablity. please perform an audit and create an audit report in a .reports folder for me to review. This report will likely inform additional items being added to the prd.json so consider that when creating the report.",
+		"steps": [],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "Bug-003",
+		"category": "Bug",
+		"description": "PRD work items and steps should each start a new Copilot chat session instead of appending to the current one. This avoids blowing the context window. Each PRD item and each step within it should start a fresh chat session with sufficient context to continue from the previous step.",
+		"steps": [],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "Action-001",
+		"category": "Action",
+		"description": "Build a new version of the extension so I can share it with others",
+		"steps": [],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "Docs-001",
+		"category": "Docs",
+		"description": "Update docs so anyone installing and using the extension has a clear overview of what the extensions does, how to use it, what's required to use it, and how to set things up.",
+		"steps": [],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "refactor-001",
+		"category": "refactor",
+		"description": "Split detailPanel.ts into modules",
+		"steps": [
+			{
+				"text": "Extract HTML generation to separate htmlRenderer.ts module",
+				"completed": true
+			},
+			{
+				"text": "Extract message handlers to messageHandlers.ts module",
+				"completed": true
+			},
+			{
+				"text": "Extract git operations to gitOperations.ts module",
+				"completed": true
+			},
+			{
+				"text": "Extract step management to stepManager.ts module",
+				"completed": true
+			},
+			{
+				"text": "Update detailPanel.ts to import and use new modules",
+				"completed": true
+			},
+			"Test all functionality to ensure refactoring didn't break anything"
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "refactor-002",
+		"category": "refactor",
+		"description": "Create PrdFileManager service",
+		"steps": [
+			{
+				"text": "Create new PrdFileManager class to abstract file operations",
+				"completed": true
+			},
+			{
+				"text": "Add methods for read, write, update operations with error handling",
+				"completed": true
+			},
+			{
+				"text": "Add transaction-like operations for atomic PRD updates",
+				"completed": true
+			},
+			{
+				"text": "Implement file backup/recovery mechanism",
+				"completed": true
+			},
+			{
+				"text": "Update prdTreeDataProvider to use PrdFileManager",
+				"completed": true
+			},
+			{
+				"text": "Update detailPanel to use PrdFileManager",
+				"completed": true
+			},
+			{
+				"text": "Add unit tests for PrdFileManager",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "refactor-003",
+		"category": "refactor",
+		"description": "Extract configuration management",
+		"steps": [
+			{
+				"text": "Define VS Code workspace configuration schema for categories",
+				"completed": true
+			},
+			{
+				"text": "Define configuration for PRD file path",
+				"completed": true
+			},
+			{
+				"text": "Define configuration for permission profiles",
+				"completed": true
+			},
+			{
+				"text": "Move hardcoded values from extension.ts to configuration",
+				"completed": true
+			},
+			{
+				"text": "Move hardcoded values from prdTreeDataProvider.ts to configuration",
+				"completed": true
+			},
+			{
+				"text": "Add migration logic for existing users",
+				"completed": true
+			},
+			{
+				"text": "Document configuration options in README",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "refactor-004",
+		"category": "refactor",
+		"description": "Add constants and enums",
+		"steps": [
+			{
+				"text": "Create constants.ts file for all magic strings",
+				"completed": true
+			},
+			{
+				"text": "Define enum for status values (not-started, in-progress, completed, etc.)",
+				"completed": true
+			},
+			{
+				"text": "Define enum for message commands (toggleStep, changeStatus, etc.)",
+				"completed": true
+			},
+			{
+				"text": "Define constants for categories",
+				"completed": true
+			},
+			{
+				"text": "Replace all magic strings throughout codebase with constants",
+				"completed": true
+			},
+			{
+				"text": "Verify no compilation errors after replacement",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "test-001",
+		"category": "test",
+		"description": "Set up testing infrastructure",
+		"steps": [
+			{
+				"text": "Install Mocha test framework and dependencies",
+				"completed": true
+			},
+			{
+				"text": "Configure VS Code test runner in package.json",
+				"completed": true
+			},
+			{
+				"text": "Create test folder structure (unit, integration)",
+				"completed": true
+			},
+			{
+				"text": "Set up test utilities and mocks for VS Code API",
+				"completed": true
+			},
+			{
+				"text": "Add npm test script to package.json",
+				"completed": true
+			},
+			{
+				"text": "Document how to run tests in README",
+				"completed": true
+			},
+			{
+				"text": "Verify tests run successfully in CI environment",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "test-002",
+		"category": "test",
+		"description": "Add unit tests for PRD operations",
+		"steps": [
+			{
+				"text": "Write tests for PRD item CRUD operations",
+				"completed": true
+			},
+			{
+				"text": "Write tests for ID generation logic",
+				"completed": true
+			},
+			{
+				"text": "Write tests for step management",
+				"completed": true
+			},
+			{
+				"text": "Write tests for status transitions",
+				"completed": true
+			},
+			{
+				"text": "Mock file system operations for isolated testing",
+				"completed": true
+			},
+			{
+				"text": "Achieve at least 70% code coverage for core logic",
+				"completed": true
+			},
+			{
+				"text": "Run tests and verify all pass",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "test-003",
+		"category": "test",
+		"description": "Add integration tests",
+		"steps": [
+			{
+				"text": "Write test for extension activation",
+				"completed": true
+			},
+			{
+				"text": "Write test for command registration and execution",
+				"completed": true
+			},
+			{
+				"text": "Write test for tree view rendering",
+				"completed": true
+			},
+			{
+				"text": "Write test for detail panel interactions",
+				"completed": true
+			},
+			{
+				"text": "Write test for file watcher behavior",
+				"completed": true
+			},
+			{
+				"text": "Run integration tests in Extension Development Host",
+				"completed": true
+			},
+			{
+				"text": "Verify all tests pass consistently",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "quality-001",
+		"category": "quality",
+		"description": "Add logging infrastructure",
+		"steps": [
+			{
+				"text": "Create Logger class using VS Code OutputChannel",
+				"completed": true
+			},
+			{
+				"text": "Add log levels (debug, info, warn, error)",
+				"completed": true
+			},
+			{
+				"text": "Add timestamps to log entries",
+				"completed": true
+			},
+			{
+				"text": "Log key operations (file changes, git operations, command execution)",
+				"completed": true
+			},
+			{
+				"text": "Add debug mode configuration option",
+				"completed": true
+			},
+			{
+				"text": "Replace console.log statements with logger calls",
+				"completed": true
+			},
+			{
+				"text": "Document logging in README for troubleshooting",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "quality-002",
+		"category": "quality",
+		"description": "Improve error handling",
+		"steps": [
+			{
+				"text": "Create custom error types for domain-specific errors",
+				"completed": true
+			},
+			{
+				"text": "Standardize error handling pattern across all modules",
+				"completed": true
+			},
+			{
+				"text": "Add try-catch blocks to all file operations",
+				"completed": true
+			},
+			{
+				"text": "Add try-catch blocks to all git operations",
+				"completed": true
+			},
+			{
+				"text": "Provide user-friendly error messages with actionable suggestions",
+				"completed": true
+			},
+			{
+				"text": "Log all errors to OutputChannel for debugging",
+				"completed": true
+			},
+			{
+				"text": "Test error scenarios to ensure graceful degradation",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "quality-003",
+		"category": "quality",
+		"description": "Add JSDoc documentation",
+		"steps": [
+			{
+				"text": "Document all public APIs in extension.ts",
+				"completed": true
+			},
+			{
+				"text": "Document all public methods in prdTreeDataProvider.ts",
+				"completed": true
+			},
+			{
+				"text": "Document all public methods in detailPanel.ts",
+				"completed": true
+			},
+			{
+				"text": "Add parameter descriptions and return types",
+				"completed": true
+			},
+			{
+				"text": "Add examples for complex functions",
+				"completed": true
+			},
+			{
+				"text": "Document expected behavior and edge cases",
+				"completed": true
+			},
+			{
+				"text": "Generate documentation with TypeDoc (optional)",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "security-001",
+		"category": "security",
+		"description": "Add input validation",
+		"steps": [
+			{
+				"text": "Install Zod or similar validation library",
+				"completed": true
+			},
+			{
+				"text": "Define schema for PRD item structure",
+				"completed": true
+			},
+			{
+				"text": "Define schema for step structure",
+				"completed": true
+			},
+			{
+				"text": "Validate PRD file content on load",
+				"completed": true
+			},
+			{
+				"text": "Validate user inputs for ID, description, category",
+				"completed": true
+			},
+			{
+				"text": "Add validation error messages for users",
+				"completed": true
+			},
+			{
+				"text": "Test with malformed PRD files and invalid inputs",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "security-002",
+		"category": "security",
+		"description": "Enhance webview security",
+		"steps": [
+			{
+				"text": "Review and strengthen Content Security Policy",
+				"completed": true
+			},
+			{
+				"text": "Sanitize all user inputs before rendering in webview",
+				"completed": true
+			},
+			{
+				"text": "Use nonce for inline scripts and styles",
+				"completed": true
+			},
+			{
+				"text": "Validate all messages from webview before processing",
+				"completed": true
+			},
+			{
+				"text": "Audit for potential XSS vulnerabilities",
+				"completed": true
+			},
+			{
+				"text": "Test with malicious inputs to verify security",
+				"completed": true
+			},
+			{
+				"text": "Document security measures in code comments",
+				"completed": true
+			}
+		],
+		"status": "completed",
+		"passes": true
+	},
+	{
+		"id": "Audit-002",
+		"category": "Audit",
+		"description": "review the applicaiton and make sure its in good working order",
+		"steps": [],
+		"status": "completed",
+		"passes": true
+	}
 ]
