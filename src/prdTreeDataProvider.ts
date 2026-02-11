@@ -303,6 +303,9 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
       promptTemplate = fs.readFileSync(fullTemplatePath, 'utf-8');
     }
 
+    // Load relevant skill references
+    const skillContext = this.loadSkillReferences(workspaceRoot, item);
+
     const prdContext = `# PRD Item Context
 
 ## Item: ${item.id}
@@ -335,10 +338,89 @@ ${stepIndex !== undefined
   ? `Work on step ${stepIndex + 1} of ${item.id}. Complete this specific step and mark it as done when finished.`
   : `Work on ${item.id}. Follow the steps listed above. Update progress.txt when you make changes.`}
 
+${skillContext}
+
 ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
 `;
 
     return prdContext;
+  }
+
+  private loadSkillReferences(workspaceRoot: string, item: PrdItem): string {
+    const skillsDir = path.join(workspaceRoot, 'skills');
+    if (!fs.existsSync(skillsDir)) {
+      const testSkillsDir = path.join(workspaceRoot, 'test', 'skills');
+      if (fs.existsSync(testSkillsDir)) {
+        return this.loadSkillsFromDirectory(testSkillsDir, item);
+      }
+      return '';
+    }
+    return this.loadSkillsFromDirectory(skillsDir, item);
+  }
+
+  private loadSkillsFromDirectory(skillsDir: string, item: PrdItem): string {
+    try {
+      const skillFolders = fs.readdirSync(skillsDir).filter(name => {
+        const fullPath = path.join(skillsDir, name);
+        return fs.statSync(fullPath).isDirectory();
+      });
+
+      // Search for relevant skills based on item description or category
+      const searchText = `${item.category} ${item.description}`.toLowerCase();
+      const relevantSkills: string[] = [];
+
+      for (const skillFolder of skillFolders) {
+        const skillMdPath = path.join(skillsDir, skillFolder, 'SKILL.md');
+        if (!fs.existsSync(skillMdPath)) {
+          continue;
+        }
+
+        // Check if skill is relevant
+        if (searchText.includes('wordpress') || searchText.includes('wp') || searchText.includes('plugin')) {
+          if (skillFolder.includes('wp-plugin') || skillFolder.includes('wordpress')) {
+            relevantSkills.push(skillFolder);
+          }
+        }
+
+        // Add more relevance checks as needed
+        // For now, we'll just match WordPress-related items
+      }
+
+      if (relevantSkills.length === 0) {
+        return '';
+      }
+
+      // Build context from relevant skills
+      let skillContext = '\n---\n\n# Available Skills\n\n';
+      
+      for (const skillFolder of relevantSkills) {
+        const skillMdPath = path.join(skillsDir, skillFolder, 'SKILL.md');
+        const skillContent = fs.readFileSync(skillMdPath, 'utf-8');
+        
+        skillContext += `## Skill: ${skillFolder}\n\n${skillContent}\n\n`;
+
+        // Load reference documents
+        const referencesDir = path.join(skillsDir, skillFolder, 'references');
+        if (fs.existsSync(referencesDir)) {
+          const referenceFiles = fs.readdirSync(referencesDir).filter(f => f.endsWith('.md'));
+          
+          if (referenceFiles.length > 0) {
+            skillContext += `### References for ${skillFolder}\n\n`;
+            
+            for (const refFile of referenceFiles) {
+              const refPath = path.join(referencesDir, refFile);
+              const refContent = fs.readFileSync(refPath, 'utf-8');
+              skillContext += `#### ${refFile}\n\n${refContent}\n\n`;
+            }
+          }
+        }
+      }
+
+      return skillContext;
+    } catch (error) {
+      console.error('Error loading skill references:', error);
+      return '';
+    }
   }
 
   async runItem(item?: PrdItem): Promise<void> {

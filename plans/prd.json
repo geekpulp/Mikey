@@ -590,14 +590,29 @@
     "category": "agent",
     "description": "Agent uses skill references for context",
     "steps": [
-      "Start work on an item related to WordPress plugin development",
-      "Verify agent has access to skills/wp-plugin-development/SKILL.md",
-      "Verify agent references the skill's references/ documents when relevant",
-      "Ask agent about WordPress security best practices",
-      "Verify response incorporates content from security.md reference"
+      {
+        "text": "Start work on an item related to WordPress plugin development",
+        "completed": true
+      },
+      {
+        "text": "Verify agent has access to skills/wp-plugin-development/SKILL.md",
+        "completed": true
+      },
+      {
+        "text": "Verify agent references the skill's references/ documents when relevant",
+        "completed": true
+      },
+      {
+        "text": "Ask agent about WordPress security best practices",
+        "completed": true
+      },
+      {
+        "text": "Verify response incorporates content from security.md reference",
+        "completed": true
+      }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "polish-001",

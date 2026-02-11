@@ -384,3 +384,27 @@
   - All 5 acceptance criteria verified: agent context includes command, agent can mark steps, UI updates, prd.json updates, manual override works
   - Agent-003 now complete with passes: true
   - Next: agent-004 (Agent uses skill references) or ui-004 (Drag-and-drop reordering) would be good next features
+
+- 2026-02-11: Completed agent-004: Agent uses skill references for context
+  - Implemented skill reference loading in buildChatContext() method in both prdTreeDataProvider.ts and detailPanel.ts
+  - Added loadSkillReferences() method that searches for skills directory in workspace root or test/skills
+  - Added loadSkillsFromDirectory() method that:
+    * Scans for skill folders containing SKILL.md files
+    * Matches skills to PRD items based on description/category keywords (e.g., WordPress, wp, plugin)
+    * Loads SKILL.md content for relevant skills
+    * Loads all reference documents from the skill's references/ directory
+    * Appends comprehensive skill context to chat including both SKILL.md and all reference files
+  - Skill context is added to chat before agent instructions section
+  - Context includes full SKILL.md with procedures and all reference documents (security.md, lifecycle.md, etc.)
+  - Agent now receives relevant skill documentation automatically when working on WordPress plugin items
+  - Gracefully handles missing skills directories (returns empty string)
+  - Supports both workspace/skills and workspace/test/skills directory structures
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm test ✓)
+  - All 5 acceptance criteria verified:
+    * Agent receives skill context when working on WordPress-related items
+    * SKILL.md content is included in chat context
+    * Reference documents are loaded and appended
+    * Security best practices from security.md are available to agent
+    * Agent can reference all skill documentation when responding
+  - Agent-004 now complete with passes: true
+  - Next: ui-004 (Drag-and-drop reordering) or polish features would be good next steps
