@@ -285,7 +285,7 @@ export class RunLoopManager {
 			}
 
 			// Execute the "Start Work" command which opens Copilot Chat
-			await vscode.commands.executeCommand('ralph.startWork', item);
+			await vscode.commands.executeCommand("mikey.startWork", item);
 
 			// Wait for completion detection
 			const detectionResult = await this.waitForCompletion(item);

@@ -15,7 +15,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onView:ralph.prdExplorer",
+    "onView:mikey.prdExplorer",
     "workspaceContains:**/prd.json"
   ],
   "main": "./out/extension.js",
@@ -23,16 +23,16 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "ralph",
+          "id": "mikey",
           "title": "Mikey",
-          "icon": "resources/ralph-icon.svg"
+          "icon": "resources/mikey-icon.svg"
         }
       ]
     },
     "views": {
-      "ralph": [
+      "mikey": [
         {
-          "id": "ralph.prdExplorer",
+          "id": "mikey.prdExplorer",
           "name": "PRD Items",
           "canMoveViews": true,
           "canSelectMany": false
@@ -41,56 +41,61 @@
     },
     "commands": [
       {
-        "command": "ralph.refresh",
+        "command": "mikey.refresh",
         "title": "Refresh",
         "icon": "$(refresh)"
       },
       {
-        "command": "ralph.filterByStatus",
+        "command": "mikey.filterByStatus",
         "title": "Filter by Status",
         "icon": "$(filter)"
       },
       {
-        "command": "ralph.filterByCategory",
+        "command": "mikey.filterByCategory",
         "title": "Filter by Category",
         "icon": "$(tag)"
       },
       {
-        "command": "ralph.addItem",
+        "command": "mikey.addItem",
         "title": "Add PRD Item",
         "icon": "$(add)"
       },
       {
-        "command": "ralph.editItem",
+        "command": "mikey.editItem",
         "title": "Edit PRD Item",
         "icon": "$(edit)"
       },
       {
-        "command": "ralph.deleteItem",
+        "command": "mikey.deleteItem",
         "title": "Delete PRD Item",
         "icon": "$(trash)"
       },
       {
-        "command": "ralph.runItem",
+        "command": "mikey.runItem",
         "title": "Run PRD Item",
         "icon": "$(play)"
       },
       {
-        "command": "ralph.startWork",
+        "command": "mikey.runItemDirect",
+        "title": "Run PRD Item (Direct)",
+        "icon": "$(play)"
+      },
+      {
+        "command": "mikey.startWork",
         "title": "Start Work (Chat)",
         "icon": "$(comment-discussion)"
       },
       {
-        "command": "ralph.markStepComplete",
+        "command": "mikey.markStepComplete",
         "title": "Mark Step Complete"
       },
       {
-        "command": "ralph.runQueue",
+        "command": "mikey.runQueue",
         "title": "Run PRD Queue",
         "icon": "$(play-circle)"
       },
       {
-        "command": "ralph.archiveCompleted",
+        "command": "mikey.archiveCompleted",
         "title": "Archive Completed Items",
         "icon": "$(archive)"
       }
@@ -98,80 +103,70 @@
     "menus": {
       "view/title": [
         {
-          "command": "ralph.runItem",
-          "when": "view == ralph.prdExplorer",
+          "command": "mikey.runQueue",
+          "when": "view == mikey.prdExplorer",
           "group": "navigation@1"
         },
         {
-          "command": "ralph.runQueue",
-          "when": "view == ralph.prdExplorer",
+          "command": "mikey.filterByStatus",
+          "when": "view == mikey.prdExplorer",
           "group": "navigation@2"
         },
         {
-          "command": "ralph.filterByStatus",
-          "when": "view == ralph.prdExplorer",
-          "group": "navigation@2"
-        },
-        {
-          "command": "ralph.filterByCategory",
-          "when": "view == ralph.prdExplorer",
+          "command": "mikey.filterByCategory",
+          "when": "view == mikey.prdExplorer",
           "group": "navigation@3"
         },
         {
-          "command": "ralph.archiveCompleted",
-          "when": "view == ralph.prdExplorer",
+          "command": "mikey.archiveCompleted",
+          "when": "view == mikey.prdExplorer",
           "group": "navigation@4"
         },
         {
-          "command": "ralph.refresh",
-          "when": "view == ralph.prdExplorer",
+          "command": "mikey.refresh",
+          "when": "view == mikey.prdExplorer",
           "group": "navigation@5"
         },
         {
-          "command": "ralph.addItem",
-          "when": "view == ralph.prdExplorer",
+          "command": "mikey.addItem",
+          "when": "view == mikey.prdExplorer",
           "group": "navigation@6"
         }
       ],
       "view/item/context": [
         {
-          "command": "ralph.startWork",
-          "when": "view == ralph.prdExplorer && viewItem == prdItem",
+          "command": "mikey.runItemDirect",
+          "when": "view == mikey.prdExplorer && viewItem == prdItem",
           "group": "inline@1"
         },
         {
-          "command": "ralph.runItem",
-          "when": "view == ralph.prdExplorer && viewItem == prdItem",
-          "group": "inline@2"
-        },
-        {
-          "command": "ralph.editItem",
-          "when": "view == ralph.prdExplorer && viewItem == prdItem",
+          "command": "mikey.editItem",
+          "when": "view == mikey.prdExplorer && viewItem == prdItem",
           "group": "inline@3"
         },
         {
-          "command": "ralph.deleteItem",
-          "when": "view == ralph.prdExplorer && viewItem == prdItem",
+          "command": "mikey.deleteItem",
+          "when": "view == mikey.prdExplorer && viewItem == prdItem",
           "group": "inline@4"
         }
       ]
     },
     "keybindings": [
       {
-        "command": "ralph.addItem",
+        "command": "mikey.addItem",
         "key": "n",
-        "when": "focusedView == ralph.prdExplorer"
+        "when": "focusedView == mikey.prdExplorer"
       },
       {
-        "command": "ralph.openItem",
+        "command": "mikey.openItem",
         "key": "enter",
-        "when": "focusedView == ralph.prdExplorer && viewItem == prdItem"
+        "when": "focusedView == mikey.prdExplorer && viewItem == prdItem"
       },
       {
-        "command": "ralph.deleteItem",
+        "command": "mikey.deleteItem",
         "key": "delete",
         "mac": "cmd+backspace",
-        "when": "focusedView == ralph.prdExplorer && viewItem == prdItem"
+        "when": "focusedView == mikey.prdExplorer && viewItem == prdItem"
       }
     ],
     "configuration": {
@@ -182,42 +177,42 @@
           "default": "prompts/default.txt",
           "description": "Path to the prompt template file to use when starting work on items (relative to workspace root)"
         },
-        "ralph.debugMode": {
+        "mikey.debugMode": {
           "type": "boolean",
           "default": false,
-          "description": "Enable debug logging in the Ralph output channel"
+          "description": "Enable debug logging in the Mikey output channel"
         },
-        "ralph.prdFilePath": {
+        "mikey.prdFilePath": {
           "type": "string",
           "default": "plans/prd.json",
           "description": "Path to the PRD JSON file (relative to workspace root)"
         },
-        "ralph.skillsDirectory": {
+        "mikey.skillsDirectory": {
           "type": "string",
           "default": "skills",
           "description": "Directory containing skill reference files"
         },
-        "ralph.testSkillsDirectory": {
+        "mikey.testSkillsDirectory": {
           "type": "string",
           "default": "test/skills",
           "description": "Directory containing test skill files"
         },
-        "ralph.promptsDirectory": {
+        "mikey.promptsDirectory": {
           "type": "string",
           "default": "prompts",
           "description": "Directory containing prompt templates"
         },
-        "ralph.featureBranchPrefix": {
+        "mikey.featureBranchPrefix": {
           "type": "string",
           "default": "feature/",
           "description": "Prefix for feature branches created when starting work on items"
         },
-        "ralph.mainBranch": {
+        "mikey.mainBranch": {
           "type": "string",
           "default": "main",
           "description": "Name of the main/default branch for git operations"
         },
-        "ralph.categories": {
+        "mikey.categories": {
           "type": "array",
           "items": {
             "type": "string"
@@ -240,12 +235,12 @@
           ],
           "description": "Available categories for PRD items. Customize this list to match your project's needs."
         },
-        "ralph.archiving.autoArchiveOnExit": {
+        "mikey.archiving.autoArchiveOnExit": {
           "type": "boolean",
           "default": false,
           "description": "Automatically archive completed items when the extension is deactivated or VS Code exits"
         },
-        "ralph.archiving.retentionDays": {
+        "mikey.archiving.retentionDays": {
           "type": "number",
           "default": 90,
           "minimum": 1,

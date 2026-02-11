@@ -11,7 +11,7 @@ export enum LogLevel {
 }
 
 /**
- * Logger class for Ralph extension
+ * Logger class for Mikey extension
  * Provides structured logging with timestamps and log levels
  */
 export class Logger {
@@ -20,7 +20,7 @@ export class Logger {
 	private debugMode: boolean = false;
 
 	private constructor() {
-		this.outputChannel = vscode.window.createOutputChannel('Ralph');
+		this.outputChannel = vscode.window.createOutputChannel("Mikey");
 		this.loadDebugMode();
 	}
 
@@ -38,7 +38,7 @@ export class Logger {
 	 * Load debug mode configuration
 	 */
 	private loadDebugMode(): void {
-		const config = vscode.workspace.getConfiguration('ralph');
+		const config = vscode.workspace.getConfiguration("mikey");
 		this.debugMode = config.get<boolean>('debugMode', false);
 	}
 

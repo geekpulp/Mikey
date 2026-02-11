@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Crust (brown) -->
+  <path d="M32 4 L58 50 L16 50 Z" fill="#CD7F32" stroke="#8B6914" stroke-width="1.5"/>
+  
+  <!-- Cheese (golden yellow) -->
+  <path d="M32 12 L54 48 L24 48 Z" fill="#FFD700" stroke="none"/>
+  
+  <!-- Pepperoni circles -->
+  <circle cx="32" cy="28" r="4" fill="#FF2626"/>
+  <circle cx="40" cy="38" r="3.5" fill="#FF2626"/>
+  <circle cx="26" cy="40" r="3.5" fill="#FF2626"/>
+  <circle cx="34" cy="44" r="3" fill="#FF2626"/>
+  
+  <!-- Highlight/shine on cheese -->
+  <ellipse cx="35" cy="22" rx="5" ry="8" fill="#FFED4E" opacity="0.6"/>
+</svg>

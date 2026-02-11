@@ -4,7 +4,7 @@ import {
 	GitOperationError, 
 	UserInputError, 
 	EnvironmentError,
-	isRalphError,
+	isMikeyError,
 	getErrorMessage,
 	getUserFriendlyMessage
 } from '../../errors';
@@ -123,14 +123,14 @@ suite('Error Handling Test Suite', () => {
 	});
 
 	suite('Error Utilities', () => {
-		test('isRalphError should identify RalphError instances', () => {
+		test('isMikeyError should identify MikeyError instances', () => {
 			const ralphError = PrdFileError.notFound('test.json');
 			const standardError = new Error('Standard error');
 			
-			assert.strictEqual(isRalphError(ralphError), true);
-			assert.strictEqual(isRalphError(standardError), false);
-			assert.strictEqual(isRalphError('string'), false);
-			assert.strictEqual(isRalphError(null), false);
+			assert.strictEqual(isMikeyError(ralphError), true);
+			assert.strictEqual(isMikeyError(standardError), false);
+			assert.strictEqual(isMikeyError('string'), false);
+			assert.strictEqual(isMikeyError(null), false);
 		});
 
 		test('getErrorMessage should handle different error types', () => {
@@ -156,7 +156,7 @@ suite('Error Handling Test Suite', () => {
 	});
 
 	suite('Error Inheritance', () => {
-		test('RalphError instances should be instanceof Error', () => {
+		test('MikeyError instances should be instanceof Error', () => {
 			const error = PrdFileError.notFound('test.json');
 			
 			assert.ok(error instanceof Error);

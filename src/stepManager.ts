@@ -45,32 +45,42 @@ export function buildChatContext(item: PrdItem, workspaceRoot: string, stepIndex
 **Passes:** ${item.passes}
 
 ## Steps
-${item.steps.map((step, idx) => {
-	const stepText = typeof step === 'string' ? step : step.text;
-	const completed = typeof step === 'string' ? false : step.completed || false;
-	const marker = completed ? STATUS_MARKERS.completed : STATUS_MARKERS.incomplete;
-	const highlight = stepIndex !== undefined && idx === stepIndex ? ' **<-- CURRENT STEP**' : '';
-	return `${idx + 1}. [${marker}] ${stepText}${highlight}`;
-}).join('\n')}
+${item.steps
+  .map((step, idx) => {
+    const stepText = typeof step === "string" ? step : step.text;
+    const completed =
+      typeof step === "string" ? false : step.completed || false;
+    const marker = completed
+      ? STATUS_MARKERS.completed
+      : STATUS_MARKERS.incomplete;
+    const highlight =
+      stepIndex !== undefined && idx === stepIndex
+        ? " **<-- CURRENT STEP**"
+        : "";
+    return `${idx + 1}. [${marker}] ${stepText}${highlight}`;
+  })
+  .join("\n")}
 
 ## Progress History
-${progressContent || '(No progress yet)'}
+${progressContent || "(No progress yet)"}
 
 ## Available Commands
 You can mark steps as complete by using the VS Code command:
 \`\`\`
-await vscode.commands.executeCommand('ralph.markStepComplete', '${item.id}', stepIndex, true);
+await vscode.commands.executeCommand('mikey.markStepComplete', '${item.id}', stepIndex, true);
 \`\`\`
 Where stepIndex is 0-based (0 for first step, 1 for second, etc.)
 
 ## Task
-${stepIndex !== undefined 
-	? `Work on step ${stepIndex + 1} of ${item.id}. Complete this specific step and mark it as done when finished.`
-	: `Work on ${item.id}. Follow the steps listed above. Update progress.txt when you make changes.`}
+${
+  stepIndex !== undefined
+    ? `Work on step ${stepIndex + 1} of ${item.id}. Complete this specific step and mark it as done when finished.`
+    : `Work on ${item.id}. Follow the steps listed above. Update progress.txt when you make changes.`
+}
 
 ${skillContext}
 
-${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
+${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ""}
 `;
 
 	return prdContext;
