@@ -1137,3 +1137,32 @@
     5. ✓ Full test suite runs successfully
   - Bug-001 now complete with passes: true
   - Next: Remaining items are refactor-001 (replace console.log) and quality-001 (update dependencies)
+
+## Completed refactor-001: Replace console.log statements with logger utility
+
+**Date:** 2026-02-11
+
+**Changes made:**
+- Replaced all console.log() and console.error() statements in src/extension.ts with appropriate logger methods
+- Used logger.info() for informational messages about extension activation and command registration
+- Used logger.debug() for detailed debugging messages about component creation
+- Used logger.error() for error conditions with proper error object passing
+- Test files (runTest.ts and suite/index.ts) retain console.error for test infrastructure - this is acceptable
+
+**Verification:**
+- ✓ pnpm typecheck: TypeScript compilation successful
+- ✓ pnpm test: All tests pass (exit code 0)
+- ✓ No console.* statements remain in main source code (only in test infrastructure)
+- ✓ Logger provides structured, timestamped output to Ralph output channel
+
+**Steps completed:**
+1. ✓ Audited codebase to find all console.log statements
+2. ✓ Identified which statements should use the logger module
+3. ✓ Replaced console.log calls with appropriate logger.* methods
+4. ✓ Verified logger configuration and output formatting
+5. ✓ Tested logging output works correctly
+
+**Item status:** completed, passes: true
+
+**Next steps:**
+- One remaining "not-started" item: quality-001 (Update dependencies to latest available versions)

@@ -24,11 +24,11 @@ import { Logger } from './logger';
  * ```
  */
 export function activate(context: vscode.ExtensionContext) {
-  console.log("[Ralph] Extension activation starting...");
   const logger = Logger.getInstance();
+  logger.info("Extension activation starting...");
   const config = ConfigManager.getInstance();
   logger.info("Ralph extension activated");
-  console.log("[Ralph] Logger initialized, creating PrdTreeDataProvider...");
+  logger.debug("Logger initialized, creating PrdTreeDataProvider...");
 
   let prdProvider: PrdTreeDataProvider | null = null;
   let treeView: vscode.TreeView<any> | null = null;
@@ -36,10 +36,8 @@ export function activate(context: vscode.ExtensionContext) {
   try {
     prdProvider = new PrdTreeDataProvider(context);
     logger.debug("PrdTreeDataProvider created successfully");
-    console.log("[Ralph] PrdTreeDataProvider created successfully");
   } catch (error) {
     logger.error("Failed to create PrdTreeDataProvider", error);
-    console.error("[Ralph] Failed to create PrdTreeDataProvider:", error);
     vscode.window.showErrorMessage(
       `Failed to initialize PRD viewer: ${error instanceof Error ? error.message : String(error)}`,
     );
@@ -47,13 +45,12 @@ export function activate(context: vscode.ExtensionContext) {
 
   if (prdProvider) {
     try {
-      console.log("[Ralph] Creating tree view...");
+      logger.debug("Creating tree view...");
       treeView = vscode.window.createTreeView("ralph.prdExplorer", {
         treeDataProvider: prdProvider,
         dragAndDropController: prdProvider,
       });
       logger.debug("Tree view created successfully");
-      console.log("[Ralph] Tree view created successfully");
 
       // Update tree view description with progress summary
       prdProvider.onProgressUpdate((progress) => {
@@ -63,7 +60,6 @@ export function activate(context: vscode.ExtensionContext) {
       context.subscriptions.push(treeView);
     } catch (error) {
       logger.error("Failed to create tree view", error);
-      console.error("[Ralph] Failed to create tree view:", error);
       vscode.window.showErrorMessage(
         `Failed to create tree view: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -302,15 +298,13 @@ export function activate(context: vscode.ExtensionContext) {
       ),
     );
 
-    console.log("[Ralph] All commands registered successfully");
     logger.info("All Ralph extension commands registered");
   } catch (error) {
     const logger = Logger.getInstance();
     logger.error("Error registering commands", error);
-    console.error("[Ralph] Error registering commands:", error);
   }
 
-  console.log("[Ralph] Extension activation completed");
+  logger.info("Extension activation completed");
 }
 
 /**

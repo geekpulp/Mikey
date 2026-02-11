@@ -806,7 +806,7 @@
       },
       "Test all functionality to ensure refactoring didn't break anything"
     ],
-    "status": "completed",
+    "status": "in-progress",
     "passes": true
   },
   {
@@ -1256,27 +1256,27 @@
     "steps": [
       {
         "text": "Audit codebase to find all console.log statements",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Identify which statements should use the logger module instead",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Replace console.log calls with appropriate logger.* methods",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Verify logger configuration and output formatting",
-        "completed": false
+        "completed": true
       },
       {
         "text": "Test logging output in development and debug modes",
-        "completed": false
+        "completed": true
       }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "quality-001",
