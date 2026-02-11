@@ -74,6 +74,9 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     TreeNode | undefined | null | void
   > = this._onDidChangeTreeData.event;
 
+  private _onProgressUpdate: vscode.EventEmitter<string> = new vscode.EventEmitter<string>();
+  readonly onProgressUpdate: vscode.Event<string> = this._onProgressUpdate.event;
+
   private prdItems: PrdItem[] = [];
   private prdFilePath: string | undefined;
   private logger = Logger.getInstance();
@@ -114,6 +117,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
           itemCount: this.prdItems.length 
         });
         this._onDidChangeTreeData.fire();
+        this.updateProgress();
       } catch (error) {
         if (isRalphError(error)) {
           this.logger.error(error.getLogMessage());
@@ -148,6 +152,25 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     });
 
     this.context.subscriptions.push(watcher);
+  }
+
+  /**
+   * Calculates and updates the progress summary
+   * 
+   * This method:
+   * - Counts completed vs total items
+   * - Calculates completion percentage
+   * - Emits progress update event with formatted string
+   * - Shows format: "X/Y completed (Z%)"
+   */
+  private updateProgress(): void {
+    const totalItems = this.prdItems.length;
+    const completedItems = this.prdItems.filter(item => item.status === 'completed').length;
+    const percentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+    
+    const progressText = `${completedItems}/${totalItems} completed (${percentage}%)`;
+    this._onProgressUpdate.fire(progressText);
+    this.logger.debug('Progress updated', { completedItems, totalItems, percentage });
   }
 
   /**

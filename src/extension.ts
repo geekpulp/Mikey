@@ -29,9 +29,16 @@ export function activate(context: vscode.ExtensionContext) {
 
   const prdProvider = new PrdTreeDataProvider(context);
   
-  context.subscriptions.push(
-    vscode.window.registerTreeDataProvider('ralph.prdExplorer', prdProvider)
-  );
+  const treeView = vscode.window.createTreeView('ralph.prdExplorer', {
+    treeDataProvider: prdProvider
+  });
+  
+  // Update tree view description with progress summary
+  prdProvider.onProgressUpdate((progress) => {
+    treeView.description = progress;
+  });
+  
+  context.subscriptions.push(treeView);
 
   context.subscriptions.push(
     vscode.commands.registerCommand('ralph.refresh', () => {

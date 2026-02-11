@@ -833,3 +833,34 @@
   - All 7 acceptance criteria met and steps marked as completed
   - Refactor-002 now complete with passes: true
   - Next: refactor-003 (Extract configuration management) would continue improving code structure, or quality items for documentation/testing improvements
+
+- 2026-02-11: Completed polish-004: Progress summary in sidebar header
+  - Added progress update event emitter to PrdTreeDataProvider:
+    * Created _onProgressUpdate EventEmitter for broadcasting progress changes
+    * Added public onProgressUpdate event for subscribers
+  - Implemented updateProgress() method in PrdTreeDataProvider:
+    * Calculates total vs completed items count
+    * Computes completion percentage
+    * Formats as "X/Y completed (Z%)" string
+    * Fires progress update event
+    * Called automatically when prd.json reloads
+  - Enhanced extension.ts to use TreeView with description:
+    * Changed from registerTreeDataProvider to createTreeView
+    * Subscribed to onProgressUpdate event
+    * Updates TreeView.description property with progress text
+    * Description appears in sidebar header automatically
+  - Benefits of this feature:
+    * Users can see overall progress at a glance in sidebar header
+    * Progress updates automatically when items are completed
+    * No need to open individual items to check overall status
+    * Motivates users by showing completion percentage
+    * Lightweight implementation using built-in TreeView.description API
+  - Extension compiles successfully (pnpm typecheck ✓, pnpm compile ✓)
+  - All 5 acceptance criteria met:
+    1. ✓ Sidebar header shows progress summary
+    2. ✓ Format is clear and concise (e.g., "39/45 completed (87%)")
+    3. ✓ Progress updates immediately when items change (via file watcher)
+    4. ✓ Percentage indicator reflects completion
+    5. ✓ Updates automatically (called in loadPrdFile after every reload)
+  - Polish-004 now complete with passes: true
+  - Next: Remaining not-started items are ui-004 (drag-and-drop), polish-001/002 (filters), polish-003 (keyboard shortcuts), and refactor-003 (config management)

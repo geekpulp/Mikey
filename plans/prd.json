@@ -661,14 +661,29 @@
     "category": "polish",
     "description": "Progress summary in sidebar header",
     "steps": [
-      "Open sidebar with items in various statuses",
-      "Verify header shows progress summary (e.g., '3/10 completed')",
-      "Complete an item",
-      "Verify progress summary updates immediately",
-      "Verify progress bar or percentage indicator reflects completion"
+      {
+        "text": "Open sidebar with items in various statuses",
+        "completed": true
+      },
+      {
+        "text": "Verify header shows progress summary (e.g., '3/10 completed')",
+        "completed": true
+      },
+      {
+        "text": "Complete an item",
+        "completed": true
+      },
+      {
+        "text": "Verify progress summary updates immediately",
+        "completed": true
+      },
+      {
+        "text": "Verify progress bar or percentage indicator reflects completion",
+        "completed": true
+      }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "Bug-001",
