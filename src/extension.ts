@@ -61,6 +61,16 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
+    vscode.commands.registerCommand('ralph.startWork', async (item?: PrdItem) => {
+      if (!item) {
+        vscode.window.showErrorMessage('No item selected');
+        return;
+      }
+      await prdProvider.startWork(item);
+    })
+  );
+
+  context.subscriptions.push(
     vscode.commands.registerCommand('ralph.openItem', (item: PrdItem) => {
       DetailPanel.createOrShow(context.extensionUri, item);
     })

@@ -37,6 +37,9 @@ export class DetailPanel {
 					case 'deleteStep':
 						this.deleteStep(message.stepIndex);
 						break;
+					case 'startWorkOnStep':
+						this.startWorkOnStep(message.stepIndex);
+						break;
 				}
 			},
 			null,
@@ -343,6 +346,13 @@ export class DetailPanel {
 				stepIndex: stepIndex
 			});
 		}
+		
+		function startWorkOnStep(stepIndex) {
+			vscode.postMessage({
+				command: 'startWorkOnStep',
+				stepIndex: stepIndex
+			});
+		}
 	<\/script>
 </head>
 <body>
@@ -404,6 +414,7 @@ export class DetailPanel {
 					</span>
 					<span class="${textClass}">${this._escapeHtml(stepText)}</span>
 					<div class="step-actions">
+						<button class="step-btn" onclick="startWorkOnStep(${index})">💬 Start Work</button>
 						<button class="step-btn" onclick="editStep(${index})">Edit</button>
 						<button class="step-btn delete" onclick="deleteStep(${index})">Delete</button>
 					</div>
@@ -771,6 +782,90 @@ export class DetailPanel {
 		} catch (error) {
 			vscode.window.showErrorMessage(`Failed to delete step: ${error}`);
 		}
+	}
+
+	private async startWorkOnStep(stepIndex: number): Promise<void> {
+		if (!this._currentItem) {
+			return;
+		}
+
+		// Ensure step exists
+		if (stepIndex < 0 || stepIndex >= this._currentItem.steps.length) {
+			vscode.window.showErrorMessage('Invalid step index');
+			return;
+		}
+
+		const step = this._currentItem.steps[stepIndex];
+		const stepText = typeof step === 'string' ? step : step.text;
+
+		// Build context for the chat session with focus on this specific step
+		const context = this.buildChatContext(this._currentItem, stepIndex);
+
+		try {
+			// Clear any existing chat session and start fresh
+			await vscode.commands.executeCommand('workbench.action.chat.clear');
+			
+			// Wait a moment for the clear to complete
+			await new Promise(resolve => setTimeout(resolve, 300));
+			
+			// Open Copilot Chat panel
+			await vscode.commands.executeCommand('workbench.panel.chat.view.copilot.focus');
+			
+			// Wait a moment for the panel to open
+			await new Promise(resolve => setTimeout(resolve, 300));
+			
+			// Send the context as a new message in the fresh chat session
+			await vscode.commands.executeCommand('workbench.action.chat.open', {
+				query: context
+			});
+			
+			vscode.window.showInformationMessage(`Started work on step ${stepIndex + 1} of ${this._currentItem.id} in new chat session`);
+		} catch (error) {
+			vscode.window.showErrorMessage(`Failed to start chat session: ${error}`);
+		}
+	}
+
+	private buildChatContext(item: PrdItem, stepIndex?: number): string {
+		const workspaceFolders = vscode.workspace.workspaceFolders;
+		if (!workspaceFolders) {
+			return '';
+		}
+
+		const workspaceRoot = workspaceFolders[0].uri.fsPath;
+		const progressFile = path.join(workspaceRoot, 'progress.txt');
+		
+		let progressContent = '';
+		if (fs.existsSync(progressFile)) {
+			progressContent = fs.readFileSync(progressFile, 'utf-8');
+		}
+
+		const prdContext = `# PRD Item Context
+
+## Item: ${item.id}
+**Category:** ${item.category}
+**Description:** ${item.description}
+**Status:** ${item.status}
+**Passes:** ${item.passes}
+
+## Steps
+${item.steps.map((step, idx) => {
+	const stepText = typeof step === 'string' ? step : step.text;
+	const completed = typeof step === 'string' ? false : step.completed || false;
+	const marker = completed ? '✓' : '○';
+	const highlight = stepIndex !== undefined && idx === stepIndex ? ' **<-- CURRENT STEP**' : '';
+	return `${idx + 1}. [${marker}] ${stepText}${highlight}`;
+}).join('\n')}
+
+## Progress History
+${progressContent || '(No progress yet)'}
+
+## Task
+${stepIndex !== undefined 
+	? `Work on step ${stepIndex + 1} of ${item.id}. Complete this specific step and mark it as done when finished.`
+	: `Work on ${item.id}. Follow the steps listed above. Update progress.txt when you make changes.`}
+`;
+
+		return prdContext;
 	}
 
 private async handleCompletionMerge(workspaceRoot: string): Promise<void> {

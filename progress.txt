@@ -192,3 +192,27 @@
   - Extension now has a single, consistent way to add PRD items via the toolbar button
   - Tests pass, typecheck passes
   - Note: If users still see duplicates, advise reloading VS Code window or reinstalling extension
+
+- 2026-02-11: Completed Bug-003: Fixed chat session management for PRD items and steps
+  - Implemented new "Start Work (Chat)" command that opens fresh Copilot Chat sessions
+  - Added `ralph.startWork` command in extension.ts to handle chat session initiation
+  - Implemented `startWork()` method in PrdTreeDataProvider that:
+    * Builds comprehensive context including PRD item details, steps, and progress history
+    * Opens new Copilot Chat panel using `workbench.panel.chat.view.copilot.focus`
+    * Sends context to chat using `workbench.action.chat.open` command
+  - Added "Start Work" button (💬 icon) to detail panel for each individual step
+  - Implemented `startWorkOnStep()` method in DetailPanel that:
+    * Opens new chat session focused on specific step
+    * Highlights current step in context with **<-- CURRENT STEP** marker
+    * Provides tailored task description for the specific step
+  - Added `buildChatContext()` method that creates structured context including:
+    * Item ID, category, description, status, and passes field
+    * All steps with completion markers (✓ for completed, ○ for incomplete)
+    * Progress history from progress.txt
+    * Specific task instructions (general or step-specific)
+  - Updated package.json to add "Start Work (Chat)" command with comment-discussion icon
+  - Each PRD item and step now starts a completely fresh chat session
+  - This prevents context window bloat and ensures each session has clean, focused context
+  - Extension compiles and type-checks successfully (pnpm typecheck ✓, pnpm test ✓)
+  - Note: Both terminal-based automation (ralph.runItem) and chat-based workflow (ralph.startWork) are now available
+  - Next: Continue with remaining PRD items (Audit-001, Docs-001, or git-001 would be good next steps)

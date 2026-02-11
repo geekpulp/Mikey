@@ -204,6 +204,83 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     }
   }
 
+  async startWork(item: PrdItem): Promise<void> {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders) {
+      vscode.window.showErrorMessage("No workspace folder found");
+      return;
+    }
+
+    // Build context for the chat session
+    const context = this.buildChatContext(item);
+
+    try {
+      // Clear any existing chat session and start fresh
+      await vscode.commands.executeCommand('workbench.action.chat.clear');
+      
+      // Wait a moment for the clear to complete
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Open Copilot Chat panel
+      await vscode.commands.executeCommand('workbench.panel.chat.view.copilot.focus');
+      
+      // Wait a moment for the panel to open
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Send the context as a new message in the fresh chat session
+      await vscode.commands.executeCommand('workbench.action.chat.open', {
+        query: context
+      });
+      
+      vscode.window.showInformationMessage(`Started work on ${item.id} in new chat session`);
+    } catch (error) {
+      vscode.window.showErrorMessage(`Failed to start chat session: ${error}`);
+    }
+  }
+
+  private buildChatContext(item: PrdItem, stepIndex?: number): string {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders) {
+      return '';
+    }
+
+    const workspaceRoot = workspaceFolders[0].uri.fsPath;
+    const progressFile = path.join(workspaceRoot, 'progress.txt');
+    
+    let progressContent = '';
+    if (fs.existsSync(progressFile)) {
+      progressContent = fs.readFileSync(progressFile, 'utf-8');
+    }
+
+    const prdContext = `# PRD Item Context
+
+## Item: ${item.id}
+**Category:** ${item.category}
+**Description:** ${item.description}
+**Status:** ${item.status}
+**Passes:** ${item.passes}
+
+## Steps
+${item.steps.map((step, idx) => {
+  const stepText = typeof step === 'string' ? step : step.text;
+  const completed = typeof step === 'string' ? false : step.completed || false;
+  const marker = completed ? '✓' : '○';
+  const highlight = stepIndex !== undefined && idx === stepIndex ? ' **<-- CURRENT STEP**' : '';
+  return `${idx + 1}. [${marker}] ${stepText}${highlight}`;
+}).join('\n')}
+
+## Progress History
+${progressContent || '(No progress yet)'}
+
+## Task
+${stepIndex !== undefined 
+  ? `Work on step ${stepIndex + 1} of ${item.id}. Complete this specific step and mark it as done when finished.`
+  : `Work on ${item.id}. Follow the steps listed above. Update progress.txt when you make changes.`}
+`;
+
+    return prdContext;
+  }
+
   async runItem(item?: PrdItem): Promise<void> {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders) {
