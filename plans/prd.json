@@ -840,16 +840,37 @@
     "category": "test",
     "description": "Add unit tests for PRD operations",
     "steps": [
-      "Write tests for PRD item CRUD operations",
-      "Write tests for ID generation logic",
-      "Write tests for step management",
-      "Write tests for status transitions",
-      "Mock file system operations for isolated testing",
-      "Achieve at least 70% code coverage for core logic",
-      "Run tests and verify all pass"
+      {
+        "text": "Write tests for PRD item CRUD operations",
+        "completed": true
+      },
+      {
+        "text": "Write tests for ID generation logic",
+        "completed": true
+      },
+      {
+        "text": "Write tests for step management",
+        "completed": true
+      },
+      {
+        "text": "Write tests for status transitions",
+        "completed": true
+      },
+      {
+        "text": "Mock file system operations for isolated testing",
+        "completed": true
+      },
+      {
+        "text": "Achieve at least 70% code coverage for core logic",
+        "completed": true
+      },
+      {
+        "text": "Run tests and verify all pass",
+        "completed": true
+      }
     ],
-    "status": "not-started",
-    "passes": false
+    "status": "completed",
+    "passes": true
   },
   {
     "id": "test-003",
