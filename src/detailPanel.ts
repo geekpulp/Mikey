@@ -3,12 +3,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { PrdItem, PrdStep } from './prdTreeDataProvider';
 import { Status, MessageCommand, STATUS_MARKERS, THEME_COLORS, GIT, FILE_PATHS } from './constants';
+import { Logger } from './logger';
 
 export class DetailPanel {
 	public static currentPanel: DetailPanel | undefined;
 	private readonly _panel: vscode.WebviewPanel;
 	private _disposables: vscode.Disposable[] = [];
 	private _currentItem: PrdItem | undefined;
+	private logger = Logger.getInstance();
 
 	private constructor(panel: vscode.WebviewPanel, private extensionUri: vscode.Uri) {
 		this._panel = panel;
@@ -55,16 +57,20 @@ export class DetailPanel {
 	}
 
 	public static createOrShow(extensionUri: vscode.Uri, item: PrdItem) {
+		const logger = Logger.getInstance();
+		logger.debug('Creating or showing detail panel', { id: item.id });
 		const column = vscode.window.activeTextEditor
 			? vscode.window.activeTextEditor.viewColumn
 			: undefined;
 
 		if (DetailPanel.currentPanel) {
+			logger.debug('Reusing existing detail panel');
 			DetailPanel.currentPanel._panel.reveal(column);
 			DetailPanel.currentPanel.update(item);
 			return;
 		}
 
+		logger.debug('Creating new detail panel');
 		const panel = vscode.window.createWebviewPanel(
 			'ralphDetailPanel',
 			'PRD Item Details',
@@ -80,6 +86,7 @@ export class DetailPanel {
 	}
 
 	public async update(item: PrdItem) {
+		this.logger.debug('Updating detail panel', { id: item.id });
 		this._currentItem = item;
 		this._panel.title = `[${item.id}] ${item.description}`;
 		this._panel.webview.html = await this._getHtmlForWebview(item);
@@ -1064,7 +1071,7 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
 
 			return skillContext;
 		} catch (error) {
-			console.error('Error loading skill references:', error);
+			this.logger.error('Error loading skill references', error);
 			return '';
 		}
 	}

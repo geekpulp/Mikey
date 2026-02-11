@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Status, CATEGORIES, STATUS_MARKERS, THEME_COLORS } from './constants';
+import { Logger } from './logger';
 
 export interface PrdStep {
 	text: string;
@@ -36,8 +37,10 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
 
   private prdItems: PrdItem[] = [];
   private prdFilePath: string | undefined;
+  private logger = Logger.getInstance();
 
   constructor(private context: vscode.ExtensionContext) {
+    this.logger.debug('Initializing PrdTreeDataProvider');
     this.loadPrdFile();
     this.watchPrdFile();
   }
@@ -45,6 +48,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
   private loadPrdFile(): void {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders) {
+      this.logger.warn('No workspace folders found');
       return;
     }
 
@@ -57,23 +61,31 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     if (fs.existsSync(prdPath)) {
       this.prdFilePath = prdPath;
       try {
+        this.logger.debug('Loading PRD file', { path: prdPath });
         const content = fs.readFileSync(prdPath, "utf-8");
         this.prdItems = JSON.parse(content);
+        this.logger.info('PRD file loaded successfully', { itemCount: this.prdItems.length });
         this._onDidChangeTreeData.fire();
       } catch (error) {
+        this.logger.error('Failed to load PRD file', error);
         vscode.window.showErrorMessage(`Failed to load PRD file: ${error}`);
       }
+    } else {
+      this.logger.warn('PRD file not found', { path: prdPath });
     }
   }
 
   private watchPrdFile(): void {
     if (!this.prdFilePath) {
+      this.logger.debug('PRD file path not set, skipping file watcher setup');
       return;
     }
 
+    this.logger.debug('Setting up file watcher for PRD file');
     const watcher = vscode.workspace.createFileSystemWatcher(this.prdFilePath);
 
     watcher.onDidChange(() => {
+      this.logger.debug('PRD file changed, reloading');
       this.loadPrdFile();
     });
 
@@ -86,6 +98,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
 
   async addItem(category: string, description: string): Promise<void> {
     if (!this.prdFilePath) {
+      this.logger.error('Cannot add item: No PRD file found');
       vscode.window.showErrorMessage("No PRD file found");
       return;
     }
@@ -103,6 +116,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     this.prdItems.push(newItem);
 
     try {
+      this.logger.info('Adding new PRD item', { id: newId, category, description });
       fs.writeFileSync(
         this.prdFilePath,
         JSON.stringify(this.prdItems, null, "\t"),
@@ -111,6 +125,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
       this._onDidChangeTreeData.fire();
       vscode.window.showInformationMessage(`Added item: ${newId}`);
     } catch (error) {
+      this.logger.error('Failed to add PRD item', error);
       vscode.window.showErrorMessage(`Failed to add item: ${error}`);
     }
   }
@@ -145,6 +160,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     // Find and update the item
     const itemIndex = this.prdItems.findIndex((i) => i.id === item.id);
     if (itemIndex === -1) {
+      this.logger.error('Item not found during edit', { id: item.id });
       vscode.window.showErrorMessage(`Item ${item.id} not found`);
       return;
     }
@@ -153,6 +169,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     this.prdItems[itemIndex].description = description;
 
     try {
+      this.logger.info('Updating PRD item', { id: item.id, category, description });
       fs.writeFileSync(
         this.prdFilePath,
         JSON.stringify(this.prdItems, null, "\t"),
@@ -161,12 +178,14 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
       this._onDidChangeTreeData.fire();
       vscode.window.showInformationMessage(`Updated item: ${item.id}`);
     } catch (error) {
+      this.logger.error('Failed to update PRD item', error);
       vscode.window.showErrorMessage(`Failed to update item: ${error}`);
     }
   }
 
   async deleteItem(item: PrdItem): Promise<void> {
     if (!this.prdFilePath) {
+      this.logger.error('Cannot delete item: No PRD file found');
       vscode.window.showErrorMessage("No PRD file found");
       return;
     }
@@ -179,12 +198,14 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     );
 
     if (confirmed !== "Delete") {
+      this.logger.debug('Delete cancelled by user', { id: item.id });
       return; // User cancelled
     }
 
     // Find and remove the item
     const itemIndex = this.prdItems.findIndex((i) => i.id === item.id);
     if (itemIndex === -1) {
+      this.logger.error('Item not found during delete', { id: item.id });
       vscode.window.showErrorMessage(`Item ${item.id} not found`);
       return;
     }
@@ -192,6 +213,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     this.prdItems.splice(itemIndex, 1);
 
     try {
+      this.logger.info('Deleting PRD item', { id: item.id });
       fs.writeFileSync(
         this.prdFilePath,
         JSON.stringify(this.prdItems, null, "\t"),
@@ -200,6 +222,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
       this._onDidChangeTreeData.fire();
       vscode.window.showInformationMessage(`Deleted item: ${item.id}`);
     } catch (error) {
+      this.logger.error('Failed to delete PRD item', error);
       vscode.window.showErrorMessage(`Failed to delete item: ${error}`);
     }
   }
@@ -207,6 +230,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
   async startWork(item: PrdItem): Promise<void> {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders) {
+      this.logger.error('Cannot start work: No workspace folder found');
       vscode.window.showErrorMessage("No workspace folder found");
       return;
     }
@@ -214,6 +238,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
     const workspaceRoot = workspaceFolders[0].uri.fsPath;
 
     try {
+      this.logger.info('Starting work on PRD item', { id: item.id });
       // Create and switch to feature branch
       const branchName = `feature/${item.id}`;
       
@@ -225,14 +250,19 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
         progress.report({ message: 'Creating feature branch...' });
         
         try {
+          this.logger.debug('Creating git branch', { branchName });
           await this.execGitCommand(workspaceRoot, ['checkout', '-b', branchName]);
+          this.logger.info('Git branch created successfully', { branchName });
           vscode.window.showInformationMessage(`✓ Created and switched to branch: ${branchName}`);
         } catch (error) {
           // Branch might already exist, try to switch to it
           try {
+            this.logger.debug('Branch exists, switching to it', { branchName });
             await this.execGitCommand(workspaceRoot, ['checkout', branchName]);
+            this.logger.info('Switched to existing branch', { branchName });
             vscode.window.showInformationMessage(`✓ Switched to existing branch: ${branchName}`);
           } catch (switchError) {
+            this.logger.error('Failed to create or switch to branch', { error, switchError });
             throw new Error(`Failed to create or switch to branch: ${error}`);
           }
         }
@@ -242,6 +272,7 @@ export class PrdTreeDataProvider implements vscode.TreeDataProvider<TreeNode> {
         // Update item status to in-progress
         const itemIndex = this.prdItems.findIndex(i => i.id === item.id);
         if (itemIndex !== -1 && this.prdFilePath) {
+          this.logger.debug('Updating item status to in-progress', { id: item.id });
           this.prdItems[itemIndex].status = Status.InProgress;
           
           fs.writeFileSync(
@@ -418,7 +449,7 @@ ${promptTemplate ? `\n---\n\n# Agent Instructions\n\n${promptTemplate}` : ''}
 
       return skillContext;
     } catch (error) {
-      console.error('Error loading skill references:', error);
+      this.logger.error('Error loading skill references', error);
       return '';
     }
   }

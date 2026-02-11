@@ -2,9 +2,11 @@ import * as vscode from 'vscode';
 import { PrdTreeDataProvider, PrdItem } from './prdTreeDataProvider';
 import { DetailPanel } from './detailPanel';
 import { CATEGORIES } from './constants';
+import { Logger } from './logger';
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log('Ralph extension is now active');
+  const logger = Logger.getInstance();
+  logger.info('Ralph extension activated');
 
   const prdProvider = new PrdTreeDataProvider(context);
   
@@ -14,17 +16,20 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand('ralph.refresh', () => {
+      logger.debug('Refreshing PRD tree view');
       prdProvider.refresh();
     })
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand('ralph.addItem', async () => {
+      logger.debug('Add item command invoked');
       const category = await vscode.window.showQuickPick(CATEGORIES, {
         placeHolder: 'Select category for the new item'
       });
       
       if (!category) {
+        logger.debug('Add item cancelled: no category selected');
         return;
       }
       
@@ -34,27 +39,32 @@ export function activate(context: vscode.ExtensionContext) {
       });
       
       if (!description) {
+        logger.debug('Add item cancelled: no description provided');
         return;
       }
       
+      logger.info('Adding new PRD item', { category, description });
       await prdProvider.addItem(category, description);
     })
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand('ralph.editItem', async (item: PrdItem) => {
+      logger.info('Editing PRD item', { id: item.id });
       await prdProvider.editItem(item);
     })
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand('ralph.deleteItem', async (item: PrdItem) => {
+      logger.info('Deleting PRD item', { id: item.id });
       await prdProvider.deleteItem(item);
     })
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("ralph.runItem", async (item?: PrdItem) => {
+      logger.info('Running PRD item', { id: item?.id });
       await prdProvider.runItem(item);
     }),
   );
@@ -62,24 +72,32 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand('ralph.startWork', async (item?: PrdItem) => {
       if (!item) {
+        logger.warn('Start work command invoked without item');
         vscode.window.showErrorMessage('No item selected');
         return;
       }
+      logger.info('Starting work on PRD item', { id: item.id });
       await prdProvider.startWork(item);
     })
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand('ralph.openItem', (item: PrdItem) => {
+      logger.debug('Opening detail panel for item', { id: item.id });
       DetailPanel.createOrShow(context.extensionUri, item);
     })
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand('ralph.markStepComplete', async (itemId: string, stepIndex: number, completed: boolean = true) => {
+      logger.debug('Marking step complete', { itemId, stepIndex, completed });
       await prdProvider.markStepComplete(itemId, stepIndex, completed);
     })
   );
 }
 
-export function deactivate() {}
+export function deactivate() {
+  const logger = Logger.getInstance();
+  logger.info('Ralph extension deactivated');
+  logger.dispose();
+}

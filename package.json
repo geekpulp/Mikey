@@ -121,6 +121,11 @@
           "type": "string",
           "default": "prompts/default.txt",
           "description": "Path to the prompt template file to use when starting work on items (relative to workspace root)"
+        },
+        "ralph.debugMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable debug logging in the Ralph output channel"
         }
       }
     }

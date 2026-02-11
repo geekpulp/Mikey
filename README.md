@@ -215,10 +215,31 @@ All Mikey commands are accessible via the Command Palette (`Cmd+Shift+P` / `Ctrl
 
 ## Troubleshooting
 
+### Enabling Debug Logging
+
+Mikey includes comprehensive logging infrastructure to help diagnose issues. To enable detailed logging:
+
+1. Open VS Code Settings (`Cmd+,` / `Ctrl+,`)
+2. Search for "Ralph Debug Mode"
+3. Check the "Ralph: Debug Mode" option
+4. Reload the window for changes to take effect
+
+Once enabled, you can view logs in the Output panel:
+- Open Output panel: View → Output
+- Select "Ralph" from the dropdown
+
+The logs include:
+- **INFO**: Key operations (item creation, status changes, git operations)
+- **DEBUG**: Detailed execution flow (only shown when debug mode is enabled)
+- **WARN**: Warnings about potential issues
+- **ERROR**: Errors with full stack traces
+
+All log entries include timestamps for easy debugging.
+
 ### Extension Not Activating
 - Ensure you have a `plans/prd.json` file in your workspace root
 - Reload VS Code window (`Cmd+R` / `Ctrl+R`)
-- Check the Output panel (View → Output → Mikey) for error messages
+- Check the Output panel (View → Output → Ralph) for error messages
 
 ### PRD Items Not Showing
 - Verify your `prd.json` file is valid JSON
