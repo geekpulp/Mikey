@@ -1,1 +1,10 @@
-[]
+[
+	{
+		"id": "Audit-002",
+		"category": "Audit",
+		"description": "review the current extension code and make suggestions for how it might be improved based on best practice of vscode extensions.",
+		"steps": [],
+		"status": "in-progress",
+		"passes": false
+	}
+]

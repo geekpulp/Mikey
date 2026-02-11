@@ -14,6 +14,7 @@ import {
 } from "./errors";
 import { PrdFileManager } from './prdFileManager';
 import { PromptExecutor } from "./promptExecutor";
+import { getCurrentBranch, isFeatureBranch } from "./gitOperations";
 
 /**
  * Represents a step within a PRD item
@@ -588,9 +589,31 @@ export class PrdTreeDataProvider
           cancellable: false,
         },
         async (progress) => {
-          progress.report({ message: "Creating feature branch..." });
+          progress.report({ message: "Preparing git branch..." });
 
           try {
+            // Check current branch - if we're on a different feature branch,
+            // switch to main first to ensure clean branch creation
+            const currentBranch = await getCurrentBranch(workspaceRoot);
+            this.logger.debug("Current git branch", { currentBranch });
+
+            if (
+              isFeatureBranch(currentBranch) &&
+              currentBranch !== branchName
+            ) {
+              this.logger.debug("Switching to main branch first", {
+                from: currentBranch,
+              });
+              const config = ConfigManager.getInstance();
+              await this.execGitCommand(workspaceRoot, [
+                "checkout",
+                config.getMainBranch(),
+              ]);
+            }
+
+            progress.report({ message: "Creating feature branch..." });
+
+            // Now try to create the new branch
             this.logger.debug("Creating git branch", { branchName });
             await this.execGitCommand(workspaceRoot, [
               "checkout",

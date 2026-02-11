@@ -202,7 +202,7 @@ export class PromptExecutor {
     args.push('--silent');
 
     // Add prompt with context file
-    args.push('-p', `@${contextFile}`, 'Follow the attached prompt.');
+    args.push("-p", `@${contextFile} Follow the attached prompt.`);
 
     // Always deny dangerous commands
     args.push('--deny-tool', 'shell(rm)');
